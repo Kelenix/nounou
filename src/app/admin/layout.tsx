@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Home } from "lucide-react";
+import { Home, UserCircle } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { Logo } from "@/components/brand/logo";
 import { AdminSidebar } from "@/components/app/admin-sidebar";
@@ -22,6 +22,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-bold text-primary">Admin</span>
             </div>
             <div className="flex items-center gap-1">
+              <Link href="/admin/profil/modifier" aria-label="Modifier mon profil" className="flex size-10 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground">
+                <UserCircle className="size-5" />
+              </Link>
               <Link href="/" aria-label="Accueil du site" className="flex size-10 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground">
                 <Home className="size-5" />
               </Link>

@@ -221,3 +221,26 @@
 - **Impact** :
 
 -->
+
+## 2026-09-03 — Avatar vide par défaut + édition de profil pour admin/staff
+- **Décideur** : Claude (frontend + product)
+- **Contexte** : À la création d'un profil (ex. admin créé par le Super Admin), la zone
+  photo affichait les initiales sur pastille colorée, perçu comme une « photo assignée
+  automatiquement ». Aucun visuel n'est réellement stocké (`profiles.photo_url` = null).
+  Par ailleurs, `app/layout.tsx` redirige les admins hors de `/app`, et aucune page
+  d'édition de profil n'existait côté `/admin` : les admins/staff ne pouvaient pas
+  modifier leur profil (photo, nom, prénom).
+- **Décision** :
+  1. `Avatar` (composant partagé) : état sans photo = **silhouette neutre vide**, plus
+     d'initiales. La zone reste vide tant que l'utilisateur n'a pas choisi de photo.
+  2. Nouvelle page `/admin/profil/modifier` réutilisant `ProfileEditForm` (rôle admin →
+     seules les infos communes : photo, prénom, nom, ville, commune). Liens ajoutés dans
+     la sidebar admin (bloc avatar) et l'en-tête mobile admin. `ProfileEditForm` navigue
+     désormais selon le rôle (`backHref`).
+- **Alternatives écartées** : garder les initiales (rejeté par le PO) ; autoriser les
+  admins dans `/app` (aurait affiché la nav candidat/employeur, incohérent).
+- **Conséquences** : l'état « sans photo » est uniforme dans toute l'app (header, listes,
+  profils). `ProviderPhoto` (catalogue public des nounous) reste inchangé (dégradé +
+  initiales voulus côté marketing).
+- **Impact** : fonctionnel (UX), non destructif, réversible. RLS `profiles_update_own_or_admin`
+  couvre déjà l'auto-édition (`id = auth.uid()`).

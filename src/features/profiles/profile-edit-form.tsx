@@ -35,6 +35,9 @@ export function ProfileEditForm({
   const supabase = createClient();
   const { toast } = useToast();
 
+  // Un administrateur / membre du staff édite depuis le back-office, pas depuis /app.
+  const backHref = profile.role === "admin" ? "/admin" : "/app/profil";
+
   // Champs communs
   const [photoUrl, setPhotoUrl] = useState<string | null>(profile.photo_url);
   const [prenom, setPrenom] = useState(profile.prenom ?? "");
@@ -120,7 +123,7 @@ export function ProfileEditForm({
       return;
     }
     toast("Profil enregistré", "success");
-    router.push("/app/profil");
+    router.push(backHref);
     router.refresh();
   }
 
@@ -128,7 +131,7 @@ export function ProfileEditForm({
     <form onSubmit={save} className="space-y-5">
       <div className="flex items-center gap-2">
         <Button asChild variant="ghost" size="icon" type="button">
-          <Link href="/app/profil"><ArrowLeft className="size-5" /></Link>
+          <Link href={backHref}><ArrowLeft className="size-5" /></Link>
         </Button>
         <h1 className="text-lg font-extrabold">Modifier mon profil</h1>
       </div>

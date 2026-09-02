@@ -59,7 +59,11 @@ export function AdminSidebar({ profile }: { profile: ProfileRow }) {
         >
           <Globe className="size-5" /> Accueil du site
         </Link>
-        <div className="mb-3 flex items-center gap-3 rounded-2xl p-2">
+        <Link
+          href="/admin/profil/modifier"
+          className="mb-3 flex items-center gap-3 rounded-2xl p-2 transition-colors hover:bg-secondary"
+          title="Modifier mon profil"
+        >
           <Avatar src={profile.photo_url} nom={profile.nom} prenom={profile.prenom} className="size-10" />
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold">
@@ -69,7 +73,7 @@ export function AdminSidebar({ profile }: { profile: ProfileRow }) {
               <ShieldCheck className="size-3" /> {profile.is_super_admin ? "Super Admin" : "Membre du staff"}
             </p>
           </div>
-        </div>
+        </Link>
         <SignOutButton />
       </div>
     </aside>
