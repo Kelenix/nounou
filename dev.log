@@ -1,0 +1,213 @@
+   ▲ Next.js 15.5.25
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.87:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 2.7s
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ○ Compiling /middleware ...
+ ✓ Compiled /middleware in 1675ms (185 modules)
+ ○ Compiling /app/candidates/[id] ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (128kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (107kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (259kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ✓ Compiled /app/candidates/[id] in 16.6s (1285 modules)
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /app/candidates/00000000-0000-0000-0000-0000000000c2 200 in 6427ms
+ GET / 200 in 19368ms
+ GET /app/candidates/00000000-0000-0000-0000-0000000000c2 200 in 3832ms
+ GET /app/candidates/00000000-0000-0000-0000-0000000000c2 200 in 698ms
+ ○ Compiling /app/messages/[id] ...
+ ✓ Compiled /app/messages/[id] in 763ms (1288 modules)
+ GET /app/messages/9d63ba07-d1f8-43a4-a1dd-a77bc80f6ce9 200 in 2759ms
+ GET /app/messages/9d63ba07-d1f8-43a4-a1dd-a77bc80f6ce9 200 in 460ms
+ GET /app/messages/9d63ba07-d1f8-43a4-a1dd-a77bc80f6ce9 200 in 383ms
+ ○ Compiling /app/messages ...
+ ✓ Compiled /app/messages in 724ms (1253 modules)
+ GET /app/messages 200 in 1924ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 717ms (1258 modules)
+ GET /app/messages/9d63ba07-d1f8-43a4-a1dd-a77bc80f6ce9 404 in 1384ms
+ GET /app/messages 404 in 207ms
+ ○ Compiling / ...
+ ✓ Compiled / in 613ms (808 modules)
+ GET / 200 in 1784ms
+ GET /app/messages 200 in 584ms
+ ✓ Compiled in 2.2s (501 modules)
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ○ Compiling /_not-found ...
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ✓ Compiled /_not-found in 1665ms (1272 modules)
+ GET /app/messages 404 in 2770ms
+ GET /app/messages 404 in 2773ms
+ ✓ Compiled / in 307ms (808 modules)
+ GET / 200 in 1811ms
+ GET / 200 in 1621ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ✓ Compiled in 4.9s (1308 modules)
+ GET / 200 in 2556ms
+ ✓ Compiled in 1491ms (501 modules)
+ ✓ Compiled in 781ms (501 modules)
+ GET / 200 in 6876ms
+ ✓ Compiled in 782ms (1308 modules)
+ ✓ Compiled in 575ms (1308 modules)
+ ✓ Compiled in 1223ms (1308 modules)
+ ✓ Compiled in 2.9s (1311 modules)
+ ○ Compiling /connexion ...
+ ✓ Compiled /connexion in 3.1s (1339 modules)
+ GET /connexion 307 in 6447ms
+ ○ Compiling /app ...
+ ✓ Compiled /app in 3.2s (1337 modules)
+ GET /app 200 in 4898ms
+ GET /app/messages 200 in 520ms
+ GET /app/messages/2f7b63a8-0601-49cf-908d-ebf2bec3988b 200 in 354ms
+ ✓ Compiled in 7.6s (1517 modules)
+ GET /app/messages/2f7b63a8-0601-49cf-908d-ebf2bec3988b 200 in 4522ms
+ GET /app/messages/2f7b63a8-0601-49cf-908d-ebf2bec3988b 200 in 241ms
+ ✓ Compiled in 320ms (512 modules)
+ GET /app/messages/2f7b63a8-0601-49cf-908d-ebf2bec3988b 200 in 182ms
+ ✓ Compiled in 315ms (512 modules)
+ GET /app/messages/2f7b63a8-0601-49cf-908d-ebf2bec3988b 200 in 205ms
+ ✓ Compiled in 292ms (512 modules)
+ ✓ Compiled in 680ms (512 modules)
+ GET /app/messages/2f7b63a8-0601-49cf-908d-ebf2bec3988b 200 in 527ms
+ GET /app/messages/2f7b63a8-0601-49cf-908d-ebf2bec3988b 200 in 253ms
+ ✓ Compiled in 196ms (512 modules)
+ GET /app/messages/2f7b63a8-0601-49cf-908d-ebf2bec3988b 200 in 181ms
+ ✓ Compiled in 342ms (512 modules)
+ GET /app/messages/2f7b63a8-0601-49cf-908d-ebf2bec3988b 200 in 272ms
+ ✓ Compiled in 259ms (512 modules)
+ GET /app/messages/2f7b63a8-0601-49cf-908d-ebf2bec3988b 200 in 172ms
+ ✓ Compiled in 240ms (512 modules)
+ GET /app/messages/2f7b63a8-0601-49cf-908d-ebf2bec3988b 200 in 227ms
+ ✓ Compiled in 246ms (512 modules)
+ GET /app/messages/2f7b63a8-0601-49cf-908d-ebf2bec3988b 200 in 149ms
+ ✓ Compiled in 254ms (512 modules)
+ GET /app/messages/2f7b63a8-0601-49cf-908d-ebf2bec3988b 200 in 177ms
+ ✓ Compiled in 319ms (512 modules)
+ GET /app/messages/2f7b63a8-0601-49cf-908d-ebf2bec3988b 200 in 164ms
+ ✓ Compiled in 274ms (512 modules)
+ GET /app/messages/2f7b63a8-0601-49cf-908d-ebf2bec3988b 200 in 150ms
+ ✓ Compiled in 282ms (512 modules)
+ GET /app/messages/2f7b63a8-0601-49cf-908d-ebf2bec3988b 200 in 226ms
+ ✓ Compiled in 226ms (512 modules)
+ GET /app/messages/2f7b63a8-0601-49cf-908d-ebf2bec3988b 200 in 176ms
+ ○ Compiling /connexion ...
+ ✓ Compiled /connexion in 644ms (839 modules)
+ GET /connexion 200 in 1870ms
+ GET /connexion 200 in 211ms
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: EPERM: operation not permitted, rename 'C:\Users\LionelDJOUAKA\Documents\SVILUPPO\nounou\.next\cache\webpack\client-development\3.pack.gz_' -> 'C:\Users\LionelDJOUAKA\Documents\SVILUPPO\nounou\.next\cache\webpack\client-development\3.pack.gz'
+ ○ Compiling /admin ...
+ ✓ Compiled /admin in 2.4s (1298 modules)
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /admin 200 in 3891ms
+ GET /connexion 307 in 799ms
+ GET /admin 200 in 1185ms
+ ○ Compiling /admin/parametres ...
+ ✓ Compiled /admin/parametres in 1069ms (1306 modules)
+ GET /admin/parametres 200 in 2225ms
+ ○ Compiling /api/admin/create-admin ...
+ ✓ Compiled /api/admin/create-admin in 664ms (1303 modules)
+ POST /api/admin/create-admin 200 in 1138ms
+ GET /admin/parametres 200 in 329ms
+ ○ Compiling /admin/utilisateurs ...
+ ✓ Compiled /admin/utilisateurs in 1170ms (1388 modules)
+ GET /admin/utilisateurs?role=candidate 200 in 2851ms
+ ○ Compiling /api/admin/users ...
+ ✓ Compiled /api/admin/users in 705ms (1367 modules)
+ POST /api/admin/users 200 in 1112ms
+ GET /admin/utilisateurs?role=candidate 200 in 503ms
+ ✓ Compiled in 4.6s (1364 modules)
+ GET /admin/utilisateurs?role=candidate 200 in 1604ms
+ ✓ Compiled in 394ms (538 modules)
+ GET /admin/utilisateurs?role=candidate 200 in 335ms
+ ✓ Compiled in 271ms (538 modules)
+ GET /admin/utilisateurs?role=candidate 200 in 244ms
+ ✓ Compiled in 208ms (538 modules)
+ GET /admin/utilisateurs?role=candidate 200 in 215ms
+ ✓ Compiled in 258ms (538 modules)
+ GET /admin/utilisateurs?role=candidate 200 in 180ms
+ ✓ Compiled in 181ms (538 modules)
+ ✓ Compiled in 737ms (1535 modules)
+ GET /admin/utilisateurs?role=candidate 200 in 1072ms
+ GET /admin/utilisateurs?role=candidate 200 in 310ms
+ GET /admin/utilisateurs?role=candidate 200 in 193ms
+ ✓ Compiled in 2.7s (1368 modules)
+ GET /admin/utilisateurs?role=candidate 200 in 698ms
+ ✓ Compiled in 724ms (1368 modules)
+ GET /admin/utilisateurs?role=candidate 200 in 416ms
+ ✓ Compiled in 480ms (1368 modules)
+ GET /admin/utilisateurs?role=candidate 200 in 525ms
+ ✓ Compiled in 744ms (1368 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /admin/utilisateurs?role=candidate 200 in 1109ms
+ ⨯ TypeError: Cannot read properties of undefined (reading 'is_super_admin')
+    at canAccess (src\lib\admin-permissions.ts:18:18)
+    at AdminBottomNav (src\components\app\admin-bottom-nav.tsx:15:80)
+  16 |   section: StaffSection,
+  17 | ): boolean {
+> 18 |   return profile.is_super_admin || (profile.staff_permissions ?? []).includes(section);
+     |                  ^
+  19 | }
+  20 | {
+  digest: '811348881'
+}
+ GET /admin/utilisateurs?role=candidate 500 in 1314ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ✓ Compiled in 989ms (1368 modules)
+ GET /admin/utilisateurs?role=candidate 200 in 2819ms
+ ✓ Compiled in 765ms (1368 modules)
+ GET /admin/utilisateurs?role=candidate 200 in 509ms
+ ✓ Compiled in 937ms (1370 modules)
+ GET /admin/utilisateurs?role=candidate 200 in 374ms
+ GET /admin 200 in 739ms
+ GET /admin 200 in 544ms
+ ✓ Compiled in 593ms (1370 modules)
+ GET /admin 200 in 353ms
+ ✓ Compiled in 653ms (1370 modules)
+ GET /admin 200 in 371ms
+ ✓ Compiled in 957ms (1370 modules)
+ GET /admin 200 in 591ms
+ ✓ Compiled in 658ms (1370 modules)
+ GET /admin 200 in 401ms
+ ✓ Compiled in 1066ms (1370 modules)
+ GET /admin 200 in 480ms
+ ✓ Compiled in 1139ms (1370 modules)
+ GET /admin 200 in 600ms
+ ✓ Compiled in 293ms (540 modules)
+ GET /admin 200 in 160ms
+ ✓ Compiled in 243ms (540 modules)
+ GET /admin 200 in 161ms
+ ✓ Compiled in 271ms (540 modules)
+ GET /admin 200 in 165ms
+ ✓ Compiled in 276ms (540 modules)
+ GET /admin 200 in 166ms
+ ✓ Compiled in 1738ms (1363 modules)
+ GET /admin 200 in 577ms
+ ✓ Compiled in 297ms (537 modules)
+ GET /admin 200 in 163ms
+ ✓ Compiled in 314ms (537 modules)
+ GET /admin 200 in 142ms
+ ✓ Compiled in 342ms (537 modules)
+ GET /admin 200 in 221ms
+ ✓ Compiled in 2.1s (1548 modules)
+ GET /admin 200 in 1987ms
+ GET /admin 200 in 149ms
+ ✓ Compiled in 1184ms (1548 modules)
+ GET /admin 200 in 1131ms
+ GET /admin 200 in 123ms
+ ✓ Compiled in 1180ms (1363 modules)
+ GET /admin 200 in 402ms
+ ✓ Compiled in 541ms (1363 modules)
+ GET /admin 200 in 371ms
+ ✓ Compiled in 1206ms (1363 modules)
+ GET /admin 200 in 449ms
+ ✓ Compiled in 784ms (1363 modules)
+ GET /admin 200 in 368ms
+ ✓ Compiled in 331ms (537 modules)
+ GET /admin 200 in 163ms
+ ✓ Compiled in 1274ms (1363 modules)
+ GET /admin 200 in 451ms
+[?25h

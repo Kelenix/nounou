@@ -1,0 +1,63 @@
+# Configuration Supabase locale (Docker). Voir https://supabase.com/docs/guides/cli/config
+project_id = "jai-ma-nounou"
+
+# Ports décalés (54331+) pour cohabiter avec une autre stack Supabase locale.
+[api]
+enabled = true
+port = 54331
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54332
+shadow_port = 54339
+major_version = 15
+
+[studio]
+enabled = true
+port = 54333
+
+[inbucket]
+enabled = true
+port = 54334
+
+[analytics]
+enabled = false
+
+[storage]
+enabled = true
+file_size_limit = "5MiB"
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000"]
+jwt_expiry = 3600
+enable_signup = true
+
+# --- Authentification par téléphone + OTP ---
+[auth.sms]
+enable_signup = true
+enable_confirmations = true
+# En local : provider Twilio factice (jamais appelé) pour ACTIVER le login téléphone,
+# combiné aux OTP de test ci-dessous qui court-circuitent tout envoi réel.
+[auth.sms.twilio]
+enabled = true
+account_sid = "ACdev0000000000000000000000000000"
+message_service_sid = "MGdev0000000000000000000000000000"
+auth_token = "dev-local-dummy-token"
+# Numéros de test (sans le +) → code fixe. Ajoutez-en pour tester d'autres numéros.
+[auth.sms.test_otp]
+2250700000001 = "123456"
+2250700000002 = "123456"
+2250700000003 = "123456"
+2250700000004 = "123456"
+2250700000005 = "123456"
+2250700000006 = "123456"
+2250700000007 = "123456"
+2250700000098 = "123456"
+2250700000099 = "123456"
+
+[edge_runtime]
+enabled = true
