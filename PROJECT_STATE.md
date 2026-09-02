@@ -4,7 +4,7 @@
 
 ## Snapshot
 
-- **Phase courante** : 5/6 — Qualité & préparation mise en production (implémentation MVP + P1/P2 terminée).
+- **Phase courante** : 6 — Mise en production (phases 0→5 terminées : MVP + P1/P2 + qualité vertes). Reste : déploiement + CI.
 - **Dernière mise à jour** : 2026-09-02
 - **Santé** : 🟢 OK — **build prod vert (42 routes), typecheck vert, lint vert, 9 tests unitaires
   verts, 12 tests E2E Playwright verts.** Vérifié en local (Docker + navigateur) sur les parcours
@@ -57,8 +57,8 @@
 | 2 — Planification           | ✅ fait | incréments verticaux |
 | 3 — Architecture & design   | ✅ fait | schéma + RLS + design system |
 | 4 — Implémentation          | ✅ fait | MVP + marketplace + admin + P1/P2 (notation, messagerie, Realtime). Reste : branchements réels paiement/SMS = tâches manuelles (comptes fournisseurs) |
-| 5 — Qualité                 | 🔄 en cours | build (38 routes), typecheck, lint, 9 tests unitaires verts ; **tests E2E Playwright à ajouter** |
-| 6 — Mise en production      | ⬜ à faire | déploiement Vercel/VPS + Supabase cloud + CI |
+| 5 — Qualité                 | ✅ fait | build (42 routes), typecheck, lint, 9 tests unitaires **et 12 tests E2E Playwright** verts |
+| 6 — Mise en production      | ⬜ à faire | déploiement Vercel/VPS + Supabase cloud + CI (GitHub Actions à créer) |
 | 7 — Documentation           | ✅ fait | README, PROJECT_STATE, DECISION_LOG, manual-tasks à jour (doc « pro/publiable » optionnelle non faite) |
 | 8 — Maintenance             | ⬜ à faire | passation après mise en prod |
 
