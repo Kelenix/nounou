@@ -6,9 +6,9 @@
 
 - **Phase courante** : 5/6 — Qualité & préparation mise en production (implémentation MVP + P1/P2 terminée).
 - **Dernière mise à jour** : 2026-09-02
-- **Santé** : 🟢 OK — **build prod vert (42 routes), typecheck vert, lint vert, 9 tests verts.**
-  Vérifié en local (Docker + navigateur) sur les parcours clés. Protections Super Admin testées
-  directement en base (trigger + index unique).
+- **Santé** : 🟢 OK — **build prod vert (42 routes), typecheck vert, lint vert, 9 tests unitaires
+  verts, 12 tests E2E Playwright verts.** Vérifié en local (Docker + navigateur) sur les parcours
+  clés. Protections Super Admin testées en base (trigger + index unique) **et via E2E (API 403)**.
 - **P1–P2 terminés** : notation mutuelle, messagerie interne, notifications temps réel (Realtime).
 - **Stack** : Next.js 15 (App Router) · TypeScript · Tailwind + shadcn-like · Supabase
   (Postgres + RLS + Auth téléphone/OTP + Storage + Edge/route handlers) · TanStack Query · Zod ·
@@ -16,7 +16,7 @@
 - **Supabase local (Docker)** : API 54331 · DB 54332 · Studio 54333 · Mailpit 54334 (ports décalés
   pour cohabiter avec la stack `melodie-ai`, analytics désactivé). Dev : http://localhost:3000.
 - **Prochaine action** : branchement d'un vrai agrégateur Mobile Money + fournisseur SMS, puis
-  déploiement (Vercel ou VPS + Supabase cloud) et tests E2E.
+  déploiement (Vercel ou VPS + Supabase cloud).
 
 ## Ce qui est livré (fonctionnel + vérifié)
 
@@ -87,8 +87,9 @@
 
 ### Reste à faire
 - **Paiement/SMS réels** : brancher un agrégateur derrière `PaymentProvider` / un fournisseur SMS.
-- **Déploiement** (Vercel ou VPS + Supabase cloud) et tests E2E Playwright.
+- **Déploiement** (Vercel ou VPS + Supabase cloud).
 - (Optionnel) badge Realtime pour la messagerie côté mobile, notifications push.
+- (Optionnel) élargir la couverture E2E (parcours candidature/messagerie de bout en bout).
 
 ## Blocages
 
@@ -100,6 +101,13 @@
 
 ## Journal de session (le plus récent en haut)
 
+- 2026-09-03 — **Tests E2E Playwright** (`e2e/`, 12 tests + setup/teardown, tous verts, ×2 stables).
+  Couvre : marketplace publique (accueil/nounous/offres + gate de contact), login OTP par rôle
+  (Super Admin → `/admin`, employeur → `/app`, redirection des connectés), et la **hiérarchie
+  d'admin** — staff ne voit pas le Super Admin, pages réservées → `/admin`, et **API 403** sur
+  toute action du staff visant le Super Admin (delete/set_role/suspend). Auth mutualisée via
+  `storageState` (setup unique par rôle → limite les envois OTP), compte staff de test restauré en
+  teardown. Scripts `test:e2e*`, artefacts ignorés par git.
 - 2026-09-02 — **Hiérarchie de rôles Super Admin / Staff / Utilisateur** (migration
   `20260902000003_super_admin`). Colonnes `is_super_admin` + `staff_permissions[]` sur `profiles`.
   **Protections appliquées côté base (non contournables via l'API/interface)** : trigger

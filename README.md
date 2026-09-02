@@ -88,9 +88,31 @@ npm run dev               # http://localhost:3000
 | `npm run lint` | ESLint |
 | `npm run typecheck` | Vérification des types |
 | `npm run test` | Tests unitaires (Vitest) |
+| `npm run test:e2e` | Tests end-to-end (Playwright) |
+| `npm run test:e2e:ui` | Playwright en mode UI (débogage) |
+| `npm run test:e2e:report` | Ouvre le dernier rapport HTML |
 | `npm run db:start` / `db:stop` | Stack Supabase locale (Docker) |
 | `npm run db:reset` | Réapplique migrations + seed |
 | `npm run db:types` | Régénère `src/lib/supabase/database.types.ts` |
+
+### Tests E2E (Playwright)
+
+Les scénarios sont dans `e2e/`. **Prérequis** : la stack Supabase locale doit tourner et être
+seedée (`npm run db:start` puis `npm run db:reset`). Playwright démarre le serveur Next lui-même
+(ou réutilise `npm run dev` s'il tourne déjà).
+
+```bash
+npx playwright install chromium   # une fois : télécharge le navigateur
+npm run test:e2e
+```
+
+Couverture : consultation publique de la marketplace (accueil, nounous, offres, gate de contact),
+login OTP par rôle (Super Admin → back-office, employeur → espace app), et surtout la
+**hiérarchie d'administration** — le staff ne voit pas le Super Admin, les pages réservées le
+renvoient vers `/admin`, et l'API **refuse (403)** toute tentative du staff de supprimer /
+rétrograder / suspendre le Super Admin (protection non contournable, doublée du trigger base).
+Les sessions sont authentifiées une seule fois puis réutilisées (`e2e/auth.setup.ts`), et le
+compte promu comme staff de test est restauré en fin de suite (`e2e/global.teardown.ts`).
 
 ## Structure
 
