@@ -48,6 +48,20 @@ export async function POST(request: Request) {
 
   const admin = createAdminClient();
 
+  // Limitation de débit (S5) : max 10 tentatives de paiement / heure / utilisateur.
+  const oneHourAgo = new Date(Date.now() - 3_600_000).toISOString();
+  const { count: recentAttempts } = await admin
+    .from("payments")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .gte("created_at", oneHourAgo);
+  if ((recentAttempts ?? 0) >= 10) {
+    return NextResponse.json(
+      { error: "Trop de tentatives de paiement. Réessayez plus tard." },
+      { status: 429 },
+    );
+  }
+
   // Tarif depuis settings (repli sur défaut).
   const { data: setting } = await admin
     .from("settings")

@@ -18,7 +18,7 @@ major_version = 15
 enabled = true
 port = 54333
 
-[inbucket]
+[local_smtp]
 enabled = true
 port = 54334
 
@@ -35,6 +35,13 @@ site_url = "http://localhost:3000"
 additional_redirect_urls = ["http://localhost:3000"]
 jwt_expiry = 3600
 enable_signup = true
+
+# --- Limitation de débit (S5) : plafonds anti-abus. En production, vérifier aussi
+#     les limites côté tableau de bord Supabase (Auth > Rate Limits). ---
+[auth.rate_limit]
+sms_sent = 30              # SMS OTP envoyés par heure (par IP)
+sign_in_sign_ups = 30      # tentatives de connexion/inscription / 5 min / IP
+token_verifications = 30   # vérifications d'OTP / 5 min / IP
 
 # --- Authentification par téléphone + OTP ---
 [auth.sms]

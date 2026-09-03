@@ -244,3 +244,39 @@
   initiales voulus côté marketing).
 - **Impact** : fonctionnel (UX), non destructif, réversible. RLS `profiles_update_own_or_admin`
   couvre déjà l'auto-édition (`id = auth.uid()`).
+
+## 2026-09-03 — Correctif sécurité CRITIQUE : verrouillage des colonnes de `profiles` (S1)
+- **Décideur** : Claude (sécurité)
+- **Contexte** : la RLS `profiles_update_own_or_admin` autorisait un utilisateur à modifier
+  n'importe quelle colonne de sa propre ligne. Combiné à `is_admin()` = `role='admin'` et à
+  l'absence de garde-fou, tout compte connecté pouvait se passer `role='admin'` depuis le
+  navigateur → accès RLS à tous les téléphones/paiements/messages (élévation de privilège,
+  OWASP A01). Même vecteur pour un faux `verification_level='verified'`.
+- **Décision** : migration `20260903000001_lock_profile_columns.sql` — trigger
+  `BEFORE UPDATE` `profiles_guard_self_update()` (SECURITY DEFINER) qui, pour un utilisateur
+  standard, interdit `role='admin'` et toute modification de `is_super_admin`,
+  `staff_permissions`, `verification_level`, `is_suspended`, `phone_verified`, `phone`.
+  Chemins de confiance préservés : service_role (`auth.uid() IS NULL`) et admins existants.
+- **Alternatives écartées** : privilèges par colonne (GRANT) — plus fragile et incomplet ;
+  déplacer le choix du rôle côté serveur only — plus lourd, casse le flux d'inscription.
+- **Conséquences** : inscription/onboarding (rôle candidate/employeur) et édition de profil
+  inchangés. Vérifié en base : escalade + faux badge **bloqués**, MAJ légitimes **OK**.
+- **Impact** : sécurité critique, réversible (drop trigger). Reste à traiter : S2 (paiement
+  réel), S3 (SMS prod), S4 (headers) — cf. `RAPPORT.md`.
+
+## 2026-09-03 — Lot de durcissement sécurité (S4–S9, §6, CI)
+- **Décideur** : Claude (sécurité + qualité)
+- **Contexte** : suite au RAPPORT.md, application de toutes les corrections réalisables côté code.
+- **Décisions** :
+  - **S4** en-têtes HTTP + CSP dans `next.config.mjs` (X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy, HSTS prod, CSP adaptée Supabase).
+  - **S5** rate-limiting : trigger `reports_rate_limit` (10/h), plafond tentatives paiement (429) dans `/api/paiement`, bloc `[auth.rate_limit]` config.toml.
+  - **S6** `candidate_phone` réécrit (VOLATILE) : journalisation dans `contact_reveals` (lisible admins seulement) + plafond 30/h anti-moissonnage.
+  - **S8** bucket `avatars` : `file_size_limit`=5 Mio + `allowed_mime_types` images — validation imposée serveur.
+  - **S9** suppression de la table `otp_codes` inutilisée.
+  - **§6** CGU + Politique de confidentialité étoffées (RGPD, mentions entre crochets à compléter).
+  - **CI** `.github/workflows/ci.yml` (lint + typecheck + tests + build).
+  - **S7** NON modifié : `is_active`/`is_suspended` de `public_profiles` sont load-bearing (masquage des comptes suspendus) ; risque faible accepté et documenté.
+- **Vérifications** : `db:reset` (13 migrations OK), triggers/tables confirmés en base, escalade toujours bloquée, `candidate_phone` journalise (reveals=1). lint + typecheck + 9 tests unitaires verts, build 42 routes OK.
+- **Note** : `database.types.ts` est **hand-authored** — ne PAS lancer `npm run db:types` (écrase les alias). Restauré depuis git après une régénération accidentelle.
+- **Reste manuel** : S2 (agrégateur paiement + webhook), S3 (fournisseur SMS).
+- **Impact** : sécurité/qualité, réversible.
