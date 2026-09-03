@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { Ban, RotateCcw, CreditCard, Trash2, UserCog, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/components/ui/toast";
-import { formatFcfa } from "@/lib/utils";
+import { formatFcfa, dateLocale } from "@/lib/utils";
 import { PAYMENT_METHOD_LABELS } from "@/lib/constants";
 import type { UserRole, PaymentMethod } from "@/lib/supabase/database.types";
 
@@ -20,8 +21,6 @@ export type SubscriptionInfo = {
 };
 
 type Dialog = "suspend" | "cancel" | "delete" | "role" | null;
-
-const ROLE_LABEL: Record<UserRole, string> = { candidate: "Candidate", employer: "Employeur", admin: "Administrateur" };
 
 export function UserActions({
   userId,
@@ -42,6 +41,8 @@ export function UserActions({
 }) {
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations();
+  const dl = dateLocale(useLocale());
   const [isSuspended, setIsSuspended] = useState(suspended);
   const [hasSub, setHasSub] = useState(hasSubscription);
   const [dialog, setDialog] = useState<Dialog>(null);
@@ -55,7 +56,7 @@ export function UserActions({
     if (await callApi("suspend", { suspended: next })) {
       setIsSuspended(next);
       setDialog(null);
-      toast(next ? "Compte suspendu" : "Compte réactivé", "success");
+      toast(next ? t("admin.toastSuspended") : t("admin.toastReactivated"), "success");
       router.refresh();
     }
   }
@@ -70,7 +71,7 @@ export function UserActions({
     const data = await res.json().catch(() => null);
     setLoading(false);
     if (!res.ok) {
-      toast(data?.error ?? "Action impossible.", "error");
+      toast(data?.error ?? t("admin.actionFailed"), "error");
       return false;
     }
     return true;
@@ -79,7 +80,7 @@ export function UserActions({
   async function confirmRole() {
     if (await callApi("set_role", { role: newRole })) {
       setDialog(null);
-      toast("Rôle mis à jour", "success");
+      toast(t("admin.toastRoleUpdated"), "success");
       router.refresh();
     }
   }
@@ -88,7 +89,7 @@ export function UserActions({
     if (await callApi("cancel_subscription")) {
       setHasSub(false);
       setDialog(null);
-      toast("Abonnement annulé", "success");
+      toast(t("admin.toastSubCancelled"), "success");
       router.refresh();
     }
   }
@@ -96,7 +97,7 @@ export function UserActions({
   async function confirmDelete() {
     if (await callApi("delete")) {
       setDialog(null);
-      toast("Compte supprimé", "success");
+      toast(t("admin.toastAccountDeleted"), "success");
       router.refresh();
     }
   }
@@ -106,25 +107,25 @@ export function UserActions({
       <div className="flex flex-wrap items-center justify-end gap-2">
         {hasSub && (
           <Button variant="secondary" size="sm" onClick={() => setDialog("cancel")}>
-            <CreditCard className="size-4" /> Annuler l&apos;abo
+            <CreditCard className="size-4" /> {t("admin.btnCancelSub")}
           </Button>
         )}
         <Button variant="secondary" size="sm" onClick={() => { setNewRole(role ?? "candidate"); setDialog("role"); }}>
-          <UserCog className="size-4" /> Rôle
+          <UserCog className="size-4" /> {t("admin.btnRole")}
         </Button>
         <Button variant="secondary" size="sm" onClick={() => setDialog("suspend")}>
           {isSuspended ? (
             <>
-              <RotateCcw className="size-4" /> Réactiver
+              <RotateCcw className="size-4" /> {t("admin.btnReactivate")}
             </>
           ) : (
             <>
-              <Ban className="size-4" /> Suspendre
+              <Ban className="size-4" /> {t("admin.btnSuspend")}
             </>
           )}
         </Button>
         <Button variant="destructive" size="sm" onClick={() => setDialog("delete")}>
-          <Trash2 className="size-4" /> Supprimer
+          <Trash2 className="size-4" /> {t("admin.btnDelete")}
         </Button>
       </div>
 
@@ -132,13 +133,15 @@ export function UserActions({
       <ConfirmDialog
         open={dialog === "suspend"}
         onOpenChange={close}
-        title={isSuspended ? "Réactiver ce compte ?" : "Suspendre ce compte ?"}
+        title={isSuspended ? t("admin.reactivateTitle") : t("admin.suspendTitle")}
         description={
           isSuspended
-            ? `${name} pourra de nouveau se connecter et utiliser la plateforme.`
-            : `${name} ne pourra plus se connecter${role === "candidate" ? " et ne sera plus visible dans le catalogue" : ""}. Vous pourrez réactiver le compte à tout moment.`
+            ? t("admin.reactivateDesc", { name })
+            : role === "candidate"
+              ? t("admin.suspendDescCandidate", { name })
+              : t("admin.suspendDesc", { name })
         }
-        confirmLabel={isSuspended ? "Réactiver" : "Suspendre"}
+        confirmLabel={isSuspended ? t("admin.btnReactivate") : t("admin.btnSuspend")}
         destructive={!isSuspended}
         loading={loading}
         onConfirm={confirmSuspend}
@@ -148,21 +151,21 @@ export function UserActions({
       <ConfirmDialog
         open={dialog === "cancel"}
         onOpenChange={close}
-        title="Annuler l'abonnement ?"
-        description={`L'abonnement de ${name} sera désactivé.${role === "candidate" ? " Le profil ne sera plus visible dans le catalogue public." : " L'accès premium sera retiré."}`}
-        confirmLabel="Confirmer l'annulation"
+        title={t("admin.cancelSubTitle")}
+        description={role === "candidate" ? t("admin.cancelSubDescCandidate", { name }) : t("admin.cancelSubDesc", { name })}
+        confirmLabel={t("admin.cancelSubConfirm")}
         destructive
         loading={loading}
         onConfirm={confirmCancel}
       >
         <div className="rounded-2xl border border-border bg-secondary/50 p-4 text-sm">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Détails de l&apos;abonnement</p>
-          <Row label="Formule" value={subscription?.label ?? (role === "candidate" ? "Activation du profil" : "Accès premium")} />
-          <Row label="Montant" value={subscription?.montant != null ? formatFcfa(subscription.montant) : "—"} />
-          <Row label="Moyen" value={subscription?.moyen ? PAYMENT_METHOD_LABELS[subscription.moyen] : "—"} />
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("admin.subDetails")}</p>
+          <Row label={t("admin.plan")} value={subscription?.label ?? (role === "candidate" ? t("admin.subActivation") : t("admin.subPremium"))} />
+          <Row label={t("admin.amount")} value={subscription?.montant != null ? formatFcfa(subscription.montant) : "—"} />
+          <Row label={t("admin.method")} value={subscription?.moyen ? PAYMENT_METHOD_LABELS[subscription.moyen] : "—"} />
           <Row
-            label="Depuis le"
-            value={subscription?.date ? new Date(subscription.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "—"}
+            label={t("admin.since")}
+            value={subscription?.date ? new Date(subscription.date).toLocaleDateString(dl, { day: "numeric", month: "long", year: "numeric" }) : "—"}
           />
         </div>
       </ConfirmDialog>
@@ -171,22 +174,22 @@ export function UserActions({
       <ConfirmDialog
         open={dialog === "role"}
         onOpenChange={close}
-        title={`Rôle de ${name}`}
-        description="Attribuez un rôle sur la plateforme. Promouvoir en administrateur donne l'accès complet au back-office."
-        confirmLabel="Enregistrer le rôle"
+        title={t("admin.roleOf", { name })}
+        description={t("admin.roleDesc")}
+        confirmLabel={t("admin.saveRole")}
         loading={loading}
         onConfirm={confirmRole}
       >
         <div className="space-y-1.5">
-          <Label>Rôle</Label>
+          <Label>{t("admin.roleLabel")}</Label>
           <Select value={newRole} onChange={(e) => setNewRole(e.target.value as UserRole)}>
-            <option value="candidate">{ROLE_LABEL.candidate}</option>
-            <option value="employer">{ROLE_LABEL.employer}</option>
-            {isSuperAdmin && <option value="admin">{ROLE_LABEL.admin}</option>}
+            <option value="candidate">{t("roles.candidate")}</option>
+            <option value="employer">{t("roles.employer")}</option>
+            {isSuperAdmin && <option value="admin">{t("admin.roleAdmin")}</option>}
           </Select>
           {newRole === "admin" && (
             <p className="inline-flex items-center gap-1 text-xs text-amber-700">
-              <AlertTriangle className="size-3.5" /> Cet utilisateur aura un accès administrateur complet.
+              <AlertTriangle className="size-3.5" /> {t("admin.adminWarning")}
             </p>
           )}
         </div>
@@ -196,9 +199,9 @@ export function UserActions({
       <ConfirmDialog
         open={dialog === "delete"}
         onOpenChange={close}
-        title="Supprimer définitivement ce compte ?"
-        description={`Le compte de ${name} et toutes ses données (profil, candidatures, offres, messages…) seront supprimés. Cette action est irréversible.`}
-        confirmLabel="Supprimer définitivement"
+        title={t("admin.deleteTitle")}
+        description={t("admin.deleteDesc", { name })}
+        confirmLabel={t("admin.deleteConfirm")}
         destructive
         loading={loading}
         onConfirm={confirmDelete}

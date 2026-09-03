@@ -1,15 +1,19 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
 import { requireProfile } from "@/lib/auth";
 import { Avatar } from "@/components/ui/avatar";
 import { getConversationThread } from "@/features/messages/queries";
 import { MessageComposer } from "@/features/messages/message-composer";
 import { RealtimeMessages } from "@/features/messages/realtime-messages";
 import { MarkMessagesRead } from "@/features/messages/mark-messages-read";
-import { cn } from "@/lib/utils";
+import { cn, dateLocale } from "@/lib/utils";
 
-export const metadata = { title: "Conversation" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("messages.conversation") };
+}
 
 export default async function ConversationPage({
   params,
@@ -21,7 +25,9 @@ export default async function ConversationPage({
   const thread = await getConversationThread(id, profile.id);
   if (!thread) notFound();
 
-  const name = `${thread.other.prenom ?? ""} ${thread.other.nom ?? ""}`.trim() || "Utilisateur";
+  const t = await getTranslations();
+  const dl = dateLocale(await getLocale());
+  const name = `${thread.other.prenom ?? ""} ${thread.other.nom ?? ""}`.trim() || t("messages.defaultUser");
 
   return (
     <div className="mx-auto flex h-[calc(100dvh-9rem)] max-w-2xl flex-col overflow-hidden rounded-2xl border border-border bg-card lg:h-[calc(100dvh-8rem)]">
@@ -41,7 +47,7 @@ export default async function ConversationPage({
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-4">
         {thread.messages.length === 0 ? (
           <p className="m-auto text-center text-sm text-muted-foreground">
-            Démarrez la conversation avec {thread.other.prenom ?? name}.
+            {t("messages.startWith", { name: thread.other.prenom ?? name })}
           </p>
         ) : (
           thread.messages.map((m) => {
@@ -56,7 +62,7 @@ export default async function ConversationPage({
                 >
                   <p className="whitespace-pre-line">{m.contenu}</p>
                   <p className={cn("mt-1 text-[10px]", mine ? "text-primary-foreground/70" : "text-muted-foreground")}>
-                    {new Date(m.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                    {new Date(m.created_at).toLocaleTimeString(dl, { hour: "2-digit", minute: "2-digit" })}
                   </p>
                 </div>
               </div>

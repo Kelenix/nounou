@@ -1,9 +1,13 @@
+import { getTranslations } from "next-intl/server";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileEditForm } from "@/features/profiles/profile-edit-form";
 import type { CandidateProfileRow, EmployerProfileRow } from "@/lib/supabase/database.types";
 
-export const metadata = { title: "Modifier le profil" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("profileEdit.metaTitle") };
+}
 
 export default async function EditProfilePage() {
   const profile = await requireProfile();

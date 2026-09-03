@@ -1,24 +1,25 @@
 import { Mail, Phone, MapPin } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
-export const metadata = { title: "Contact" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("contact.metaTitle") };
+}
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const t = await getTranslations();
   return (
     <div className="container max-w-2xl py-14">
-      <h1 className="text-3xl font-extrabold md:text-4xl">Nous contacter</h1>
-      <p className="mt-3 text-muted-foreground">
-        Une question, une suggestion, un souci ? Écrivez-nous, nous répondons vite.
-      </p>
+      <h1 className="text-3xl font-extrabold md:text-4xl">{t("contact.title")}</h1>
+      <p className="mt-3 text-muted-foreground">{t("contact.subtitle")}</p>
 
       <div className="mt-8 space-y-4">
-        <Row icon={<Phone className="size-5" />} label="Téléphone" value="+225 07 00 00 00 00" />
-        <Row icon={<Mail className="size-5" />} label="E-mail" value="contact@jaimanounou.ci" />
-        <Row icon={<MapPin className="size-5" />} label="Adresse" value="Abidjan, Côte d'Ivoire" />
+        <Row icon={<Phone className="size-5" />} label={t("contact.phone")} value="+225 07 00 00 00 00" />
+        <Row icon={<Mail className="size-5" />} label={t("contact.email")} value="contact@jaimanounou.ci" />
+        <Row icon={<MapPin className="size-5" />} label={t("contact.address")} value={t("contact.addressValue")} />
       </div>
 
-      <p className="mt-8 text-sm text-muted-foreground">
-        Un formulaire de contact en ligne sera bientôt disponible.
-      </p>
+      <p className="mt-8 text-sm text-muted-foreground">{t("contact.soon")}</p>
     </div>
   );
 }

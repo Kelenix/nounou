@@ -1,17 +1,18 @@
 import Link from "next/link";
 import { MapPin, Clock, BadgeCheck } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
-import { SERVICE_LABELS } from "@/lib/constants";
 import { formatFcfa } from "@/lib/utils";
 import type { OfferRow } from "@/lib/supabase/database.types";
 
-export function OfferCard({
+export async function OfferCard({
   offer,
   basePath = "/app/offres",
 }: {
   offer: OfferRow;
   basePath?: string;
 }) {
+  const t = await getTranslations();
   return (
     <Link
       href={`${basePath}/${offer.id}`}
@@ -28,7 +29,7 @@ export function OfferCard({
       <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1">
           <BadgeCheck className="size-3.5 text-primary" />
-          {SERVICE_LABELS[offer.type_service]}
+          {t(`services.${offer.type_service}`)}
         </span>
         <span className="inline-flex items-center gap-1">
           <MapPin className="size-3.5" />
@@ -48,7 +49,7 @@ export function OfferCard({
         </p>
       ) : null}
       {offer.status === "close" && (
-        <Badge className="mt-2 bg-muted text-muted-foreground">Clôturée</Badge>
+        <Badge className="mt-2 bg-muted text-muted-foreground">{t("offres.closed")}</Badge>
       )}
     </Link>
   );

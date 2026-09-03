@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Search, Briefcase, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
   const router = useRouter();
   const supabase = createClient();
   const { toast } = useToast();
+  const t = useTranslations();
 
   const [step, setStep] = useState<"infos" | "role">("infos");
   const [photoUrl, setPhotoUrl] = useState<string | null>(profile.photo_url);
@@ -33,11 +35,11 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
     e.preventDefault();
     setError(null);
     if (prenom.trim().length < 2 || nom.trim().length < 2) {
-      setError("Renseignez votre nom et prénom.");
+      setError(t("onboarding.nameRequired"));
       return;
     }
     if (!ville) {
-      setError("Choisissez votre ville.");
+      setError(t("onboarding.cityRequired"));
       return;
     }
     setStep("role");
@@ -61,7 +63,7 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
 
     if (upErr) {
       setLoading(false);
-      setError("Une erreur est survenue. Réessayez.");
+      setError(t("onboarding.error"));
       return;
     }
 
@@ -72,7 +74,7 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
       await supabase.from("employer_profiles").upsert({ user_id: profile.id });
     }
 
-    toast("Bienvenue sur J'ai ma nounou !", "success");
+    toast(t("onboarding.welcome"), "success");
     router.replace("/app");
     router.refresh();
   }
@@ -88,9 +90,9 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
           {step === "infos" ? (
             <form onSubmit={goToRole} className="space-y-5">
               <div className="text-center">
-                <h1 className="text-xl font-extrabold">Faisons connaissance</h1>
+                <h1 className="text-xl font-extrabold">{t("onboarding.getToKnow")}</h1>
                 <p className="text-sm text-muted-foreground">
-                  Ces informations rassurent les autres membres.
+                  {t("onboarding.getToKnowSub")}
                 </p>
               </div>
 
@@ -104,17 +106,17 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label htmlFor="prenom">Prénom</Label>
+                  <Label htmlFor="prenom">{t("onboarding.firstName")}</Label>
                   <Input id="prenom" value={prenom} onChange={(e) => setPrenom(e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="nom">Nom</Label>
+                  <Label htmlFor="nom">{t("onboarding.lastName")}</Label>
                   <Input id="nom" value={nom} onChange={(e) => setNom(e.target.value)} />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="ville">Ville</Label>
+                <Label htmlFor="ville">{t("onboarding.city")}</Label>
                 <Select id="ville" value={ville} onChange={(e) => setVille(e.target.value)}>
                   {VILLES_CI.map((v) => (
                     <option key={v} value={v}>{v}</option>
@@ -123,10 +125,10 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="commune">Commune / quartier</Label>
+                <Label htmlFor="commune">{t("onboarding.communeQuartier")}</Label>
                 {ville === "Abidjan" ? (
                   <Select id="commune" value={commune} onChange={(e) => setCommune(e.target.value)}>
-                    <option value="">Sélectionner…</option>
+                    <option value="">{t("onboarding.select")}</option>
                     {COMMUNES_ABIDJAN.map((c) => (
                       <option key={c} value={c}>{c}</option>
                     ))}
@@ -134,7 +136,7 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
                 ) : (
                   <Input
                     id="commune"
-                    placeholder="Votre commune ou quartier"
+                    placeholder={t("onboarding.communePlaceholder")}
                     value={commune}
                     onChange={(e) => setCommune(e.target.value)}
                   />
@@ -144,30 +146,30 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
               {error && <p className="text-sm text-destructive">{error}</p>}
 
               <Button type="submit" className="w-full">
-                Continuer <ArrowRight className="size-4" />
+                {t("onboarding.continue")} <ArrowRight className="size-4" />
               </Button>
             </form>
           ) : (
             <div className="space-y-5">
               <div className="text-center">
-                <h1 className="text-xl font-extrabold">Que recherchez-vous ?</h1>
+                <h1 className="text-xl font-extrabold">{t("onboarding.whatLooking")}</h1>
                 <p className="text-sm text-muted-foreground">
-                  Vous pourrez compléter votre profil ensuite.
+                  {t("onboarding.completeLater")}
                 </p>
               </div>
 
               <div className="space-y-3">
                 <RoleCard
                   icon={<Search className="size-6" />}
-                  title="Je recherche un emploi"
-                  subtitle="Je suis une aide à domicile (candidate)"
+                  title={t("onboarding.candidateTitle")}
+                  subtitle={t("onboarding.candidateSub")}
                   onClick={() => chooseRole("candidate")}
                   disabled={loading}
                 />
                 <RoleCard
                   icon={<Briefcase className="size-6" />}
-                  title="Je recherche une personne"
-                  subtitle="Je suis une famille / un employeur"
+                  title={t("onboarding.employerTitle")}
+                  subtitle={t("onboarding.employerSub")}
                   onClick={() => chooseRole("employer")}
                   disabled={loading}
                 />
@@ -185,7 +187,7 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
                 onClick={() => setStep("infos")}
                 className="w-full text-center text-sm text-muted-foreground"
               >
-                Revenir aux informations
+                {t("onboarding.backToInfo")}
               </button>
             </div>
           )}

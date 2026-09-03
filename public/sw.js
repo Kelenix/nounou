@@ -1,7 +1,7 @@
 // Service worker « J'ai ma nounou » — cache hors-ligne basique (app shell).
 // Stratégie : network-first pour la navigation (fallback cache/offline),
 // cache-first pour les assets statiques. Volontairement simple et léger.
-const CACHE = "jmn-v1";
+const CACHE = "jmn-v2";
 const OFFLINE_URL = "/offline";
 const PRECACHE = ["/", OFFLINE_URL, "/manifest.webmanifest"];
 

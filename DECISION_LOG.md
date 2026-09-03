@@ -5,6 +5,37 @@
 
 ---
 
+## ADR-009 — Interface multilingue FR/EN (next-intl, cookie sans routing)
+
+- **Date** : 2026-09-03
+- **Statut** : Accepté
+- **Décideur** : Utilisateur + Claude
+- **Contexte** : l'INTAKE (§0) mentionnait « 100 % FR » mais son entête demandait FR/EN ;
+  l'utilisateur a tranché pour le **multilingue FR/EN**.
+- **Décisions** :
+  - **Bibliothèque** : `next-intl` (standard App Router, support RSC + Server/Client Components).
+  - **Stratégie d'URL** : **mode « sans routing »** — la langue est mémorisée dans un cookie
+    `NEXT_LOCALE` (défaut `fr`), **pas de préfixe `/en/`**. Choix de l'utilisateur : évite de
+    restructurer tout `app/` en `app/[locale]/` (groupes `(public)/(auth)/app/admin`), chantier
+    beaucoup plus lourd. Compromis assumé : pas d'URL dédiée par langue (SEO EN moindre) — acceptable
+    pour un marché où le FR domine ; migration possible plus tard si besoin.
+  - **Périmètre** : **tout** — public, auth, espace connecté, back-office admin.
+  - **Dictionnaires** : `messages/fr.json` + `messages/en.json`, organisés par namespace,
+    **parité de clés vérifiée** (719 = 719). Sélecteur de langue = server action `setUserLocale`
+    (pose le cookie) + `router.refresh()`. Dates localisées via `dateLocale(locale)`.
+  - **Textes légaux (CGU/confidentialité)** : rendus par **branche de locale** (JSX FR ou EN)
+    plutôt que du HTML dans le JSON — plus lisible pour du contenu riche, et adapté au fait que ces
+    textes restent à relire juridiquement.
+  - **Enums partagés** (services, statuts de candidature, motifs/statuts de signalement) : traduits
+    via `t(\`services.${key}\`)` etc., les constantes ne servent plus que de source de clés.
+- **Alternatives écartées** : préfixe d'URL `/en/` (meilleur SEO mais restructuration lourde) ;
+  i18n maison (réinventer le chargement de messages et le formatage).
+- **Conséquences** : composants « feuilles » partagés passés en `async` (RSC) pour `getTranslations`
+  (provider-card, offer-card, candidate-card, verification-badge, rating-stars, pagination, etc.).
+- **Impact** : produit + i18n + architecture — niveau élevé.
+
+---
+
 ## ADR-008 — Hiérarchie de rôles Super Admin / Staff & protections côté base
 
 - **Date** : 2026-09-02

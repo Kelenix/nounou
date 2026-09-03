@@ -1,16 +1,21 @@
 import Link from "next/link";
 import { HeartOff } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { CandidateCard, type CandidateListItem } from "@/features/candidates/candidate-card";
 import type { PublicProfileRow, CandidateProfileRow } from "@/lib/supabase/database.types";
 
-export const metadata = { title: "Favoris" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("favorites.metaTitle") };
+}
 
 export default async function FavorisPage() {
   const profile = await requireRole("employer");
   const supabase = await createClient();
+  const t = await getTranslations();
 
   const { data: favs } = await supabase
     .from("favorites")
@@ -50,15 +55,15 @@ export default async function FavorisPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-extrabold tracking-tight">Favoris</h1>
+      <h1 className="text-2xl font-extrabold tracking-tight">{t("favorites.title")}</h1>
       {items.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-3 p-10 text-center">
             <span className="flex size-14 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
               <HeartOff className="size-7" />
             </span>
-            <p className="text-sm text-muted-foreground">Vous n&apos;avez pas encore de nounou en favori.</p>
-            <Link href="/app/recherche" className="text-sm font-semibold text-primary">Trouver une nounou</Link>
+            <p className="text-sm text-muted-foreground">{t("favorites.empty")}</p>
+            <Link href="/app/recherche" className="text-sm font-semibold text-primary">{t("favorites.find")}</Link>
           </CardContent>
         </Card>
       ) : (

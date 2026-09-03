@@ -1,31 +1,26 @@
+import { getLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdminSection } from "@/lib/admin";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pagination } from "@/components/ui/pagination";
 import { ReportActions } from "@/features/admin/report-actions";
-import type { ReportMotif, ReportStatus } from "@/lib/supabase/database.types";
+import { dateLocale } from "@/lib/utils";
+import type { ReportStatus } from "@/lib/supabase/database.types";
 
-export const metadata = { title: "Admin — Signalements" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("admin.metaReports") };
+}
 
 const PAGE_SIZE = 15;
 type SP = Record<string, string | string[] | undefined>;
 
-const MOTIF_LABELS: Record<ReportMotif, string> = {
-  fausse_identite: "Fausse identité",
-  arnaque: "Arnaque",
-  harcelement: "Harcèlement",
-  offre_frauduleuse: "Offre frauduleuse",
-  comportement: "Comportement déplacé",
-  conditions_differentes: "Conditions différentes",
-  autre: "Autre",
-};
-
-const STATUS_META: Record<ReportStatus, { label: string; className: string }> = {
-  ouvert: { label: "Ouvert", className: "bg-amber-100 text-amber-800" },
-  en_cours: { label: "En cours", className: "bg-blue-100 text-blue-700" },
-  traite: { label: "Traité", className: "bg-primary-soft text-primary" },
-  rejete: { label: "Rejeté", className: "bg-muted text-muted-foreground" },
+const STATUS_CLASS: Record<ReportStatus, string> = {
+  ouvert: "bg-amber-100 text-amber-800",
+  en_cours: "bg-blue-100 text-blue-700",
+  traite: "bg-primary-soft text-primary",
+  rejete: "bg-muted text-muted-foreground",
 };
 
 export default async function AdminReportsPage({
@@ -34,6 +29,8 @@ export default async function AdminReportsPage({
   searchParams: Promise<SP>;
 }) {
   await requireAdminSection("reports");
+  const t = await getTranslations();
+  const dl = dateLocale(await getLocale());
   const sp = await searchParams;
   const page = Math.max(1, Number(typeof sp.page === "string" ? sp.page : "1") || 1);
 
@@ -51,28 +48,27 @@ export default async function AdminReportsPage({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-extrabold tracking-tight">Signalements ({total})</h1>
+      <h1 className="text-2xl font-extrabold tracking-tight">{t("admin.reportsTitle", { count: total })}</h1>
       {list.length === 0 ? (
         <Card>
           <CardContent className="p-6 text-center text-sm text-muted-foreground">
-            Aucun signalement.
+            {t("admin.noReports")}
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-2">
           {list.map((r) => {
-            const s = STATUS_META[r.status];
             const open = r.status === "ouvert" || r.status === "en_cours";
             return (
               <Card key={r.id}>
                 <CardContent className="space-y-2 p-4">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold">{MOTIF_LABELS[r.motif]}</span>
-                    <Badge className={s.className}>{s.label}</Badge>
+                    <span className="font-semibold">{t(`reportMotifs.${r.motif}`)}</span>
+                    <Badge className={STATUS_CLASS[r.status]}>{t(`reportStatus.${r.status}`)}</Badge>
                   </div>
                   {r.description && <p className="text-sm text-muted-foreground">{r.description}</p>}
                   <p className="text-xs text-muted-foreground">
-                    Signalé le {new Date(r.created_at).toLocaleDateString("fr-FR")}
+                    {t("admin.reportedOn", { date: new Date(r.created_at).toLocaleDateString(dl) })}
                   </p>
                   {open && <ReportActions reportId={r.id} />}
                 </CardContent>

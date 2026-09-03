@@ -7,12 +7,15 @@ import { getCurrentProfile } from "@/lib/auth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getTranslations } from "next-intl/server";
 import { VerificationBadge } from "@/components/app/verification-badge";
 import { RatingStars } from "@/components/app/rating-stars";
-import { SERVICE_LABELS } from "@/lib/constants";
 import { formatFcfa } from "@/lib/utils";
 
-export const metadata = { title: "Profil nounou" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("nounouDetail.metaTitle") };
+}
 
 export default async function PublicProviderPage({
   params,
@@ -24,13 +27,14 @@ export default async function PublicProviderPage({
   if (!item) notFound();
 
   const viewer = await getCurrentProfile();
+  const t = await getTranslations();
   const { profile, candidate, rating, createdAt } = item;
-  const name = `${profile.prenom ?? ""} ${profile.nom ?? ""}`.trim() || "Nounou";
+  const name = `${profile.prenom ?? ""} ${profile.nom ?? ""}`.trim() || t("card.defaultName");
 
   return (
     <div className="container max-w-3xl py-8 lg:py-12">
       <Link href="/nounous" className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="size-4" /> Retour aux nounous
+        <ArrowLeft className="size-4" /> {t("nounouDetail.back")}
       </Link>
 
       <Card className="overflow-hidden">
@@ -50,7 +54,7 @@ export default async function PublicProviderPage({
             <h1 className="text-2xl font-extrabold">{name}</h1>
             <p className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground">
               <MapPin className="size-4" />
-              {[profile.commune, profile.ville].filter(Boolean).join(", ") || "Côte d'Ivoire"}
+              {[profile.commune, profile.ville].filter(Boolean).join(", ") || t("card.country")}
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <RatingStars value={rating.average} count={rating.count} size="md" />
@@ -59,7 +63,7 @@ export default async function PublicProviderPage({
             {candidate.salaire_souhaite != null && (
               <div className="mt-4">
                 <span className="text-2xl font-extrabold text-primary">{formatFcfa(candidate.salaire_souhaite)}</span>
-                <span className="text-sm text-muted-foreground"> / mois</span>
+                <span className="text-sm text-muted-foreground">{t("nounouDetail.perMonth")}</span>
               </div>
             )}
           </CardContent>
@@ -70,20 +74,20 @@ export default async function PublicProviderPage({
         <CardContent className="space-y-4 p-6">
           <div className="flex items-center gap-2">
             <span className="flex size-8 items-center justify-center rounded-xl bg-primary-soft text-primary"><Sparkles className="size-4" /></span>
-            <h2 className="font-bold">Services &amp; expérience</h2>
+            <h2 className="font-bold">{t("nounouDetail.servicesExp")}</h2>
           </div>
           <div>
-            <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Services proposés</p>
+            <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("nounouDetail.servicesOffered")}</p>
             <div className="flex flex-wrap gap-2">
               {candidate.services.map((s) => (
-                <Badge key={s} className="bg-primary-soft text-primary">{SERVICE_LABELS[s]}</Badge>
+                <Badge key={s} className="bg-primary-soft text-primary">{t(`services.${s}`)}</Badge>
               ))}
             </div>
           </div>
 
           {candidate.competences.length > 0 && (
             <div>
-              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Compétences</p>
+              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("nounouDetail.skills")}</p>
               <div className="flex flex-wrap gap-2">
                 {candidate.competences.map((c) => (
                   <Badge key={c} className="bg-secondary text-foreground">{c}</Badge>
@@ -93,14 +97,14 @@ export default async function PublicProviderPage({
           )}
 
           <div className="flex flex-wrap gap-x-6 gap-y-2 border-t border-border/60 pt-3 text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5"><Briefcase className="size-4 text-primary" /> {candidate.experience_annees} an(s) d&apos;expérience</span>
-            <span className="inline-flex items-center gap-1.5"><Clock className="size-4 text-primary" /> {candidate.disponibilite || (candidate.temps_plein ? "Temps plein" : "Temps partiel")}</span>
-            <span className="inline-flex items-center gap-1.5"><CalendarDays className="size-4 text-primary" /> Membre depuis {new Date(createdAt).getFullYear()}</span>
+            <span className="inline-flex items-center gap-1.5"><Briefcase className="size-4 text-primary" /> {t("nounouDetail.experienceYears", { years: candidate.experience_annees })}</span>
+            <span className="inline-flex items-center gap-1.5"><Clock className="size-4 text-primary" /> {candidate.disponibilite || (candidate.temps_plein ? t("nounouDetail.fullTime") : t("nounouDetail.partTime"))}</span>
+            <span className="inline-flex items-center gap-1.5"><CalendarDays className="size-4 text-primary" /> {t("nounouDetail.memberSince", { year: new Date(createdAt).getFullYear() })}</span>
           </div>
 
           {candidate.description && (
             <div>
-              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">À propos</p>
+              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("nounouDetail.about")}</p>
               <p className="whitespace-pre-line text-sm text-muted-foreground">{candidate.description}</p>
             </div>
           )}
@@ -112,23 +116,23 @@ export default async function PublicProviderPage({
         {viewer ? (
           <Button asChild size="lg" className="w-full">
             <Link href={`/app/candidates/${id}`}>
-              <MessageCircle className="size-5" /> Contacter {profile.prenom}
+              <MessageCircle className="size-5" /> {t("nounouDetail.contact", { name: profile.prenom ?? "" })}
             </Link>
           </Button>
         ) : (
           <Card className="border-primary/30 bg-primary-soft/30">
             <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
               <p className="text-sm text-muted-foreground">
-                Connectez-vous ou créez un compte pour contacter {profile.prenom}.
+                {t("nounouDetail.loginToContact", { name: profile.prenom ?? "" })}
               </p>
               <div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
                 <Button asChild size="lg">
                   <Link href={`/connexion?redirect=/app/candidates/${id}`}>
-                    <LogIn className="size-5" /> Se connecter
+                    <LogIn className="size-5" /> {t("nounouDetail.login")}
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="secondary">
-                  <Link href={`/inscription?redirect=/app/candidates/${id}`}>Créer un compte</Link>
+                  <Link href={`/inscription?redirect=/app/candidates/${id}`}>{t("nounouDetail.register")}</Link>
                 </Button>
               </div>
             </CardContent>

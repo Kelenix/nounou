@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ export function OfferForm({ employerId }: { employerId: string }) {
   const router = useRouter();
   const supabase = createClient();
   const { toast } = useToast();
+  const t = useTranslations();
 
   const [titre, setTitre] = useState("");
   const [service, setService] = useState<ServiceType>("garde_enfants");
@@ -50,7 +52,7 @@ export function OfferForm({ employerId }: { employerId: string }) {
       logee,
     });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "Formulaire invalide");
+      setError(parsed.error.issues[0]?.message ?? t("offerForm.invalid"));
       return;
     }
     setLoading(true);
@@ -74,10 +76,10 @@ export function OfferForm({ employerId }: { employerId: string }) {
       .single();
     setLoading(false);
     if (insErr || !data) {
-      setError("Publication impossible. Réessayez.");
+      setError(t("offerForm.publishFailed"));
       return;
     }
-    toast("Offre publiée", "success");
+    toast(t("offerForm.published"), "success");
     router.push(`/app/offres/${data.id}`);
     router.refresh();
   }
@@ -88,67 +90,67 @@ export function OfferForm({ employerId }: { employerId: string }) {
         <Button asChild variant="ghost" size="icon" type="button">
           <Link href="/app/offres"><ArrowLeft className="size-5" /></Link>
         </Button>
-        <h1 className="text-lg font-extrabold">Publier une offre</h1>
+        <h1 className="text-lg font-extrabold">{t("offerForm.title")}</h1>
       </div>
 
-      <Field label="Titre de l'offre *">
-        <Input value={titre} onChange={(e) => setTitre(e.target.value)} placeholder="Ex. Nounou pour 2 enfants" />
+      <Field label={t("offerForm.offerTitle")}>
+        <Input value={titre} onChange={(e) => setTitre(e.target.value)} placeholder={t("offerForm.offerTitlePlaceholder")} />
       </Field>
 
-      <Field label="Type de service *">
+      <Field label={t("offerForm.serviceType")}>
         <Select value={service} onChange={(e) => setService(e.target.value as ServiceType)}>
-          {SERVICE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          {SERVICE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{t(`services.${o.value}`)}</option>)}
         </Select>
       </Field>
 
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Ville *">
+        <Field label={t("offerForm.city")}>
           <Select value={ville} onChange={(e) => setVille(e.target.value)}>
             {VILLES_CI.map((v) => <option key={v} value={v}>{v}</option>)}
           </Select>
         </Field>
-        <Field label="Commune">
+        <Field label={t("offerForm.commune")}>
           {ville === "Abidjan" ? (
             <Select value={commune} onChange={(e) => setCommune(e.target.value)}>
               <option value="">—</option>
               {COMMUNES_ABIDJAN.map((c) => <option key={c} value={c}>{c}</option>)}
             </Select>
           ) : (
-            <Input value={commune} onChange={(e) => setCommune(e.target.value)} placeholder="Commune" />
+            <Input value={commune} onChange={(e) => setCommune(e.target.value)} placeholder={t("offerForm.communePlaceholder")} />
           )}
         </Field>
       </div>
 
-      <Field label="Quartier">
-        <Input value={quartier} onChange={(e) => setQuartier(e.target.value)} placeholder="Optionnel" />
+      <Field label={t("offerForm.quartier")}>
+        <Input value={quartier} onChange={(e) => setQuartier(e.target.value)} placeholder={t("offerForm.optional")} />
       </Field>
 
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Salaire (FCFA)">
-          <Input type="number" inputMode="numeric" min={0} value={salaire} onChange={(e) => setSalaire(e.target.value)} placeholder="Optionnel" />
+        <Field label={t("offerForm.salary")}>
+          <Input type="number" inputMode="numeric" min={0} value={salaire} onChange={(e) => setSalaire(e.target.value)} placeholder={t("offerForm.optional")} />
         </Field>
-        <Field label="Expérience souhaitée (ans)">
-          <Input type="number" inputMode="numeric" min={0} value={experience} onChange={(e) => setExperience(e.target.value)} placeholder="Optionnel" />
+        <Field label={t("offerForm.expWanted")}>
+          <Input type="number" inputMode="numeric" min={0} value={experience} onChange={(e) => setExperience(e.target.value)} placeholder={t("offerForm.optional")} />
         </Field>
       </div>
 
-      <Field label="Horaires">
-        <Input value={horaires} onChange={(e) => setHoraires(e.target.value)} placeholder="Ex. 8h-17h, lun-ven" />
+      <Field label={t("offerForm.hours")}>
+        <Input value={horaires} onChange={(e) => setHoraires(e.target.value)} placeholder={t("offerForm.hoursPlaceholder")} />
       </Field>
 
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" checked={logee} onChange={(e) => setLogee(e.target.checked)} className="size-4 accent-primary" />
-        Personne logée sur place
+        {t("offerForm.housed")}
       </label>
 
-      <Field label="Description">
-        <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Décrivez le poste, les tâches, les conditions…" />
+      <Field label={t("offerForm.description")}>
+        <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("offerForm.descriptionPlaceholder")} />
       </Field>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? <Spinner className="text-primary-foreground" /> : "Publier l'offre"}
+        {loading ? <Spinner className="text-primary-foreground" /> : t("offerForm.submit")}
       </Button>
     </form>
   );

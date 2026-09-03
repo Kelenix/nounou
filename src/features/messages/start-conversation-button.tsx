@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { MessageCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import { useToast } from "@/components/ui/toast";
 export function StartConversationButton({
   employerId,
   candidateId,
-  label = "Envoyer un message",
+  label,
 }: {
   employerId: string;
   candidateId: string;
@@ -20,7 +21,9 @@ export function StartConversationButton({
 }) {
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations();
   const [loading, setLoading] = useState(false);
+  const buttonLabel = label ?? t("messages.startConversation");
 
   async function open() {
     setLoading(true);
@@ -32,7 +35,7 @@ export function StartConversationButton({
       .single();
     setLoading(false);
     if (error || !data) {
-      toast("Impossible d'ouvrir la conversation.", "error");
+      toast(t("messages.openFailed"), "error");
       return;
     }
     router.push(`/app/messages/${data.id}`);
@@ -40,7 +43,7 @@ export function StartConversationButton({
 
   return (
     <Button className="w-full" onClick={open} disabled={loading}>
-      {loading ? <Spinner className="text-primary-foreground" /> : <><MessageCircle className="size-4" /> {label}</>}
+      {loading ? <Spinner className="text-primary-foreground" /> : <><MessageCircle className="size-4" /> {buttonLabel}</>}
     </Button>
   );
 }

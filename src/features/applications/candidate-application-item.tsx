@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { MapPin, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
-import { APPLICATION_STATUS_META, SERVICE_LABELS } from "@/lib/constants";
+import { APPLICATION_STATUS_META } from "@/lib/constants";
 import { RatingForm } from "@/features/ratings/rating-form";
 import type { ApplicationStatus, OfferRow } from "@/lib/supabase/database.types";
 
@@ -28,6 +29,7 @@ export function CandidateApplicationItem({ application }: { application: Candida
   const router = useRouter();
   const supabase = createClient();
   const { toast } = useToast();
+  const t = useTranslations();
   const [status, setStatus] = useState<ApplicationStatus>(application.status);
   const [loading, setLoading] = useState(false);
   const offer = application.offer;
@@ -39,11 +41,11 @@ export function CandidateApplicationItem({ application }: { application: Candida
     const { error } = await supabase.from("applications").update({ status: "annulee" }).eq("id", application.id);
     setLoading(false);
     if (error) {
-      toast("Annulation impossible.", "error");
+      toast(t("applications.cancelFailed"), "error");
       return;
     }
     setStatus("annulee");
-    toast("Candidature annulée", "success");
+    toast(t("applications.cancelled"), "success");
     router.refresh();
   }
 
@@ -51,13 +53,13 @@ export function CandidateApplicationItem({ application }: { application: Candida
     <div className="rounded-2xl border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-2">
         <Link href={offer ? `/app/offres/${offer.id}` : "#"} className="font-bold hover:underline">
-          {offer?.titre ?? "Offre supprimée"}
+          {offer?.titre ?? t("applications.offerDeleted")}
         </Link>
-        <Badge className={meta.className}>{meta.label}</Badge>
+        <Badge className={meta.className}>{t(`applicationStatus.${status}`)}</Badge>
       </div>
       {offer && (
         <p className="mt-1 flex flex-wrap items-center gap-x-3 text-xs text-muted-foreground">
-          <span>{SERVICE_LABELS[offer.type_service]}</span>
+          <span>{t(`services.${offer.type_service}`)}</span>
           <span className="inline-flex items-center gap-1">
             <MapPin className="size-3.5" />
             {[offer.commune, offer.ville].filter(Boolean).join(", ")}
@@ -66,7 +68,7 @@ export function CandidateApplicationItem({ application }: { application: Candida
       )}
       {canCancel && (
         <Button variant="ghost" size="sm" className="mt-2 text-muted-foreground" onClick={cancel} disabled={loading}>
-          <X className="size-4" /> Annuler ma candidature
+          <X className="size-4" /> {t("applications.cancelMine")}
         </Button>
       )}
 

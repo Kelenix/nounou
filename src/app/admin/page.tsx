@@ -1,4 +1,5 @@
 import { Users, UserCheck, Briefcase, FileText, Send, CreditCard, Flag, ShieldCheck } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +7,10 @@ import { requireAdmin } from "@/lib/admin";
 import { canAccess } from "@/lib/admin-permissions";
 import { formatFcfa } from "@/lib/utils";
 
-export const metadata = { title: "Admin — Tableau de bord" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("admin.metaDashboard") };
+}
 
 async function count(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -22,6 +26,7 @@ async function count(
 export default async function AdminDashboard() {
   const me = await requireAdmin();
   const supabase = await createClient();
+  const t = await getTranslations();
   const canSeeRevenue = me.is_super_admin || canAccess(me, "settings");
 
   const totalUsers = await count(supabase, "profiles");
@@ -56,60 +61,62 @@ export default async function AdminDashboard() {
     <div className="space-y-6">
       <div className="animate-fade-up flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight">Tableau de bord</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight">{t("admin.dashboardTitle")}</h1>
           <p className="text-sm text-muted-foreground">
-            Bonjour {me.prenom ?? "Admin"} — {me.is_super_admin ? "vue complète de la plateforme." : "vue de vos responsabilités."}
+            {me.is_super_admin
+              ? t("admin.greetingFull", { name: me.prenom ?? t("admin.adminFallback") })
+              : t("admin.greetingStaff", { name: me.prenom ?? t("admin.adminFallback") })}
           </p>
         </div>
         <Badge className={me.is_super_admin ? "bg-amber-100 text-amber-800" : "bg-primary-soft text-primary"}>
-          <ShieldCheck className="size-3" /> {me.is_super_admin ? "Super Admin" : "Membre du staff"}
+          <ShieldCheck className="size-3" /> {me.is_super_admin ? t("admin.superAdmin") : t("admin.staffMember")}
         </Badge>
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
-        <Stat icon={<Users className="size-5" />} label="Utilisateurs" value={totalUsers} />
-        <Stat icon={<UserCheck className="size-5" />} label="Candidates" value={candidates} />
-        <Stat icon={<Briefcase className="size-5" />} label="Employeurs" value={employers} />
-        <Stat icon={<FileText className="size-5" />} label="Offres" value={offers} />
-        <Stat icon={<Send className="size-5" />} label="Candidatures" value={applications} />
-        <Stat icon={<Flag className="size-5" />} label="Signalements ouverts" value={openReports} highlight={openReports > 0} />
+        <Stat icon={<Users className="size-5" />} label={t("admin.statUsers")} value={totalUsers} />
+        <Stat icon={<UserCheck className="size-5" />} label={t("admin.statCandidates")} value={candidates} />
+        <Stat icon={<Briefcase className="size-5" />} label={t("admin.statEmployers")} value={employers} />
+        <Stat icon={<FileText className="size-5" />} label={t("admin.statOffers")} value={offers} />
+        <Stat icon={<Send className="size-5" />} label={t("admin.statApplications")} value={applications} />
+        <Stat icon={<Flag className="size-5" />} label={t("admin.statOpenReports")} value={openReports} highlight={openReports > 0} />
         {canSeeRevenue && (
-          <Stat icon={<CreditCard className="size-5" />} label="Chiffre d'affaires" value={formatFcfa(revenue)} accent />
+          <Stat icon={<CreditCard className="size-5" />} label={t("admin.statRevenue")} value={formatFcfa(revenue)} accent />
         )}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardContent className="p-5">
-            <h2 className="mb-3 font-bold">Derniers inscrits</h2>
+            <h2 className="mb-3 font-bold">{t("admin.recentUsers")}</h2>
             <ul className="divide-y divide-border/60">
               {(recentUsers ?? []).map((u) => (
                 <li key={u.id} className="flex items-center justify-between py-2.5 text-sm">
-                  <span className="font-medium">{`${u.prenom ?? ""} ${u.nom ?? ""}`.trim() || "Sans nom"}</span>
+                  <span className="font-medium">{`${u.prenom ?? ""} ${u.nom ?? ""}`.trim() || t("admin.noName")}</span>
                   <span className="text-xs text-muted-foreground">
-                    {u.role === "candidate" ? "Candidate" : u.role === "employer" ? "Employeur" : "Admin"}
+                    {u.role === "candidate" ? t("roles.candidate") : u.role === "employer" ? t("roles.employer") : t("roles.admin")}
                     {u.ville ? ` · ${u.ville}` : ""}
                   </span>
                 </li>
               ))}
-              {(recentUsers ?? []).length === 0 && <li className="py-3 text-sm text-muted-foreground">Aucun utilisateur.</li>}
+              {(recentUsers ?? []).length === 0 && <li className="py-3 text-sm text-muted-foreground">{t("admin.noUsers")}</li>}
             </ul>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-5">
-            <h2 className="mb-3 font-bold">Dernières offres</h2>
+            <h2 className="mb-3 font-bold">{t("admin.recentOffers")}</h2>
             <ul className="divide-y divide-border/60">
               {(recentOffers ?? []).map((o) => (
                 <li key={o.id} className="flex items-center justify-between py-2.5 text-sm">
                   <span className="truncate font-medium">{o.titre}</span>
                   <span className="shrink-0 text-xs text-muted-foreground">
-                    {o.status === "active" ? "Active" : "Clôturée"}{o.ville ? ` · ${o.ville}` : ""}
+                    {o.status === "active" ? t("admin.offerActive") : t("admin.offerClosed")}{o.ville ? ` · ${o.ville}` : ""}
                   </span>
                 </li>
               ))}
-              {(recentOffers ?? []).length === 0 && <li className="py-3 text-sm text-muted-foreground">Aucune offre.</li>}
+              {(recentOffers ?? []).length === 0 && <li className="py-3 text-sm text-muted-foreground">{t("admin.noOffers")}</li>}
             </ul>
           </CardContent>
         </Card>

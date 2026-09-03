@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { LayoutDashboard, Users, FileText, Flag, Settings, UserCog } from "lucide-react";
 import { canAccess } from "@/lib/admin-permissions";
 import { cn } from "@/lib/utils";
@@ -9,14 +10,15 @@ import type { ProfileRow } from "@/lib/supabase/database.types";
 
 export function AdminBottomNav({ profile }: { profile: ProfileRow }) {
   const pathname = usePathname();
+  const t = useTranslations();
 
   const tabs = [
-    { href: "/admin", label: "Tableau", icon: LayoutDashboard, exact: true, show: true },
-    { href: "/admin/utilisateurs", label: "Users", icon: Users, show: canAccess(profile, "users") },
-    { href: "/admin/offres", label: "Offres", icon: FileText, show: canAccess(profile, "offers") },
-    { href: "/admin/signalements", label: "Alertes", icon: Flag, show: canAccess(profile, "reports") },
-    { href: "/admin/parametres", label: "Réglages", icon: Settings, show: canAccess(profile, "settings") },
-    { href: "/admin/administrateurs", label: "Admins", icon: UserCog, show: profile.is_super_admin },
+    { href: "/admin", label: t("adminNav.shortDashboard"), icon: LayoutDashboard, exact: true, show: true },
+    { href: "/admin/utilisateurs", label: t("adminNav.shortUsers"), icon: Users, show: canAccess(profile, "users") },
+    { href: "/admin/offres", label: t("adminNav.shortOffers"), icon: FileText, show: canAccess(profile, "offers") },
+    { href: "/admin/signalements", label: t("adminNav.shortReports"), icon: Flag, show: canAccess(profile, "reports") },
+    { href: "/admin/parametres", label: t("adminNav.shortSettings"), icon: Settings, show: canAccess(profile, "settings") },
+    { href: "/admin/administrateurs", label: t("adminNav.shortAdmins"), icon: UserCog, show: profile.is_super_admin },
   ]
     .filter((t) => t.show)
     .slice(0, 5);

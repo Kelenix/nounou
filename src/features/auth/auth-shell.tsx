@@ -1,15 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ShieldCheck, BadgeCheck, Star } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 /** Coque des pages d'authentification : logo/brand à gauche, formulaire à droite. */
-export function AuthShell({
+export async function AuthShell({
   children,
   footer,
 }: {
   children: React.ReactNode;
   footer: React.ReactNode;
 }) {
+  const t = await getTranslations();
   return (
     <div className="grid min-h-[calc(100dvh-4rem)] lg:grid-cols-2">
       {/* Panneau marque (desktop) */}
@@ -20,12 +22,12 @@ export function AuthShell({
           <Image src="/logo.png" alt="J'ai ma nounou" width={420} height={280} priority className="h-64 w-auto object-contain" />
         </Link>
         <p className="relative mt-8 max-w-md text-center text-2xl font-semibold leading-snug text-foreground/80">
-          La plateforme de confiance pour trouver une aide à domicile en Côte d&apos;Ivoire.
+          {t("auth.brandTagline")}
         </p>
         <div className="relative mt-10 flex flex-col gap-4 text-lg text-foreground/70">
-          <span className="inline-flex items-center gap-3"><BadgeCheck className="size-6 text-primary" /> Profils vérifiés par SMS</span>
-          <span className="inline-flex items-center gap-3"><Star className="size-6 text-primary" /> Avis authentiques</span>
-          <span className="inline-flex items-center gap-3"><ShieldCheck className="size-6 text-primary" /> Signalement en un geste</span>
+          <span className="inline-flex items-center gap-3"><BadgeCheck className="size-6 text-primary" /> {t("auth.brandVerified")}</span>
+          <span className="inline-flex items-center gap-3"><Star className="size-6 text-primary" /> {t("auth.brandReviews")}</span>
+          <span className="inline-flex items-center gap-3"><ShieldCheck className="size-6 text-primary" /> {t("auth.brandReport")}</span>
         </div>
       </div>
 

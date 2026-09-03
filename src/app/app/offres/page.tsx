@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PlusCircle, Inbox } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Pagination } from "@/components/ui/pagination";
 import { OfferCard } from "@/features/offers/offer-card";
 
-export const metadata = { title: "Mes offres" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("offres.myOffersTitle") };
+}
 
 const PAGE_SIZE = 12;
 type SP = Record<string, string | string[] | undefined>;
@@ -20,6 +24,7 @@ export default async function MesOffresPage({
 }) {
   const profile = await requireRole("employer");
   const supabase = await createClient();
+  const t = await getTranslations();
   const sp = await searchParams;
   const page = Math.max(1, Number(typeof sp.page === "string" ? sp.page : "1") || 1);
 
@@ -45,13 +50,13 @@ export default async function MesOffresPage({
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight">Mes offres</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight">{t("offres.myOffersTitle")}</h1>
           <p className="text-sm text-muted-foreground">
-            {total} offre(s) · {activeCount ?? 0} active(s)
+            {t("offres.myOffersCount", { count: total, active: activeCount ?? 0 })}
           </p>
         </div>
         <Button asChild size="sm">
-          <Link href="/app/offres/nouvelle"><PlusCircle className="size-4" /> Publier</Link>
+          <Link href="/app/offres/nouvelle"><PlusCircle className="size-4" /> {t("offres.publish")}</Link>
         </Button>
       </div>
 
@@ -62,10 +67,10 @@ export default async function MesOffresPage({
               <Inbox className="size-7" />
             </span>
             <p className="text-sm text-muted-foreground">
-              Vous n&apos;avez pas encore publié d&apos;offre.
+              {t("offres.noneYet")}
             </p>
             <Button asChild>
-              <Link href="/app/offres/nouvelle">Publier ma première offre</Link>
+              <Link href="/app/offres/nouvelle">{t("offres.publishFirst")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -76,7 +81,7 @@ export default async function MesOffresPage({
               <div key={o.id} className="relative">
                 <OfferCard offer={o} />
                 {o.status === "active" && (
-                  <Badge className="absolute right-3 top-3 bg-primary-soft text-primary">Active</Badge>
+                  <Badge className="absolute right-3 top-3 bg-primary-soft text-primary">{t("offres.active")}</Badge>
                 )}
               </div>
             ))}

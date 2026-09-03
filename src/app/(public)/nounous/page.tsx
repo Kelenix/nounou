@@ -1,15 +1,18 @@
 import { Suspense } from "react";
 import { SearchX } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { CatalogFilters } from "@/features/catalog/catalog-filters";
 import { ProviderCard } from "@/features/catalog/provider-card";
 import { Pagination } from "@/components/ui/pagination";
 import { listPublicProviders, type ProviderFilters } from "@/features/catalog/queries";
 import type { ServiceType } from "@/lib/supabase/database.types";
-import { SERVICE_LABELS } from "@/lib/constants";
 
 const PAGE_SIZE = 12;
 
-export const metadata = { title: "Nounous disponibles" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("nounous.title") };
+}
 
 type SP = Record<string, string | string[] | undefined>;
 
@@ -34,7 +37,8 @@ export default async function NounousPage({
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const page = Math.min(Math.max(1, Number(get("page")) || 1), totalPages);
   const providers = all.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const serviceLabel = filters.service ? SERVICE_LABELS[filters.service] : null;
+  const t = await getTranslations();
+  const serviceLabel = filters.service ? t(`services.${filters.service}`) : null;
 
   // Paramètres à préserver dans les liens de pagination (hors "page").
   const linkParams: Record<string, string> = {};
@@ -47,11 +51,12 @@ export default async function NounousPage({
     <div className="container py-8 lg:py-12">
       <div className="mb-6">
         <h1 className="text-2xl font-extrabold tracking-tight md:text-3xl">
-          {serviceLabel ? `Nounous — ${serviceLabel}` : "Nounous disponibles"}
+          {serviceLabel ? t("nounous.titleService", { service: serviceLabel }) : t("nounous.title")}
         </h1>
         <p className="mt-1 text-muted-foreground">
-          {total} prestataire(s) {filters.ville ? `à ${filters.ville}` : "en Côte d'Ivoire"}.
-          Consultez librement, connectez-vous seulement pour contacter.
+          {filters.ville
+            ? t("nounous.countCity", { count: total, city: filters.ville })
+            : t("nounous.countCountry", { count: total })}
         </p>
       </div>
 
@@ -73,8 +78,8 @@ export default async function NounousPage({
           ) : (
             <div className="rounded-3xl border border-border bg-card p-12 text-center">
               <SearchX className="mx-auto size-12 text-muted-foreground" />
-              <h2 className="mt-4 text-lg font-bold">Aucune nounou trouvée</h2>
-              <p className="mt-1 text-muted-foreground">Essayez d&apos;élargir vos critères de recherche.</p>
+              <h2 className="mt-4 text-lg font-bold">{t("nounous.empty")}</h2>
+              <p className="mt-1 text-muted-foreground">{t("nounous.emptyHint")}</p>
             </div>
           )}
         </div>

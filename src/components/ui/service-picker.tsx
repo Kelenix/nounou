@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SERVICE_OPTIONS } from "@/lib/constants";
@@ -13,6 +14,7 @@ export function ServicePicker({
   value: ServiceType[];
   onChange: (next: ServiceType[]) => void;
 }) {
+  const t = useTranslations();
   function toggle(s: ServiceType) {
     onChange(value.includes(s) ? value.filter((x) => x !== s) : [...value, s]);
   }
@@ -33,7 +35,7 @@ export function ServicePicker({
             )}
           >
             {active && <Check className="size-3.5" />}
-            {o.label}
+            {t(`services.${o.value}`)}
           </button>
         );
       })}

@@ -1,7 +1,8 @@
 import { Star } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { cn } from "@/lib/utils";
 
-export function RatingStars({
+export async function RatingStars({
   value,
   count,
   size = "sm",
@@ -10,6 +11,7 @@ export function RatingStars({
   count?: number;
   size?: "sm" | "md";
 }) {
+  const t = await getTranslations();
   const v = value ?? 0;
   const px = size === "md" ? "size-5" : "size-4";
   return (
@@ -25,7 +27,7 @@ export function RatingStars({
       {value != null ? (
         <span className="text-sm font-semibold">{v.toFixed(1)}</span>
       ) : (
-        <span className="text-sm text-muted-foreground">Pas encore de note</span>
+        <span className="text-sm text-muted-foreground">{t("rating.noRating")}</span>
       )}
       {typeof count === "number" && count > 0 && (
         <span className="text-xs text-muted-foreground">({count})</span>

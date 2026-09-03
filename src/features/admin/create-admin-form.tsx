@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { useToast } from "@/components/ui/toast";
 export function CreateAdminForm() {
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations();
   const [prenom, setPrenom] = useState("");
   const [nom, setNom] = useState("");
   const [phone, setPhone] = useState("");
@@ -20,7 +22,7 @@ export function CreateAdminForm() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (prenom.trim().length < 2 || nom.trim().length < 2) {
-      toast("Renseignez le prénom et le nom.", "error");
+      toast(t("admin.createAdminInvalid"), "error");
       return;
     }
     setLoading(true);
@@ -32,10 +34,10 @@ export function CreateAdminForm() {
     const data = await res.json().catch(() => null);
     setLoading(false);
     if (!res.ok) {
-      toast(data?.error ?? "Création impossible.", "error");
+      toast(data?.error ?? t("admin.createAdminFailed"), "error");
       return;
     }
-    toast(data?.promoted ? "Compte existant promu administrateur" : "Administrateur créé", "success");
+    toast(data?.promoted ? t("admin.createAdminPromoted") : t("admin.createAdminSuccess"), "success");
     setPrenom("");
     setNom("");
     setPhone("");
@@ -46,27 +48,26 @@ export function CreateAdminForm() {
     <form onSubmit={submit} className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="a-prenom">Prénom</Label>
+          <Label htmlFor="a-prenom">{t("admin.createAdminFirstName")}</Label>
           <Input id="a-prenom" value={prenom} onChange={(e) => setPrenom(e.target.value)} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="a-nom">Nom</Label>
+          <Label htmlFor="a-nom">{t("admin.createAdminLastName")}</Label>
           <Input id="a-nom" value={nom} onChange={(e) => setNom(e.target.value)} />
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="a-phone">Numéro de téléphone</Label>
+        <Label htmlFor="a-phone">{t("admin.createAdminPhoneLabel")}</Label>
         <div className="flex items-center gap-2">
           <span className="flex h-11 items-center rounded-2xl border border-input bg-secondary px-3 text-sm font-medium text-muted-foreground">+225</span>
           <Input id="a-phone" inputMode="numeric" placeholder="07 00 00 00 00" value={phone} onChange={(e) => setPhone(e.target.value)} />
         </div>
         <p className="text-xs text-muted-foreground">
-          Le nouvel administrateur se connecte avec ce numéro (OTP). Si un compte existe déjà avec
-          ce numéro, il est promu administrateur.
+          {t("admin.createAdminPhoneHint")}
         </p>
       </div>
       <Button type="submit" disabled={loading}>
-        {loading ? <Spinner className="text-primary-foreground" /> : <><UserPlus className="size-4" /> Créer l&apos;administrateur</>}
+        {loading ? <Spinner className="text-primary-foreground" /> : <><UserPlus className="size-4" /> {t("admin.createAdminSubmit")}</>}
       </Button>
     </form>
   );

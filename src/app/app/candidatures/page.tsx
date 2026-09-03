@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FileText } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,7 +15,10 @@ import {
 } from "@/features/applications/employer-application-item";
 import type { OfferRow, PublicProfileRow } from "@/lib/supabase/database.types";
 
-export const metadata = { title: "Candidatures" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("applications.metaTitle") };
+}
 
 const CAND_PAGE_SIZE = 12;
 const EMP_OFFERS_PER_PAGE = 5;
@@ -27,6 +31,7 @@ export default async function CandidaturesPage({
 }) {
   const profile = await requireProfile();
   const supabase = await createClient();
+  const t = await getTranslations();
   const sp = await searchParams;
   const page = Math.max(1, Number(typeof sp.page === "string" ? sp.page : "1") || 1);
 
@@ -59,7 +64,7 @@ export default async function CandidaturesPage({
     const ratedEmployers = new Set<string>();
     if (employerIds.length > 0) {
       const { data: emps } = await supabase.from("public_profiles").select("id, prenom, nom").in("id", employerIds);
-      for (const e of emps ?? []) employerNames.set(e.id, `${e.prenom ?? ""} ${e.nom ?? ""}`.trim() || "l'employeur");
+      for (const e of emps ?? []) employerNames.set(e.id, `${e.prenom ?? ""} ${e.nom ?? ""}`.trim() || t("applications.defaultEmployer"));
       const { data: rated } = await supabase
         .from("ratings")
         .select("to_user")
@@ -82,7 +87,7 @@ export default async function CandidaturesPage({
             ? {
                 candidateId: profile.id,
                 employerId: o.employer_id,
-                employerName: employerNames.get(o.employer_id) ?? "l'employeur",
+                employerName: employerNames.get(o.employer_id) ?? t("applications.defaultEmployer"),
                 alreadyRated: ratedEmployers.has(o.employer_id),
               }
             : null,
@@ -91,9 +96,9 @@ export default async function CandidaturesPage({
 
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-extrabold tracking-tight">Mes candidatures</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("applications.myApplications")}</h1>
         {items.length === 0 ? (
-          <Empty label="Vous n'avez pas encore postulé." href="/app/recherche" cta="Voir les offres" />
+          <Empty label={t("applications.empty")} href="/app/recherche" cta={t("applications.seeOffers")} />
         ) : (
           <>
             <div className="space-y-3">
@@ -146,7 +151,7 @@ export default async function CandidaturesPage({
     }
     grouped = Array.from(byOffer.entries()).map(([offerId, appsList]) => ({
       offerId,
-      title: offerTitle.get(offerId) ?? "Offre",
+      title: offerTitle.get(offerId) ?? t("applications.offerFallback"),
       apps: appsList,
     }));
   }
@@ -157,9 +162,9 @@ export default async function CandidaturesPage({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-extrabold tracking-tight">Candidatures reçues</h1>
+      <h1 className="text-2xl font-extrabold tracking-tight">{t("applications.receivedTitle")}</h1>
       {total === 0 ? (
-        <Empty label="Aucune candidature reçue pour l'instant." href="/app/offres/nouvelle" cta="Publier une offre" />
+        <Empty label={t("applications.emptyReceived")} href="/app/offres/nouvelle" cta={t("applications.postOffer")} />
       ) : (
         <>
           <div className="space-y-6">

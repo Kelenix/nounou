@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Save } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ export function AdminSettingsForm({
   const router = useRouter();
   const { toast } = useToast();
   const supabase = createClient();
+  const t = useTranslations();
 
   const [activation, setActivation] = useState(String(activationCandidate));
   const [premium, setPremium] = useState(String(premiumEmployeur));
@@ -30,7 +32,7 @@ export function AdminSettingsForm({
     const a = Number(activation);
     const p = Number(premium);
     if (!Number.isFinite(a) || a < 0 || !Number.isFinite(p) || p < 0) {
-      toast("Montants invalides.", "error");
+      toast(t("admin.invalidAmounts"), "error");
       return;
     }
     setLoading(true);
@@ -40,10 +42,10 @@ export function AdminSettingsForm({
     ]);
     setLoading(false);
     if (error) {
-      toast("Enregistrement impossible.", "error");
+      toast(t("admin.settingsFailed"), "error");
       return;
     }
-    toast("Tarifs mis à jour", "success");
+    toast(t("admin.priceUpdated"), "success");
     router.refresh();
   }
 
@@ -51,18 +53,18 @@ export function AdminSettingsForm({
     <form onSubmit={save} className="space-y-5">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="activation">Activation profil candidate (FCFA)</Label>
+          <Label htmlFor="activation">{t("admin.activationLabel")}</Label>
           <Input id="activation" type="number" inputMode="numeric" min={0} value={activation} onChange={(e) => setActivation(e.target.value)} />
-          <p className="text-xs text-muted-foreground">Payé par une candidate pour rendre son profil visible.</p>
+          <p className="text-xs text-muted-foreground">{t("admin.activationHint")}</p>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="premium">Accès premium employeur (FCFA)</Label>
+          <Label htmlFor="premium">{t("admin.premiumLabel")}</Label>
           <Input id="premium" type="number" inputMode="numeric" min={0} value={premium} onChange={(e) => setPremium(e.target.value)} />
-          <p className="text-xs text-muted-foreground">Payé par un employeur pour la recherche avancée et le contact direct.</p>
+          <p className="text-xs text-muted-foreground">{t("admin.premiumHint")}</p>
         </div>
       </div>
       <Button type="submit" disabled={loading}>
-        {loading ? <Spinner className="text-primary-foreground" /> : <><Save className="size-4" /> Enregistrer les tarifs</>}
+        {loading ? <Spinner className="text-primary-foreground" /> : <><Save className="size-4" /> {t("admin.savePrices")}</>}
       </Button>
     </form>
   );

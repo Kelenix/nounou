@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Send, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
-import { APPLICATION_STATUS_META } from "@/lib/constants";
 import type { ApplicationStatus } from "@/lib/supabase/database.types";
 
 export function ApplyButton({
@@ -25,18 +25,18 @@ export function ApplyButton({
   const router = useRouter();
   const supabase = createClient();
   const { toast } = useToast();
+  const t = useTranslations();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   if (existingStatus) {
-    const meta = APPLICATION_STATUS_META[existingStatus];
     return (
       <div className="flex items-center gap-2 rounded-2xl border border-border bg-card p-4">
         <CheckCircle2 className="size-5 text-primary" />
         <span className="text-sm">
-          Vous avez déjà postulé — statut :{" "}
-          <span className="font-semibold">{meta.label}</span>
+          {t("applications.alreadyApplied")}{" "}
+          <span className="font-semibold">{t(`applicationStatus.${existingStatus}`)}</span>
         </span>
       </div>
     );
@@ -45,8 +45,8 @@ export function ApplyButton({
   if (!isActivePaid) {
     return (
       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-        Activez votre profil pour pouvoir postuler.{" "}
-        <a href="/app/paiement" className="font-semibold underline">Activer maintenant</a>
+        {t("applications.activateToApply")}{" "}
+        <a href="/app/paiement" className="font-semibold underline">{t("applications.activateNow")}</a>
       </div>
     );
   }
@@ -61,10 +61,10 @@ export function ApplyButton({
     });
     setLoading(false);
     if (error) {
-      toast("Impossible de postuler. Réessayez.", "error");
+      toast(t("applications.applyFailed"), "error");
       return;
     }
-    toast("Candidature envoyée !", "success");
+    toast(t("applications.applied"), "success");
     setOpen(false);
     router.refresh();
   }
@@ -72,7 +72,7 @@ export function ApplyButton({
   if (!open) {
     return (
       <Button className="w-full" onClick={() => setOpen(true)}>
-        <Send className="size-4" /> Postuler à cette offre
+        <Send className="size-4" /> {t("applications.apply")}
       </Button>
     );
   }
@@ -82,14 +82,14 @@ export function ApplyButton({
       <Textarea
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        placeholder="Message à l'employeur (optionnel)…"
+        placeholder={t("applications.messagePlaceholder")}
       />
       <div className="flex gap-2">
         <Button variant="secondary" className="flex-1" onClick={() => setOpen(false)} disabled={loading}>
-          Annuler
+          {t("applications.cancel")}
         </Button>
         <Button className="flex-1" onClick={apply} disabled={loading}>
-          {loading ? <Spinner className="text-primary-foreground" /> : "Envoyer"}
+          {loading ? <Spinner className="text-primary-foreground" /> : t("applications.send")}
         </Button>
       </div>
     </div>

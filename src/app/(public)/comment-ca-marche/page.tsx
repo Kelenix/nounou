@@ -1,32 +1,35 @@
-export const metadata = { title: "Comment ça marche" };
+import { getTranslations } from "next-intl/server";
 
-const STEPS_EMPLOYEUR = [
-  "Créez votre compte par téléphone (code SMS).",
-  "Choisissez « Je recherche une personne ».",
-  "Publiez une offre : type de service, ville, détails.",
-  "Recevez les candidatures et échangez.",
-  "Acceptez la bonne candidate, puis notez votre expérience.",
-];
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("howItWorks.title") };
+}
 
-const STEPS_CANDIDATE = [
-  "Créez votre compte par téléphone (code SMS).",
-  "Choisissez « Je recherche un emploi ».",
-  "Complétez votre profil : services, expérience, disponibilité.",
-  "Parcourez les offres et postulez en un clic.",
-  "Suivez vos candidatures et échangez avec les familles.",
-];
+export default async function CommentCaMarchePage() {
+  const t = await getTranslations();
+  const stepsEmployeur = [
+    t("howItWorks.employer1"),
+    t("howItWorks.employer2"),
+    t("howItWorks.employer3"),
+    t("howItWorks.employer4"),
+    t("howItWorks.employer5"),
+  ];
+  const stepsCandidate = [
+    t("howItWorks.candidate1"),
+    t("howItWorks.candidate2"),
+    t("howItWorks.candidate3"),
+    t("howItWorks.candidate4"),
+    t("howItWorks.candidate5"),
+  ];
 
-export default function CommentCaMarchePage() {
   return (
     <div className="container max-w-3xl py-14">
-      <h1 className="text-3xl font-extrabold md:text-4xl">Comment ça marche</h1>
-      <p className="mt-3 text-muted-foreground">
-        Simple, rapide et sécurisé — que vous cherchiez une aide à domicile ou un emploi.
-      </p>
+      <h1 className="text-3xl font-extrabold md:text-4xl">{t("howItWorks.title")}</h1>
+      <p className="mt-3 text-muted-foreground">{t("howItWorks.subtitle")}</p>
 
       <div className="mt-10 grid gap-8 md:grid-cols-2">
-        <Column title="Pour les familles / employeurs" steps={STEPS_EMPLOYEUR} />
-        <Column title="Pour les candidates" steps={STEPS_CANDIDATE} />
+        <Column title={t("howItWorks.employersTitle")} steps={stepsEmployeur} />
+        <Column title={t("howItWorks.candidatesTitle")} steps={stepsCandidate} />
       </div>
     </div>
   );

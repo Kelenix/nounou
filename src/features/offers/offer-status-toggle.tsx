@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Lock, Unlock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ export function OfferStatusToggle({
   const router = useRouter();
   const supabase = createClient();
   const { toast } = useToast();
+  const t = useTranslations();
   const [loading, setLoading] = useState(false);
 
   async function toggle() {
@@ -26,10 +28,10 @@ export function OfferStatusToggle({
     const { error } = await supabase.from("offers").update({ status: next }).eq("id", offerId);
     setLoading(false);
     if (error) {
-      toast("Action impossible.", "error");
+      toast(t("offerManage.actionFailed"), "error");
       return;
     }
-    toast(next === "close" ? "Offre clôturée" : "Offre réactivée", "success");
+    toast(next === "close" ? t("offerManage.offerClosed") : t("offerManage.offerReopened"), "success");
     router.refresh();
   }
 
@@ -37,11 +39,11 @@ export function OfferStatusToggle({
     <Button variant="secondary" className="w-full" onClick={toggle} disabled={loading}>
       {status === "active" ? (
         <>
-          <Lock className="size-4" /> Clôturer l&apos;offre
+          <Lock className="size-4" /> {t("offerManage.closeOffer")}
         </>
       ) : (
         <>
-          <Unlock className="size-4" /> Réactiver l&apos;offre
+          <Unlock className="size-4" /> {t("offerManage.reopenOffer")}
         </>
       )}
     </Button>

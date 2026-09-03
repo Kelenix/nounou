@@ -1,10 +1,25 @@
+import { getLocale, getTranslations } from "next-intl/server";
 import { LegalProse } from "@/components/brand/legal-prose";
 
-export const metadata = { title: "Politique de confidentialité" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("legal.privacyMetaTitle") };
+}
 
-export default function ConfidentialitePage() {
+export default async function ConfidentialitePage() {
+  const t = await getTranslations();
+  const locale = await getLocale();
+
   return (
-    <LegalProse title="Politique de confidentialité" updated="3 septembre 2026">
+    <LegalProse title={t("legal.privacyTitle")} updated={t("legal.privacyUpdated")}>
+      {locale === "en" ? <PrivacyEn /> : <PrivacyFr />}
+    </LegalProse>
+  );
+}
+
+function PrivacyFr() {
+  return (
+    <>
       <section>
         <h2>1. Responsable du traitement</h2>
         <p>
@@ -117,6 +132,121 @@ export default function ConfidentialitePage() {
         <strong> doit faire l&apos;objet d&apos;une relecture juridique</strong> avant mise en
         production.
       </p>
-    </LegalProse>
+    </>
+  );
+}
+
+function PrivacyEn() {
+  return (
+    <>
+      <section>
+        <h2>1. Data controller</h2>
+        <p>
+          The data controller is [Publisher company name], [legal form], headquartered at [address],
+          Côte d&apos;Ivoire. Contact: <a href="mailto:[contact email]">[contact email]</a>.
+        </p>
+      </section>
+
+      <section>
+        <h2>2. Data we collect</h2>
+        <p>We collect only the data necessary for the service:</p>
+        <ul>
+          <li><strong>Identity &amp; contact</strong>: phone number, last name, first name, profile photo (optional).</li>
+          <li><strong>Declared location</strong>: city, district/neighborhood.</li>
+          <li><strong>Profile data</strong>: for candidates (services, experience, skills, availability, desired salary); for employers (type of need, household, posted offers).</li>
+          <li><strong>Activity</strong>: applications, favorites, internal messages, ratings and reports.</li>
+          <li><strong>Payments</strong>: amount, method (Mobile Money), reference and transaction status. We do not store any full banking data.</li>
+          <li><strong>Technical data</strong>: connection and security logs strictly necessary.</li>
+        </ul>
+        <p>
+          An email address is not required today; if it is added later, this policy will be updated
+          accordingly.
+        </p>
+      </section>
+
+      <section>
+        <h2>3. Purposes and legal bases</h2>
+        <ul>
+          <li><strong>Providing the connection service</strong> (account creation, profiles, offers, applications, messaging) — performance of the contract.</li>
+          <li><strong>SMS OTP authentication</strong> and account security — performance of the contract and legitimate interest.</li>
+          <li><strong>Payments</strong> (candidate activation, employer premium) — performance of the contract.</li>
+          <li><strong>Notifications</strong> related to your activity — performance of the contract / legitimate interest.</li>
+          <li><strong>Moderation</strong> (reports, suspensions, audit log) — legitimate interest and legal obligations.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>4. Who can see your data</h2>
+        <p>
+          Your last name, first name, photo, city/district and professional profile information are
+          visible to other users as part of the connection service.
+          <strong> Your phone number is never displayed publicly</strong>: it is revealed only to a
+          signed-in user viewing a profile to make contact, and these views are logged and capped to
+          prevent abuse.
+        </p>
+      </section>
+
+      <section>
+        <h2>5. Processors and hosting</h2>
+        <p>We rely on technical providers acting on our behalf:</p>
+        <ul>
+          <li><strong>Supabase</strong> — database hosting, authentication and photo storage.</li>
+          <li><strong>[SMS provider]</strong> — sending verification codes (OTP).</li>
+          <li><strong>[Mobile Money aggregator]</strong> — payment processing.</li>
+          <li><strong>[Host / CDN]</strong> — application delivery.</li>
+        </ul>
+        <p>We do not sell your data and do not share it for advertising purposes.</p>
+      </section>
+
+      <section>
+        <h2>6. Retention periods</h2>
+        <ul>
+          <li>Account and profile: for the duration of use, then deletion on request or after a prolonged period of inactivity.</li>
+          <li>Messages, applications, offers: as long as necessary for the service, then archiving/deletion.</li>
+          <li>Payment transactions: retained for applicable accounting and legal obligations.</li>
+          <li>Security and audit logs: limited duration for security purposes.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>7. Security</h2>
+        <p>
+          Data access is restricted at the database level (Row Level Security): each user accesses only
+          their own data, and administration roles are strictly controlled and logged. Exchanges are
+          encrypted in transit (HTTPS).
+        </p>
+      </section>
+
+      <section>
+        <h2>8. Your rights</h2>
+        <p>
+          In accordance with the regulations applicable in Côte d&apos;Ivoire (Law No. 2013-450 on the
+          protection of personal data) and the principles of the GDPR, you have the rights of access,
+          rectification, erasure, restriction and objection. You can delete your own account from your
+          settings, or write to us at <a href="mailto:[contact email]">[contact email]</a>. You may
+          also refer the matter to the competent data protection authority (ARTCI).
+        </p>
+      </section>
+
+      <section>
+        <h2>9. Minors</h2>
+        <p>
+          The service is reserved for adults. We do not knowingly collect data concerning minors.
+        </p>
+      </section>
+
+      <section>
+        <h2>10. Changes</h2>
+        <p>
+          This policy may be updated. The last-updated date appears at the top of the page; significant
+          changes will be brought to your attention.
+        </p>
+      </section>
+
+      <p className="text-xs">
+        This document is a template to be completed (items in brackets) and
+        <strong> must undergo legal review</strong> before going into production.
+      </p>
+    </>
   );
 }

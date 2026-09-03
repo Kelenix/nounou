@@ -1,18 +1,23 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { AuthShell } from "@/features/auth/auth-shell";
 import { PhoneAuthForm } from "@/features/auth/phone-auth-form";
 import { FullPageSpinner } from "@/components/ui/spinner";
 
-export const metadata = { title: "Créer un compte" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("auth.registerMetaTitle") };
+}
 
-export default function InscriptionPage() {
+export default async function InscriptionPage() {
+  const t = await getTranslations();
   return (
     <AuthShell
       footer={
         <>
-          Vous avez déjà un compte ?{" "}
-          <Link href="/connexion" className="font-semibold text-primary hover:underline">Se connecter</Link>
+          {t("auth.haveAccount")}{" "}
+          <Link href="/connexion" className="font-semibold text-primary hover:underline">{t("auth.login")}</Link>
         </>
       }
     >

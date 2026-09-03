@@ -36,6 +36,9 @@
   stats, **utilisateurs** (filtres + pagination + suspendre / annuler l'abonnement / supprimer, avec
   **dialogues de confirmation** et détails d'abonnement), offres (pagination), signalements
   (pagination + traitement), **paramètres du site** (tarifs configurables + catégories).
+- **Interface multilingue FR/EN** : `next-intl` (cookie, sans préfixe d'URL, défaut FR),
+  sélecteur globe dans les 3 en-têtes, tout le périmètre traduit (public + app + admin, dont
+  CGU/confidentialité), 719 clés à parité, dates localisées.
 - **Hiérarchie d'administration** : **Super Admin** (compte protégé côté base — ni supprimable,
   ni rétrogradable, ni suspendable, un seul autorisé ; crée les admins, attribue/révoque les
   permissions, voit le journal d'audit, tableau de bord complet dont CA) · **Staff/Admin**
@@ -101,6 +104,17 @@
 
 ## Journal de session (le plus récent en haut)
 
+- 2026-09-03 — **Interface multilingue FR/EN** (next-intl, mode cookie sans préfixe d'URL,
+  défaut FR). Sélecteur de langue (globe FR/EN) dans les 3 en-têtes (public, app, admin).
+  **Tout le périmètre traduit** : public (accueil, catalogue, offres, fiches, tarifs, FAQ,
+  contact, comment ça marche, **CGU/confidentialité** en versions FR/EN), auth (OTP), espace
+  connecté (dashboards, recherche, candidatures, favoris, messagerie, notifications, profil +
+  édition, paiement, signalements) et **back-office admin** (utilisateurs, offres, signalements,
+  paramètres, administrateurs, journal d'audit). Dictionnaires `messages/fr.json` + `en.json`
+  (**719 clés, parité 100 %**), dates localisées (`dateLocale`). **Vérifié** : build prod vert,
+  typecheck + lint verts, bascule FR↔EN testée en production. Corrigé au passage : en-tête
+  `Permissions-Policy` (`interest-cohort` retiré), icônes PWA générées depuis le logo, `priority`
+  sur le logo (LCP).
 - 2026-09-03 — **Tests E2E Playwright** (`e2e/`, 12 tests + setup/teardown, tous verts, ×2 stables).
   Couvre : marketplace publique (accueil/nounous/offres + gate de contact), login OTP par rôle
   (Super Admin → `/admin`, employeur → `/app`, redirection des connectés), et la **hiérarchie

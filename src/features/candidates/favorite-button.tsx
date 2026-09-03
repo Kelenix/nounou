@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Heart } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ export function FavoriteButton({
 }) {
   const supabase = createClient();
   const { toast } = useToast();
+  const t = useTranslations();
   const [fav, setFav] = useState(initial);
   const [loading, setLoading] = useState(false);
 
@@ -30,7 +32,7 @@ export function FavoriteButton({
       const { error } = await supabase.from("favorites").insert({ employer_id: employerId, candidate_id: candidateId });
       if (!error) {
         setFav(true);
-        toast("Ajoutée à vos favoris", "success");
+        toast(t("favorites.added"), "success");
       }
     }
     setLoading(false);
@@ -39,7 +41,7 @@ export function FavoriteButton({
   return (
     <Button variant="secondary" className="w-full" onClick={toggle} disabled={loading}>
       <Heart className={cn("size-4", fav && "fill-destructive text-destructive")} />
-      {fav ? "Retirer des favoris" : "Ajouter aux favoris"}
+      {fav ? t("favorites.remove") : t("favorites.add")}
     </Button>
   );
 }

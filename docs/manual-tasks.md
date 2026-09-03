@@ -5,9 +5,8 @@
 
 ## Identité visuelle (logo & photos)
 - [x] **Logo** en place dans **`public/logo.png`** (fourni).
-- [ ] (Optionnel) Régénérer les icônes PWA à partir du logo : `public/icons/icon-192.png`,
-  `icon-512.png`, `maskable-512.png` (512×512, fond plein pour la *maskable*). Le script
-  `scripts/gen-icons.mjs` génère des placeholders verts.
+- [x] **Icônes PWA** générées depuis le logo (`public/icons/icon-192.png`, `icon-512.png`,
+  `maskable-512.png`, avec safe-zone pour la *maskable*). Régénérables via `sharp` si le logo change.
 - [ ] **Photos de démonstration** : `public/demo/nounou-1..5.jpg` sont des portraits libres
   génériques (128 px). À remplacer par de vraies photos (ou régénérer via IA si crédits dispo).
   Les vraies nounous téléversent leur photo depuis leur profil.

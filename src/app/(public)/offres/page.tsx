@@ -1,14 +1,17 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { SearchX, ArrowLeft } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { OfferCard } from "@/features/offers/offer-card";
 import { Pagination } from "@/components/ui/pagination";
 import { SearchFilters } from "@/features/search/search-filters";
 import type { ServiceType } from "@/lib/supabase/database.types";
-import { SERVICE_LABELS } from "@/lib/constants";
 
-export const metadata = { title: "Offres d'emploi" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("offres.title") };
+}
 
 type SP = Record<string, string | string[] | undefined>;
 
@@ -37,18 +40,19 @@ export default async function OffresPubliquesPage({
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const linkParams: Record<string, string> = {};
   for (const k of ["service", "ville", "salaireMax"]) if (get(k)) linkParams[k] = get(k);
+  const t = await getTranslations();
 
   return (
     <div className="container py-8 lg:py-12">
       <Link href="/" className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="size-4" /> Accueil
+        <ArrowLeft className="size-4" /> {t("offres.home")}
       </Link>
       <div className="mb-6">
         <h1 className="text-2xl font-extrabold tracking-tight md:text-3xl">
-          {service ? `Offres — ${SERVICE_LABELS[service]}` : "Offres d'emploi"}
+          {service ? t("offres.titleService", { service: t(`services.${service}`) }) : t("offres.title")}
         </h1>
         <p className="mt-1 text-muted-foreground">
-          {total} offre(s). Consultez librement, connectez-vous seulement pour postuler.
+          {t("offres.count", { count: total })}
         </p>
       </div>
 
@@ -68,8 +72,8 @@ export default async function OffresPubliquesPage({
       ) : (
         <div className="rounded-3xl border border-border bg-card p-12 text-center">
           <SearchX className="mx-auto size-12 text-muted-foreground" />
-          <h2 className="mt-4 text-lg font-bold">Aucune offre trouvée</h2>
-          <p className="mt-1 text-muted-foreground">Revenez bientôt, de nouvelles offres arrivent régulièrement.</p>
+          <h2 className="mt-4 text-lg font-bold">{t("offres.empty")}</h2>
+          <p className="mt-1 text-muted-foreground">{t("offres.emptyHint")}</p>
         </div>
       )}
     </div>

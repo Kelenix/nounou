@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 import { Select } from "@/components/ui/select";
@@ -14,6 +15,7 @@ export function SearchFilters({ role }: { role: "candidate" | "employer" }) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
+  const t = useTranslations();
   const [open, setOpen] = useState(false);
 
   function update(key: string, value: string) {
@@ -44,29 +46,29 @@ export function SearchFilters({ role }: { role: "candidate" | "employer" }) {
         className="flex w-full items-center justify-between p-4"
       >
         <span className="inline-flex items-center gap-2 font-semibold">
-          <SlidersHorizontal className="size-4" /> Filtres
+          <SlidersHorizontal className="size-4" /> {t("searchFilters.title")}
           {activeCount > 0 && (
             <span className="rounded-full bg-primary px-2 text-xs text-primary-foreground">{activeCount}</span>
           )}
         </span>
-        <span className="text-sm text-primary">{open ? "Masquer" : "Afficher"}</span>
+        <span className="text-sm text-primary">{open ? t("searchFilters.hide") : t("searchFilters.show")}</span>
       </button>
 
       {open && (
         <div className="space-y-3 border-t border-border p-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label>Ville</Label>
+              <Label>{t("searchFilters.city")}</Label>
               <Select value={ville} onChange={(e) => update("ville", e.target.value)}>
-                <option value="">Toutes</option>
+                <option value="">{t("searchFilters.allFem")}</option>
                 {VILLES_CI.map((v) => <option key={v} value={v}>{v}</option>)}
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>Service</Label>
+              <Label>{t("searchFilters.service")}</Label>
               <Select value={service} onChange={(e) => update("service", e.target.value)}>
-                <option value="">Tous</option>
-                {SERVICE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                <option value="">{t("searchFilters.allMasc")}</option>
+                {SERVICE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{t(`services.${o.value}`)}</option>)}
               </Select>
             </div>
           </div>
@@ -74,22 +76,22 @@ export function SearchFilters({ role }: { role: "candidate" | "employer" }) {
           {role === "employer" && (
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Commune</Label>
+                <Label>{t("searchFilters.commune")}</Label>
                 <Select value={commune} onChange={(e) => update("commune", e.target.value)}>
-                  <option value="">Toutes</option>
+                  <option value="">{t("searchFilters.allFem")}</option>
                   {COMMUNES_ABIDJAN.map((c) => <option key={c} value={c}>{c}</option>)}
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>Expérience min. (ans)</Label>
+                <Label>{t("searchFilters.expMin")}</Label>
                 <Input type="number" inputMode="numeric" min={0} value={expMin} onChange={(e) => update("expMin", e.target.value)} />
               </div>
               <div className="space-y-1.5 col-span-2">
-                <Label>Disponibilité</Label>
+                <Label>{t("searchFilters.availability")}</Label>
                 <Select value={tempsPlein} onChange={(e) => update("tempsPlein", e.target.value)}>
-                  <option value="">Peu importe</option>
-                  <option value="true">Temps plein</option>
-                  <option value="false">Temps partiel</option>
+                  <option value="">{t("searchFilters.any")}</option>
+                  <option value="true">{t("searchFilters.fullTime")}</option>
+                  <option value="false">{t("searchFilters.partTime")}</option>
                 </Select>
               </div>
             </div>
@@ -97,14 +99,14 @@ export function SearchFilters({ role }: { role: "candidate" | "employer" }) {
 
           {role === "candidate" && (
             <div className="space-y-1.5">
-              <Label>Salaire minimum (FCFA)</Label>
-              <Input type="number" inputMode="numeric" min={0} value={salaireMax} onChange={(e) => update("salaireMax", e.target.value)} placeholder="Ex. 50000" />
+              <Label>{t("searchFilters.salaryMin")}</Label>
+              <Input type="number" inputMode="numeric" min={0} value={salaireMax} onChange={(e) => update("salaireMax", e.target.value)} placeholder={t("searchFilters.salaryPlaceholder")} />
             </div>
           )}
 
           {activeCount > 0 && (
             <Button variant="ghost" size="sm" onClick={reset} className="w-full text-muted-foreground">
-              <X className="size-4" /> Réinitialiser
+              <X className="size-4" /> {t("searchFilters.reset")}
             </Button>
           )}
         </div>

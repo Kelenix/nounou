@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Check, X, Eye, UserRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar } from "@/components/ui/avatar";
@@ -23,6 +24,7 @@ export function EmployerApplicationItem({ application }: { application: Employer
   const router = useRouter();
   const supabase = createClient();
   const { toast } = useToast();
+  const t = useTranslations();
   const [status, setStatus] = useState<ApplicationStatus>(application.status);
   const [loading, setLoading] = useState(false);
   const cand = application.candidate;
@@ -32,12 +34,12 @@ export function EmployerApplicationItem({ application }: { application: Employer
     const { error } = await supabase.from("applications").update({ status: next }).eq("id", application.id);
     setLoading(false);
     if (error) {
-      toast("Action impossible.", "error");
+      toast(t("applications.actionFailed"), "error");
       return;
     }
     setStatus(next);
     toast(
-      next === "acceptee" ? "Candidature acceptée" : next === "refusee" ? "Candidature refusée" : "Mise à jour",
+      next === "acceptee" ? t("applications.accepted") : next === "refusee" ? t("applications.declined") : t("applications.updated"),
       "success",
     );
     router.refresh();
@@ -52,14 +54,14 @@ export function EmployerApplicationItem({ application }: { application: Employer
         <Avatar src={cand?.photo_url} nom={cand?.nom} prenom={cand?.prenom} className="size-12" />
         <div className="flex-1">
           <Link href={cand ? `/app/candidates/${cand.id}` : "#"} className="font-semibold hover:underline">
-            {cand ? `${cand.prenom ?? ""} ${cand.nom ?? ""}`.trim() || "Candidate" : "Candidate"}
+            {cand ? `${cand.prenom ?? ""} ${cand.nom ?? ""}`.trim() || t("roles.candidate") : t("roles.candidate")}
           </Link>
           {(cand?.commune || cand?.ville) && (
             <p className="text-xs text-muted-foreground">
               {[cand?.commune, cand?.ville].filter(Boolean).join(", ")}
             </p>
           )}
-          <Badge className={`mt-1 ${meta.className}`}>{meta.label}</Badge>
+          <Badge className={`mt-1 ${meta.className}`}>{t(`applicationStatus.${status}`)}</Badge>
         </div>
       </div>
 
@@ -73,7 +75,7 @@ export function EmployerApplicationItem({ application }: { application: Employer
       {cand && (
         <Button asChild variant="secondary" size="sm" className="mt-3 w-full">
           <Link href={`/app/candidates/${cand.id}`}>
-            <UserRound className="size-4" /> Voir le profil de la candidate
+            <UserRound className="size-4" /> {t("applications.viewProfile")}
           </Link>
         </Button>
       )}
@@ -82,14 +84,14 @@ export function EmployerApplicationItem({ application }: { application: Employer
         <div className="mt-2 flex gap-2">
           {status === "en_attente" && (
             <Button variant="ghost" size="sm" className="flex-1" onClick={() => setNewStatus("consultee")} disabled={loading}>
-              <Eye className="size-4" /> Marquer consultée
+              <Eye className="size-4" /> {t("applications.markViewed")}
             </Button>
           )}
           <Button variant="destructive" size="sm" className="flex-1" onClick={() => setNewStatus("refusee")} disabled={loading}>
-            <X className="size-4" /> Refuser
+            <X className="size-4" /> {t("applications.decline")}
           </Button>
           <Button size="sm" className="flex-1" onClick={() => setNewStatus("acceptee")} disabled={loading}>
-            <Check className="size-4" /> Accepter
+            <Check className="size-4" /> {t("applications.accept")}
           </Button>
         </div>
       )}

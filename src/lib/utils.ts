@@ -31,3 +31,8 @@ export function formatPhoneCi(phone: string): string {
   const local = phone.replace(/^\+?225/, "");
   return `+225 ${local.replace(/(\d{2})(?=\d)/g, "$1 ").trim()}`;
 }
+
+/** Convertit la locale de l'app (fr/en) en identifiant BCP-47 pour toLocaleDateString/Number. */
+export function dateLocale(locale: string): string {
+  return locale === "en" ? "en-US" : "fr-FR";
+}

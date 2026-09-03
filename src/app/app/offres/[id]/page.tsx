@@ -11,11 +11,14 @@ import {
   EmployerApplicationItem,
   type EmployerApplication,
 } from "@/features/applications/employer-application-item";
-import { SERVICE_LABELS } from "@/lib/constants";
+import { getTranslations } from "next-intl/server";
 import { formatFcfa } from "@/lib/utils";
 import type { ApplicationStatus, PublicProfileRow } from "@/lib/supabase/database.types";
 
-export const metadata = { title: "Offre" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("offerManage.metaTitle") };
+}
 
 export default async function OfferDetailPage({
   params,
@@ -25,6 +28,7 @@ export default async function OfferDetailPage({
   const { id } = await params;
   const profile = await requireProfile();
   const supabase = await createClient();
+  const t = await getTranslations();
 
   const { data: offer } = await supabase.from("offers").select("*").eq("id", id).maybeSingle();
   if (!offer) notFound();
@@ -92,28 +96,28 @@ export default async function OfferDetailPage({
           <div className="flex items-start justify-between gap-3">
             <h1 className="text-xl font-extrabold leading-tight">{offer.titre}</h1>
             {offer.status === "close" && (
-              <Badge className="bg-muted text-muted-foreground">Clôturée</Badge>
+              <Badge className="bg-muted text-muted-foreground">{t("offerManage.closed")}</Badge>
             )}
           </div>
 
           <div className="flex flex-wrap gap-2">
             <Badge className="bg-primary-soft text-primary">
-              <BadgeCheck className="size-3" /> {SERVICE_LABELS[offer.type_service]}
+              <BadgeCheck className="size-3" /> {t(`services.${offer.type_service}`)}
             </Badge>
             {offer.salaire != null && (
               <Badge className="bg-secondary text-foreground">{formatFcfa(offer.salaire)}</Badge>
             )}
             {offer.logee && (
-              <Badge className="bg-secondary text-foreground"><Home className="size-3" /> Logée</Badge>
+              <Badge className="bg-secondary text-foreground"><Home className="size-3" /> {t("offreDetail.housed")}</Badge>
             )}
           </div>
 
           <div className="space-y-2 text-sm">
             <Row icon={<MapPin className="size-4" />} value={[offer.quartier, offer.commune, offer.ville].filter(Boolean).join(", ")} />
             {offer.horaires && <Row icon={<Clock className="size-4" />} value={offer.horaires} />}
-            {offer.date_debut && <Row icon={<Calendar className="size-4" />} value={`Début : ${offer.date_debut}`} />}
+            {offer.date_debut && <Row icon={<Calendar className="size-4" />} value={t("offerManage.start", { date: offer.date_debut })} />}
             {offer.experience_souhaitee != null && (
-              <Row icon={<Users className="size-4" />} value={`Expérience souhaitée : ${offer.experience_souhaitee} an(s)`} />
+              <Row icon={<Users className="size-4" />} value={t("offerManage.expWanted", { years: t("card.years", { years: offer.experience_souhaitee }) })} />
             )}
           </div>
 
@@ -130,7 +134,7 @@ export default async function OfferDetailPage({
             <Avatar src={employer.photo_url} nom={employer.nom} prenom={employer.prenom} className="size-11" />
             <div>
               <p className="text-sm font-semibold">
-                {`${employer.prenom ?? ""} ${employer.nom ?? ""}`.trim() || "Employeur"}
+                {`${employer.prenom ?? ""} ${employer.nom ?? ""}`.trim() || t("offerManage.employer")}
               </p>
               <p className="text-xs text-muted-foreground">
                 {[employer.commune, employer.ville].filter(Boolean).join(", ")}
@@ -156,12 +160,12 @@ export default async function OfferDetailPage({
           <OfferStatusToggle offerId={offer.id} status={offer.status} />
           <section>
             <h2 className="mb-3 font-bold">
-              Candidatures reçues ({applications.length})
+              {t("offerManage.applicationsReceived", { count: applications.length })}
             </h2>
             {applications.length === 0 ? (
               <Card>
                 <CardContent className="p-6 text-center text-sm text-muted-foreground">
-                  Aucune candidature pour le moment.
+                  {t("offerManage.noApplications")}
                 </CardContent>
               </Card>
             ) : (

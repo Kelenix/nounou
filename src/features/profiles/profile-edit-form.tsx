@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -34,6 +35,7 @@ export function ProfileEditForm({
   const router = useRouter();
   const supabase = createClient();
   const { toast } = useToast();
+  const t = useTranslations();
 
   // Un administrateur / membre du staff édite depuis le back-office, pas depuis /app.
   const backHref = profile.role === "admin" ? "/admin" : "/app/profil";
@@ -75,7 +77,7 @@ export function ProfileEditForm({
     e.preventDefault();
     setError(null);
     if (prenom.trim().length < 2 || nom.trim().length < 2) {
-      setError("Renseignez votre nom et prénom.");
+      setError(t("profileEdit.nameRequired"));
       return;
     }
     setLoading(true);
@@ -119,10 +121,10 @@ export function ProfileEditForm({
 
     setLoading(false);
     if (pErr || roleErr) {
-      setError("Enregistrement impossible. Réessayez.");
+      setError(t("profileEdit.saveFailed"));
       return;
     }
-    toast("Profil enregistré", "success");
+    toast(t("profileEdit.saved"), "success");
     router.push(backHref);
     router.refresh();
   }
@@ -133,85 +135,85 @@ export function ProfileEditForm({
         <Button asChild variant="ghost" size="icon" type="button">
           <Link href={backHref}><ArrowLeft className="size-5" /></Link>
         </Button>
-        <h1 className="text-lg font-extrabold">Modifier mon profil</h1>
+        <h1 className="text-lg font-extrabold">{t("profileEdit.title")}</h1>
       </div>
 
       <AvatarUpload userId={profile.id} value={photoUrl} nom={nom} prenom={prenom} onChange={setPhotoUrl} />
 
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Prénom"><Input value={prenom} onChange={(e) => setPrenom(e.target.value)} /></Field>
-        <Field label="Nom"><Input value={nom} onChange={(e) => setNom(e.target.value)} /></Field>
+        <Field label={t("profileEdit.firstName")}><Input value={prenom} onChange={(e) => setPrenom(e.target.value)} /></Field>
+        <Field label={t("profileEdit.lastName")}><Input value={nom} onChange={(e) => setNom(e.target.value)} /></Field>
       </div>
 
-      <Field label="Ville">
+      <Field label={t("profileEdit.city")}>
         <Select value={ville} onChange={(e) => setVille(e.target.value)}>
           {VILLES_CI.map((v) => <option key={v} value={v}>{v}</option>)}
         </Select>
       </Field>
 
-      <Field label="Commune / quartier">
+      <Field label={t("profileEdit.communeQuartier")}>
         {ville === "Abidjan" ? (
           <Select value={commune} onChange={(e) => setCommune(e.target.value)}>
-            <option value="">Sélectionner…</option>
+            <option value="">{t("profileEdit.select")}</option>
             {COMMUNES_ABIDJAN.map((c) => <option key={c} value={c}>{c}</option>)}
           </Select>
         ) : (
-          <Input value={commune} onChange={(e) => setCommune(e.target.value)} placeholder="Commune ou quartier" />
+          <Input value={commune} onChange={(e) => setCommune(e.target.value)} placeholder={t("profileEdit.communePlaceholder")} />
         )}
       </Field>
 
       {profile.role === "candidate" && (
         <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
-          <h2 className="font-bold">Informations candidate</h2>
-          <Field label="Services proposés">
+          <h2 className="font-bold">{t("profileEdit.candidateInfo")}</h2>
+          <Field label={t("profileEdit.servicesOffered")}>
             <ServicePicker value={services} onChange={setServices} />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Expérience (années)">
+            <Field label={t("profileEdit.experienceYears")}>
               <Input type="number" inputMode="numeric" min={0} value={experience} onChange={(e) => setExperience(e.target.value)} />
             </Field>
-            <Field label="Salaire souhaité (FCFA)">
-              <Input type="number" inputMode="numeric" min={0} value={salaireSouhaite} onChange={(e) => setSalaireSouhaite(e.target.value)} placeholder="Optionnel" />
+            <Field label={t("profileEdit.desiredSalary")}>
+              <Input type="number" inputMode="numeric" min={0} value={salaireSouhaite} onChange={(e) => setSalaireSouhaite(e.target.value)} placeholder={t("profileEdit.optional")} />
             </Field>
           </div>
-          <Field label="Compétences (séparées par des virgules)">
-            <Input value={competences} onChange={(e) => setCompetences(e.target.value)} placeholder="Ex. Premiers secours, Cuisine ivoirienne, Repassage" />
+          <Field label={t("profileEdit.skills")}>
+            <Input value={competences} onChange={(e) => setCompetences(e.target.value)} placeholder={t("profileEdit.skillsPlaceholder")} />
           </Field>
-          <Field label="Disponibilité">
-            <Input value={dispo} onChange={(e) => setDispo(e.target.value)} placeholder="Ex. immédiate, en semaine…" />
+          <Field label={t("profileEdit.availability")}>
+            <Input value={dispo} onChange={(e) => setDispo(e.target.value)} placeholder={t("profileEdit.availabilityPlaceholder")} />
           </Field>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={tempsPlein} onChange={(e) => setTempsPlein(e.target.checked)} className="size-4 accent-primary" />
-            Disponible à temps plein
+            {t("profileEdit.fullTimeAvailable")}
           </label>
-          <Field label="À propos de moi">
-            <Textarea value={candDesc} onChange={(e) => setCandDesc(e.target.value)} placeholder="Présentez-vous en quelques mots…" />
+          <Field label={t("profileEdit.aboutMe")}>
+            <Textarea value={candDesc} onChange={(e) => setCandDesc(e.target.value)} placeholder={t("profileEdit.aboutMePlaceholder")} />
           </Field>
         </div>
       )}
 
       {profile.role === "employer" && (
         <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
-          <h2 className="font-bold">Informations employeur</h2>
-          <Field label="Type de besoin">
-            <Input value={typeBesoin} onChange={(e) => setTypeBesoin(e.target.value)} placeholder="Ex. garde d'enfants, ménage…" />
+          <h2 className="font-bold">{t("profileEdit.employerInfo")}</h2>
+          <Field label={t("profileEdit.needType")}>
+            <Input value={typeBesoin} onChange={(e) => setTypeBesoin(e.target.value)} placeholder={t("profileEdit.needTypePlaceholder")} />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Personnes au foyer">
+            <Field label={t("profileEdit.householdSize")}>
               <Input type="number" inputMode="numeric" min={0} value={nbFoyer} onChange={(e) => setNbFoyer(e.target.value)} />
             </Field>
-            <Field label="Salaire proposé (FCFA)">
-              <Input type="number" inputMode="numeric" min={0} value={salairePropose} onChange={(e) => setSalairePropose(e.target.value)} placeholder="Optionnel" />
+            <Field label={t("profileEdit.salaryOffered")}>
+              <Input type="number" inputMode="numeric" min={0} value={salairePropose} onChange={(e) => setSalairePropose(e.target.value)} placeholder={t("profileEdit.optional")} />
             </Field>
           </div>
-          <Field label="Type de logement">
-            <Input value={typeLogement} onChange={(e) => setTypeLogement(e.target.value)} placeholder="Ex. appartement, villa…" />
+          <Field label={t("profileEdit.housingType")}>
+            <Input value={typeLogement} onChange={(e) => setTypeLogement(e.target.value)} placeholder={t("profileEdit.housingPlaceholder")} />
           </Field>
-          <Field label="Horaires habituels">
-            <Input value={horaires} onChange={(e) => setHoraires(e.target.value)} placeholder="Ex. 8h-17h, lun-ven" />
+          <Field label={t("profileEdit.usualHours")}>
+            <Input value={horaires} onChange={(e) => setHoraires(e.target.value)} placeholder={t("profileEdit.hoursPlaceholder")} />
           </Field>
-          <Field label="Description">
-            <Textarea value={empDesc} onChange={(e) => setEmpDesc(e.target.value)} placeholder="Décrivez votre foyer et vos attentes…" />
+          <Field label={t("profileEdit.description")}>
+            <Textarea value={empDesc} onChange={(e) => setEmpDesc(e.target.value)} placeholder={t("profileEdit.descriptionPlaceholder")} />
           </Field>
         </div>
       )}
@@ -219,7 +221,7 @@ export function ProfileEditForm({
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? <Spinner className="text-primary-foreground" /> : "Enregistrer"}
+        {loading ? <Spinner className="text-primary-foreground" /> : t("profileEdit.save")}
       </Button>
     </form>
   );

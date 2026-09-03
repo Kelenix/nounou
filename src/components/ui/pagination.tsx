@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { cn } from "@/lib/utils";
 
 /** Pagination par liens (préserve les filtres passés dans `params`). */
-export function Pagination({
+export async function Pagination({
   basePath,
   page,
   totalPages,
@@ -15,6 +16,7 @@ export function Pagination({
   params?: Record<string, string>;
 }) {
   if (totalPages <= 1) return null;
+  const t = await getTranslations();
 
   const href = (p: number) => {
     const q = new URLSearchParams(params);
@@ -30,7 +32,7 @@ export function Pagination({
 
   return (
     <nav className="mt-8 flex items-center justify-center gap-1.5">
-      <PageLink href={href(page - 1)} disabled={page <= 1} aria-label="Précédent">
+      <PageLink href={href(page - 1)} disabled={page <= 1} aria-label={t("common.previous")}>
         <ChevronLeft className="size-4" />
       </PageLink>
 
@@ -55,7 +57,7 @@ export function Pagination({
         );
       })}
 
-      <PageLink href={href(page + 1)} disabled={page >= totalPages} aria-label="Suivant">
+      <PageLink href={href(page + 1)} disabled={page >= totalPages} aria-label={t("common.next")}>
         <ChevronRight className="size-4" />
       </PageLink>
     </nav>

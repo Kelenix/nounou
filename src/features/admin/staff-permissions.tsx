@@ -2,12 +2,20 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Save, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
 import { STAFF_SECTIONS } from "@/lib/admin-permissions";
 import { cn } from "@/lib/utils";
+
+const SECTION_KEY: Record<string, string> = {
+  users: "admin.sectionUsers",
+  offers: "admin.sectionOffers",
+  reports: "admin.sectionReports",
+  settings: "admin.sectionSettings",
+};
 
 export function StaffPermissions({
   userId,
@@ -18,6 +26,7 @@ export function StaffPermissions({
 }) {
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations();
   const [perms, setPerms] = useState<Set<string>>(new Set(initial));
   const [loading, setLoading] = useState(false);
 
@@ -39,16 +48,16 @@ export function StaffPermissions({
     });
     setLoading(false);
     if (!res.ok) {
-      toast("Enregistrement impossible.", "error");
+      toast(t("admin.permFailed"), "error");
       return;
     }
-    toast("Permissions mises à jour", "success");
+    toast(t("admin.permSaved"), "success");
     router.refresh();
   }
 
   return (
     <div className="space-y-3">
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Permissions (sections accessibles)</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("admin.permsHint")}</p>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {STAFF_SECTIONS.map((s) => {
           const active = perms.has(s.key);
@@ -65,13 +74,13 @@ export function StaffPermissions({
               <span className={cn("flex size-4 items-center justify-center rounded border", active ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/40")}>
                 {active && <Check className="size-3" />}
               </span>
-              {s.label}
+              {t(SECTION_KEY[s.key] ?? "admin.sectionUsers")}
             </button>
           );
         })}
       </div>
       <Button size="sm" onClick={save} disabled={loading}>
-        {loading ? <Spinner className="text-primary-foreground" /> : <><Save className="size-4" /> Enregistrer les permissions</>}
+        {loading ? <Spinner className="text-primary-foreground" /> : <><Save className="size-4" /> {t("admin.permSave")}</>}
       </Button>
     </div>
   );

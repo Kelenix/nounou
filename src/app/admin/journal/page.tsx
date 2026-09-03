@@ -1,22 +1,27 @@
 import { ScrollText, UserPlus, UserCog, ShieldCheck, Ban, RotateCcw, Trash2, CreditCard } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
 import { requireSuperAdmin } from "@/lib/admin";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pagination } from "@/components/ui/pagination";
+import { dateLocale } from "@/lib/utils";
 
-export const metadata = { title: "Admin — Journal d'audit" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("admin.metaJournal") };
+}
 
 const PAGE_SIZE = 20;
 type SP = Record<string, string | string[] | undefined>;
 
-const ACTION_META: Record<string, { label: string; icon: typeof UserCog }> = {
-  create_admin: { label: "Création d'un administrateur", icon: UserPlus },
-  set_role: { label: "Changement de rôle", icon: UserCog },
-  set_permissions: { label: "Modification des permissions", icon: ShieldCheck },
-  suspend: { label: "Suspension d'un compte", icon: Ban },
-  reactivate: { label: "Réactivation d'un compte", icon: RotateCcw },
-  delete_user: { label: "Suppression d'un compte", icon: Trash2 },
-  cancel_subscription: { label: "Annulation d'abonnement", icon: CreditCard },
+const ACTION_ICON: Record<string, typeof UserCog> = {
+  create_admin: UserPlus,
+  set_role: UserCog,
+  set_permissions: ShieldCheck,
+  suspend: Ban,
+  reactivate: RotateCcw,
+  delete_user: Trash2,
+  cancel_subscription: CreditCard,
 };
 
 export default async function AdminJournalPage({
@@ -25,6 +30,8 @@ export default async function AdminJournalPage({
   searchParams: Promise<SP>;
 }) {
   await requireSuperAdmin();
+  const t = await getTranslations();
+  const dl = dateLocale(await getLocale());
   const sp = await searchParams;
   const page = Math.max(1, Number(typeof sp.page === "string" ? sp.page : "1") || 1);
 
@@ -42,8 +49,8 @@ export default async function AdminJournalPage({
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-extrabold tracking-tight">Journal d&apos;audit</h1>
-        <p className="text-sm text-muted-foreground">Historique des actions sensibles ({count ?? 0}).</p>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("admin.journalTitle")}</h1>
+        <p className="text-sm text-muted-foreground">{t("admin.journalSubtitle", { count: count ?? 0 })}</p>
       </div>
 
       {list.length === 0 ? (
@@ -52,14 +59,14 @@ export default async function AdminJournalPage({
             <span className="flex size-14 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
               <ScrollText className="size-7" />
             </span>
-            <p className="text-sm text-muted-foreground">Aucune action enregistrée pour le moment.</p>
+            <p className="text-sm text-muted-foreground">{t("admin.journalEmpty")}</p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-2">
           {list.map((e) => {
-            const meta = ACTION_META[e.action] ?? { label: e.action, icon: ScrollText };
-            const Icon = meta.icon;
+            const Icon = ACTION_ICON[e.action] ?? ScrollText;
+            const hasLabel = ACTION_ICON[e.action] !== undefined;
             return (
               <Card key={e.id}>
                 <CardContent className="flex items-start gap-3 p-4">
@@ -67,14 +74,14 @@ export default async function AdminJournalPage({
                     <Icon className="size-4" />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold">{meta.label}</p>
+                    <p className="text-sm font-semibold">{hasLabel ? t(`admin.action_${e.action}`) : e.action}</p>
                     <p className="text-xs text-muted-foreground">
-                      Par <span className="font-medium">{e.actor_name ?? "?"}</span>
-                      {e.target_name ? <> · cible : <span className="font-medium">{e.target_name}</span></> : null}
+                      {t("admin.journalBy")} <span className="font-medium">{e.actor_name ?? "?"}</span>
+                      {e.target_name ? <> · {t("admin.journalTarget")} <span className="font-medium">{e.target_name}</span></> : null}
                     </p>
                   </div>
                   <span className="shrink-0 text-xs text-muted-foreground">
-                    {new Date(e.created_at).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                    {new Date(e.created_at).toLocaleString(dl, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </CardContent>
               </Card>

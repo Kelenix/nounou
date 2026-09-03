@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { useToast } from "@/components/ui/toast";
 export function DeleteAccountButton() {
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -19,12 +21,12 @@ export function DeleteAccountButton() {
     const res = await fetch("/api/account", { method: "DELETE" });
     if (!res.ok) {
       setLoading(false);
-      toast("Suppression impossible. Réessayez.", "error");
+      toast(t("settings.deleteFailed"), "error");
       return;
     }
     // Nettoie la session locale puis redirige vers l'accueil.
     await createClient().auth.signOut();
-    toast("Votre compte a été supprimé.", "success");
+    toast(t("settings.deleteSuccess"), "success");
     router.replace("/");
     router.refresh();
   }
@@ -32,15 +34,15 @@ export function DeleteAccountButton() {
   return (
     <>
       <Button variant="destructive" className="w-full" onClick={() => setOpen(true)}>
-        <Trash2 className="size-4" /> Supprimer mon compte
+        <Trash2 className="size-4" /> {t("settings.deleteAccount")}
       </Button>
 
       <ConfirmDialog
         open={open}
         onOpenChange={(o) => !loading && setOpen(o)}
-        title="Supprimer votre compte ?"
-        description="Votre compte et toutes vos données (profil, candidatures, offres, messages, avis…) seront définitivement supprimés. Cette action est irréversible."
-        confirmLabel="Supprimer définitivement"
+        title={t("settings.deleteConfirmTitle")}
+        description={t("settings.deleteConfirmDesc")}
+        confirmLabel={t("settings.deleteConfirmLabel")}
         destructive
         loading={loading}
         onConfirm={remove}

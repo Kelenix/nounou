@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Users } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -12,14 +13,12 @@ import { getPricing } from "@/features/settings/queries";
 import { formatPhoneCi } from "@/lib/utils";
 import type { UserRole, PaymentMethod } from "@/lib/supabase/database.types";
 
-export const metadata = { title: "Admin — Utilisateurs" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("admin.metaUsers") };
+}
 
 const PAGE_SIZE = 15;
-const ROLE_LABEL: Record<string, string> = {
-  candidate: "Candidate",
-  employer: "Employeur",
-  admin: "Admin",
-};
 
 type SP = Record<string, string | string[] | undefined>;
 
@@ -29,6 +28,12 @@ export default async function AdminUsersPage({
   searchParams: Promise<SP>;
 }) {
   const me = await requireAdminSection("users");
+  const t = await getTranslations();
+  const roleLabel: Record<string, string> = {
+    candidate: t("roles.candidate"),
+    employer: t("roles.employer"),
+    admin: t("roles.admin"),
+  };
   const sp = await searchParams;
   const get = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : "");
   const role = get("role") as UserRole | "";
@@ -94,9 +99,9 @@ export default async function AdminUsersPage({
   function subscriptionOf(userId: string, r: UserRole | null): SubscriptionInfo {
     const pay = lastPayment.get(userId);
     if (r === "candidate") {
-      return { label: "Activation du profil", montant: pay?.montant ?? pricing.activationCandidate, moyen: pay?.moyen ?? null, date: pay?.created_at ?? null };
+      return { label: t("admin.subActivation"), montant: pay?.montant ?? pricing.activationCandidate, moyen: pay?.moyen ?? null, date: pay?.created_at ?? null };
     }
-    return { label: "Accès premium", montant: pay?.montant ?? pricing.premiumEmployeur, moyen: pay?.moyen ?? null, date: pay?.created_at ?? null };
+    return { label: t("admin.subPremium"), montant: pay?.montant ?? pricing.premiumEmployeur, moyen: pay?.moyen ?? null, date: pay?.created_at ?? null };
   }
 
   const linkParams: Record<string, string> = {};
@@ -105,8 +110,8 @@ export default async function AdminUsersPage({
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-extrabold tracking-tight">Utilisateurs</h1>
-        <p className="text-sm text-muted-foreground">{total} compte(s) au total.</p>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("admin.usersTitle")}</h1>
+        <p className="text-sm text-muted-foreground">{t("admin.totalAccounts", { count: total })}</p>
       </div>
 
       <Suspense fallback={null}>
@@ -119,7 +124,7 @@ export default async function AdminUsersPage({
             <span className="flex size-14 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
               <Users className="size-7" />
             </span>
-            <p className="text-sm text-muted-foreground">Aucun utilisateur ne correspond aux filtres.</p>
+            <p className="text-sm text-muted-foreground">{t("admin.noMatch")}</p>
           </CardContent>
         </Card>
       ) : (
@@ -133,7 +138,7 @@ export default async function AdminUsersPage({
                     <Avatar src={u.photo_url} nom={u.nom} prenom={u.prenom} className="size-11" />
                     <div className="min-w-0">
                       <p className="truncate font-semibold">
-                        {`${u.prenom ?? ""} ${u.nom ?? ""}`.trim() || "Sans nom"}
+                        {`${u.prenom ?? ""} ${u.nom ?? ""}`.trim() || t("admin.noName")}
                       </p>
                       <p className="truncate text-xs text-muted-foreground">
                         {formatPhoneCi(u.phone)}
@@ -141,19 +146,19 @@ export default async function AdminUsersPage({
                       </p>
                       <div className="mt-1 flex flex-wrap gap-1.5">
                         {u.is_super_admin ? (
-                          <Badge className="bg-amber-100 text-amber-800">Super Admin</Badge>
+                          <Badge className="bg-amber-100 text-amber-800">{t("admin.superAdmin")}</Badge>
                         ) : (
-                          <Badge className="bg-primary-soft text-primary">{u.role ? ROLE_LABEL[u.role] : "—"}</Badge>
+                          <Badge className="bg-primary-soft text-primary">{u.role ? roleLabel[u.role] : "—"}</Badge>
                         )}
-                        {hasSub && <Badge className="bg-emerald-100 text-emerald-700">Abonné</Badge>}
-                        {u.is_suspended && <Badge className="bg-red-100 text-red-700">Suspendu</Badge>}
+                        {hasSub && <Badge className="bg-emerald-100 text-emerald-700">{t("admin.subscriber")}</Badge>}
+                        {u.is_suspended && <Badge className="bg-red-100 text-red-700">{t("admin.suspended")}</Badge>}
                       </div>
                     </div>
                   </div>
                   {u.id !== me.id && !u.is_super_admin && (u.role !== "admin" || me.is_super_admin) && (
                     <UserActions
                       userId={u.id}
-                      name={`${u.prenom ?? ""} ${u.nom ?? ""}`.trim() || "Cet utilisateur"}
+                      name={`${u.prenom ?? ""} ${u.nom ?? ""}`.trim() || t("admin.thisUser")}
                       role={u.role}
                       suspended={u.is_suspended}
                       hasSubscription={hasSub}

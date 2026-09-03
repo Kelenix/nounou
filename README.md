@@ -15,6 +15,7 @@ Nounou · ménage · cuisine · garde d'enfants · aide aux personnes âgées �
 [![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20RLS-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8?logo=pwa&logoColor=white)](#progressive-web-app-pwa)
+[![i18n](https://img.shields.io/badge/i18n-FR%20%2F%20EN-0088CC)](#fonctionnalités)
 [![Tests](https://img.shields.io/badge/tests-unit%20%2B%20e2e-brightgreen)](#tests)
 
 </div>
@@ -56,7 +57,7 @@ protections appliquées **au niveau de la base de données**.
 |---|---|
 | **Cible** | Familles (employeurs) et aides à domicile (candidates) en Côte d'Ivoire |
 | **Plateforme** | Web responsive / PWA installable (mobile-first) |
-| **Langue / devise** | Français · FCFA · téléphone +225 |
+| **Langue / devise** | **Français + Anglais** (bascule FR/EN) · FCFA · téléphone +225 |
 | **Modèle** | Consultation publique, connexion à l'action, abonnement d'activation |
 
 ---
@@ -80,6 +81,9 @@ protections appliquées **au niveau de la base de données**.
 - Réception et suivi des **candidatures**, **messagerie**, **notation** mutuelle.
 
 ### Transverse
+- **Interface multilingue FR/EN** : bascule via un sélecteur (globe) dans l'en-tête ; langue
+  mémorisée dans un cookie (`next-intl`, sans préfixe d'URL). Tout le produit est traduit — public,
+  espace connecté et back-office admin.
 - **Auth téléphone + OTP** : inscription progressive (rôle → prénom + nom → téléphone → OTP).
 - **Notation mutuelle** (5 critères + avis), **messagerie** (conversations + fil), **notifications temps réel** (Supabase Realtime).
 - **Suppression de son propre compte** (RGPD).
@@ -95,6 +99,7 @@ protections appliquées **au niveau de la base de données**.
 | **Langage** | [TypeScript 5](https://www.typescriptlang.org/) |
 | **UI** | [Tailwind CSS 3.4](https://tailwindcss.com/) + composants maison (style shadcn/ui) · icônes [lucide-react](https://lucide.dev/) |
 | **Backend / BaaS** | [Supabase](https://supabase.com/) — PostgreSQL, **RLS sur toutes les tables**, Auth (téléphone/OTP), Storage, Realtime |
+| **i18n** | [next-intl](https://next-intl.dev/) — FR/EN, mode cookie sans préfixe d'URL (défaut FR) |
 | **Données / state** | [TanStack Query](https://tanstack.com/query) · validation [Zod](https://zod.dev/) |
 | **Tests** | [Vitest](https://vitest.dev/) (unitaires) · [Playwright](https://playwright.dev/) (E2E) |
 | **Distribution** | PWA installable (manifest + service worker, offline basique) |
@@ -258,6 +263,8 @@ src/
                        #   candidates, catalog, ratings, reports, payments,
                        #   notifications, admin, account, search, settings)
   lib/                 # supabase/ (clients + types), utils, constants, auth, env
+  i18n/                # config (locales, cookie), request (next-intl), action setUserLocale
+messages/              # Dictionnaires de traduction : fr.json, en.json (parité de clés)
 supabase/
   migrations/          # Schéma, triggers, RLS, storage, navigation publique, RPC contact,
                        #   realtime, hiérarchie Super Admin + audit

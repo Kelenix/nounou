@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Send } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ export function MessageComposer({
 }) {
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations();
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -32,7 +34,7 @@ export function MessageComposer({
     });
     setLoading(false);
     if (error) {
-      toast("Envoi impossible.", "error");
+      toast(t("messages.sendFailed"), "error");
       return;
     }
     setText("");
@@ -51,7 +53,7 @@ export function MessageComposer({
           }
         }}
         rows={1}
-        placeholder="Écrire un message…"
+        placeholder={t("messages.typePlaceholder")}
         className="max-h-32 min-h-11 flex-1 resize-none rounded-2xl border border-input bg-background px-4 py-2.5 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       />
       <Button type="submit" size="icon" className="size-11 shrink-0" disabled={loading || !text.trim()}>

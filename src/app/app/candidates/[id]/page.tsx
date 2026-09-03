@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { MapPin, Briefcase, Clock, Sparkles, Phone, MessageCircle, CalendarDays } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getRatingSummary } from "@/features/ratings/queries";
@@ -13,10 +14,12 @@ import { FavoriteButton } from "@/features/candidates/favorite-button";
 import { ReportButton } from "@/features/reports/report-button";
 import { RatingForm } from "@/features/ratings/rating-form";
 import { StartConversationButton } from "@/features/messages/start-conversation-button";
-import { SERVICE_LABELS } from "@/lib/constants";
 import { formatFcfa, formatPhoneCi } from "@/lib/utils";
 
-export const metadata = { title: "Profil candidate" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("candidateDetail.metaTitle") };
+}
 
 export default async function CandidateDetailPage({
   params,
@@ -26,6 +29,7 @@ export default async function CandidateDetailPage({
   const { id } = await params;
   const viewer = await requireProfile();
   const supabase = await createClient();
+  const t = await getTranslations();
 
   const { data: profile } = await supabase
     .from("public_profiles")
@@ -46,7 +50,7 @@ export default async function CandidateDetailPage({
   const { data: phone } = await supabase.rpc("candidate_phone", { candidate: id });
   const digits = phone ? phone.replace(/\D/g, "") : "";
 
-  const name = `${profile.prenom ?? ""} ${profile.nom ?? ""}`.trim() || "Candidate";
+  const name = `${profile.prenom ?? ""} ${profile.nom ?? ""}`.trim() || t("roles.candidate");
   const isEmployer = viewer.role === "employer";
   let isFavorite = false;
   let canRate = false;
@@ -95,7 +99,7 @@ export default async function CandidateDetailPage({
   const reviewerIds = (reviewsRaw ?? []).map((r) => r.from_user);
   if (reviewerIds.length > 0) {
     const { data: revs } = await supabase.from("public_profiles").select("id, prenom, nom").in("id", reviewerIds);
-    for (const r of revs ?? []) reviewerNames.set(r.id, `${r.prenom ?? ""} ${r.nom ?? ""}`.trim() || "Utilisateur");
+    for (const r of revs ?? []) reviewerNames.set(r.id, `${r.prenom ?? ""} ${r.nom ?? ""}`.trim() || t("candidateDetail.reviewer"));
   }
   const reviews = reviewsRaw ?? [];
 
@@ -119,7 +123,7 @@ export default async function CandidateDetailPage({
             {candidate?.salaire_souhaite != null && (
               <div className="mt-3">
                 <span className="text-xl font-extrabold text-primary">{formatFcfa(candidate.salaire_souhaite)}</span>
-                <span className="text-sm text-muted-foreground"> / mois</span>
+                <span className="text-sm text-muted-foreground">{t("nounouDetail.perMonth")}</span>
               </div>
             )}
           </CardContent>
@@ -132,16 +136,16 @@ export default async function CandidateDetailPage({
           <CardContent className="p-5">
             <div className="flex items-center gap-2">
               <span className="flex size-8 items-center justify-center rounded-xl bg-primary text-primary-foreground"><Phone className="size-4" /></span>
-              <h2 className="font-bold">Contact</h2>
+              <h2 className="font-bold">{t("candidateDetail.contact")}</h2>
             </div>
             <p className="mt-2 text-lg font-bold tracking-wide">{formatPhoneCi(phone)}</p>
             <div className="mt-3 grid grid-cols-2 gap-2">
               <Button asChild>
-                <a href={`tel:+${digits}`}><Phone className="size-4" /> Appeler</a>
+                <a href={`tel:+${digits}`}><Phone className="size-4" /> {t("candidateDetail.call")}</a>
               </Button>
               <Button asChild variant="secondary">
                 <a href={`https://wa.me/${digits}`} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="size-4" /> WhatsApp
+                  <MessageCircle className="size-4" /> {t("candidateDetail.whatsapp")}
                 </a>
               </Button>
             </div>
@@ -155,21 +159,21 @@ export default async function CandidateDetailPage({
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center gap-2">
               <span className="flex size-8 items-center justify-center rounded-xl bg-primary-soft text-primary"><Sparkles className="size-4" /></span>
-              <h2 className="font-bold">Services &amp; compétences</h2>
+              <h2 className="font-bold">{t("candidateDetail.servicesSkills")}</h2>
             </div>
 
             <div>
-              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Services proposés</p>
+              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("nounouDetail.servicesOffered")}</p>
               <div className="flex flex-wrap gap-2">
                 {candidate.services.map((s) => (
-                  <Badge key={s} className="bg-primary-soft text-primary">{SERVICE_LABELS[s]}</Badge>
+                  <Badge key={s} className="bg-primary-soft text-primary">{t(`services.${s}`)}</Badge>
                 ))}
               </div>
             </div>
 
             {candidate.competences.length > 0 && (
               <div>
-                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Compétences</p>
+                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("nounouDetail.skills")}</p>
                 <div className="flex flex-wrap gap-2">
                   {candidate.competences.map((c) => (
                     <Badge key={c} className="bg-secondary text-foreground">{c}</Badge>
@@ -179,14 +183,14 @@ export default async function CandidateDetailPage({
             )}
 
             <div className="flex flex-wrap gap-x-6 gap-y-2 border-t border-border/60 pt-3 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5"><Briefcase className="size-4 text-primary" /> {candidate.experience_annees} an(s) d&apos;expérience</span>
-              <span className="inline-flex items-center gap-1.5"><Clock className="size-4 text-primary" /> {candidate.disponibilite || (candidate.temps_plein ? "Temps plein" : "Temps partiel")}</span>
-              <span className="inline-flex items-center gap-1.5"><CalendarDays className="size-4 text-primary" /> Membre depuis {new Date(profile.created_at).getFullYear()}</span>
+              <span className="inline-flex items-center gap-1.5"><Briefcase className="size-4 text-primary" /> {t("nounouDetail.experienceYears", { years: candidate.experience_annees })}</span>
+              <span className="inline-flex items-center gap-1.5"><Clock className="size-4 text-primary" /> {candidate.disponibilite || (candidate.temps_plein ? t("nounouDetail.fullTime") : t("nounouDetail.partTime"))}</span>
+              <span className="inline-flex items-center gap-1.5"><CalendarDays className="size-4 text-primary" /> {t("nounouDetail.memberSince", { year: new Date(profile.created_at).getFullYear() })}</span>
             </div>
 
             {candidate.description && (
               <div>
-                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">À propos</p>
+                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("nounouDetail.about")}</p>
                 <p className="whitespace-pre-line text-sm text-muted-foreground">{candidate.description}</p>
               </div>
             )}
@@ -199,7 +203,7 @@ export default async function CandidateDetailPage({
           fromUser={viewer.id}
           toUser={id}
           roleContext="employer_rates_candidate"
-          targetName={profile.prenom ?? "cette candidate"}
+          targetName={profile.prenom ?? t("candidateDetail.rateTarget")}
           alreadyRated={alreadyRated}
         />
       )}
@@ -208,11 +212,11 @@ export default async function CandidateDetailPage({
       {reviews.length > 0 && (
         <Card>
           <CardContent className="space-y-4 p-5">
-            <h2 className="font-bold">Avis ({reviews.length})</h2>
+            <h2 className="font-bold">{t("candidateDetail.reviews", { count: reviews.length })}</h2>
             {reviews.map((r) => (
               <div key={r.id} className="border-b border-border/60 pb-3 last:border-0 last:pb-0">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold">{reviewerNames.get(r.from_user) ?? "Utilisateur"}</span>
+                  <span className="text-sm font-semibold">{reviewerNames.get(r.from_user) ?? t("candidateDetail.reviewer")}</span>
                   <RatingStars value={r.note_moyenne} />
                 </div>
                 {r.commentaire && <p className="mt-1 text-sm text-muted-foreground">« {r.commentaire} »</p>}

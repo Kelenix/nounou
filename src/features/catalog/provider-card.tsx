@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { MapPin, Briefcase, ArrowRight, Star, BadgeCheck } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { ProviderPhoto } from "@/features/catalog/provider-photo";
-import { SERVICE_LABELS } from "@/lib/constants";
 import { formatFcfa } from "@/lib/utils";
 import type { ProviderItem } from "@/features/catalog/queries";
 
-export function ProviderCard({ item }: { item: ProviderItem }) {
+export async function ProviderCard({ item }: { item: ProviderItem }) {
   const { profile, candidate, rating } = item;
-  const name = `${profile.prenom ?? ""} ${profile.nom ?? ""}`.trim() || "Nounou";
+  const t = await getTranslations();
+  const name = `${profile.prenom ?? ""} ${profile.nom ?? ""}`.trim() || t("card.defaultName");
 
   return (
     <Link
@@ -35,7 +36,7 @@ export function ProviderCard({ item }: { item: ProviderItem }) {
         {/* Badge vérifié en surimpression */}
         {profile.verification_level !== "phone" && (
           <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground shadow-sm">
-            <BadgeCheck className="size-3.5" /> Vérifié
+            <BadgeCheck className="size-3.5" /> {t("card.verified")}
           </span>
         )}
 
@@ -43,7 +44,7 @@ export function ProviderCard({ item }: { item: ProviderItem }) {
         {candidate.salaire_souhaite != null && (
           <span className="absolute bottom-3 left-3 rounded-full bg-white/95 px-3 py-1 text-sm font-bold text-primary shadow-sm">
             {formatFcfa(candidate.salaire_souhaite)}
-            <span className="text-xs font-normal text-muted-foreground">/mois</span>
+            <span className="text-xs font-normal text-muted-foreground">{t("card.perMonth")}</span>
           </span>
         )}
       </div>
@@ -53,12 +54,12 @@ export function ProviderCard({ item }: { item: ProviderItem }) {
         <h3 className="truncate text-base font-bold">{name}</h3>
         <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
           <MapPin className="size-3.5" />
-          {[profile.commune, profile.ville].filter(Boolean).join(", ") || "Côte d'Ivoire"}
+          {[profile.commune, profile.ville].filter(Boolean).join(", ") || t("card.country")}
         </p>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
           {candidate.services.slice(0, 3).map((s) => (
-            <Badge key={s} className="bg-primary-soft text-primary">{SERVICE_LABELS[s]}</Badge>
+            <Badge key={s} className="bg-primary-soft text-primary">{t(`services.${s}`)}</Badge>
           ))}
           {candidate.services.length > 3 && (
             <Badge className="bg-secondary text-muted-foreground">+{candidate.services.length - 3}</Badge>
@@ -67,10 +68,10 @@ export function ProviderCard({ item }: { item: ProviderItem }) {
 
         <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3">
           <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-            <Briefcase className="size-3.5" /> {candidate.experience_annees} an(s)
+            <Briefcase className="size-3.5" /> {t("card.years", { years: candidate.experience_annees })}
           </span>
           <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition-all group-hover:gap-2">
-            Voir <ArrowRight className="size-4" />
+            {t("card.see")} <ArrowRight className="size-4" />
           </span>
         </div>
       </div>

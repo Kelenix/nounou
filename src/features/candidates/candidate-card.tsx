@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { MapPin, Briefcase } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { VerificationBadge } from "@/components/app/verification-badge";
-import { SERVICE_LABELS } from "@/lib/constants";
 import type {
   PublicProfileRow,
   CandidateProfileRow,
@@ -17,8 +17,9 @@ export type CandidateListItem = {
   candidate: Pick<CandidateProfileRow, "services" | "experience_annees" | "temps_plein" | "description">;
 };
 
-export function CandidateCard({ item }: { item: CandidateListItem }) {
+export async function CandidateCard({ item }: { item: CandidateListItem }) {
   const { profile, candidate } = item;
+  const t = await getTranslations();
   return (
     <Link
       href={`/app/candidates/${profile.id}`}
@@ -29,7 +30,7 @@ export function CandidateCard({ item }: { item: CandidateListItem }) {
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <h3 className="font-bold leading-tight">
-              {`${profile.prenom ?? ""} ${profile.nom ?? ""}`.trim() || "Candidate"}
+              {`${profile.prenom ?? ""} ${profile.nom ?? ""}`.trim() || t("roles.candidate")}
             </h3>
           </div>
           <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
@@ -38,8 +39,8 @@ export function CandidateCard({ item }: { item: CandidateListItem }) {
           </p>
           <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
             <Briefcase className="size-3.5" />
-            {candidate.experience_annees} an(s) d&apos;expérience ·{" "}
-            {candidate.temps_plein ? "Temps plein" : "Temps partiel"}
+            {t("nounouDetail.experienceYears", { years: candidate.experience_annees })} ·{" "}
+            {candidate.temps_plein ? t("nounouDetail.fullTime") : t("nounouDetail.partTime")}
           </p>
         </div>
       </div>
@@ -47,7 +48,7 @@ export function CandidateCard({ item }: { item: CandidateListItem }) {
         <div className="mt-3 flex flex-wrap gap-1.5">
           {candidate.services.slice(0, 4).map((s) => (
             <Badge key={s} className="bg-secondary text-foreground">
-              {SERVICE_LABELS[s]}
+              {t(`services.${s}`)}
             </Badge>
           ))}
         </div>

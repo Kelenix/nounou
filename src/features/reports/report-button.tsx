@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Flag } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,14 +13,14 @@ import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
 import type { ReportMotif } from "@/lib/supabase/database.types";
 
-const MOTIFS: { value: ReportMotif; label: string }[] = [
-  { value: "fausse_identite", label: "Fausse identité" },
-  { value: "arnaque", label: "Arnaque" },
-  { value: "harcelement", label: "Harcèlement" },
-  { value: "offre_frauduleuse", label: "Offre frauduleuse" },
-  { value: "comportement", label: "Comportement déplacé" },
-  { value: "conditions_differentes", label: "Conditions différentes de l'annonce" },
-  { value: "autre", label: "Autre" },
+const MOTIF_KEYS: ReportMotif[] = [
+  "fausse_identite",
+  "arnaque",
+  "harcelement",
+  "offre_frauduleuse",
+  "comportement",
+  "conditions_differentes",
+  "autre",
 ];
 
 export function ReportButton({
@@ -32,6 +33,7 @@ export function ReportButton({
   const router = useRouter();
   const supabase = createClient();
   const { toast } = useToast();
+  const t = useTranslations();
   const [open, setOpen] = useState(false);
   const [motif, setMotif] = useState<ReportMotif>("comportement");
   const [description, setDescription] = useState("");
@@ -48,10 +50,10 @@ export function ReportButton({
     });
     setLoading(false);
     if (error) {
-      toast("Signalement impossible. Réessayez.", "error");
+      toast(t("report.failed"), "error");
       return;
     }
-    toast("Signalement envoyé. Merci.", "success");
+    toast(t("report.sent"), "success");
     setOpen(false);
     setDescription("");
     router.refresh();
@@ -60,31 +62,31 @@ export function ReportButton({
   if (!open) {
     return (
       <Button variant="ghost" className="w-full text-muted-foreground" onClick={() => setOpen(true)}>
-        <Flag className="size-4" /> Signaler cet utilisateur
+        <Flag className="size-4" /> {t("report.button")}
       </Button>
     );
   }
 
   return (
     <div className="space-y-3 rounded-2xl border border-destructive/30 bg-card p-4">
-      <p className="text-sm font-semibold text-foreground">Signaler cet utilisateur</p>
+      <p className="text-sm font-semibold text-foreground">{t("report.button")}</p>
       <div className="space-y-1.5">
-        <Label>Motif</Label>
+        <Label>{t("report.motif")}</Label>
         <Select value={motif} onChange={(e) => setMotif(e.target.value as ReportMotif)}>
-          {MOTIFS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+          {MOTIF_KEYS.map((m) => <option key={m} value={m}>{t(`reportMotifs.${m}`)}</option>)}
         </Select>
       </div>
       <Textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        placeholder="Décrivez le problème (optionnel)…"
+        placeholder={t("report.descPlaceholder")}
       />
       <div className="flex gap-2">
         <Button variant="secondary" className="flex-1" onClick={() => setOpen(false)} disabled={loading}>
-          Annuler
+          {t("report.cancel")}
         </Button>
         <Button variant="destructive" className="flex-1" onClick={submit} disabled={loading}>
-          {loading ? <Spinner className="text-destructive-foreground" /> : "Envoyer"}
+          {loading ? <Spinner className="text-destructive-foreground" /> : t("report.send")}
         </Button>
       </div>
     </div>

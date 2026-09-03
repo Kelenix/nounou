@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ export function CatalogFilters() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
+  const t = useTranslations();
 
   function update(key: string, value: string) {
     const next = new URLSearchParams(params.toString());
@@ -32,58 +34,58 @@ export function CatalogFilters() {
   return (
     <div className="space-y-4 rounded-3xl border border-border bg-card p-5 shadow-sm">
       <div className="flex items-center justify-between">
-        <h2 className="font-bold">Filtres</h2>
+        <h2 className="font-bold">{t("filters.title")}</h2>
         {active > 0 && (
           <Button variant="ghost" size="sm" onClick={() => router.replace(pathname)} className="text-muted-foreground">
-            <X className="size-4" /> Effacer
+            <X className="size-4" /> {t("filters.clear")}
           </Button>
         )}
       </div>
 
       <div className="space-y-1.5">
-        <Label>Service</Label>
+        <Label>{t("filters.service")}</Label>
         <Select value={service} onChange={(e) => update("service", e.target.value)}>
-          <option value="">Tous les services</option>
-          {SERVICE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          <option value="">{t("filters.allServices")}</option>
+          {SERVICE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{t(`services.${o.value}`)}</option>)}
         </Select>
       </div>
 
       <div className="space-y-1.5">
-        <Label>Ville</Label>
+        <Label>{t("filters.city")}</Label>
         <Select value={ville} onChange={(e) => update("ville", e.target.value)}>
-          <option value="">Toutes les villes</option>
+          <option value="">{t("filters.allCities")}</option>
           {VILLES_CI.map((v) => <option key={v} value={v}>{v}</option>)}
         </Select>
       </div>
 
       {ville === "Abidjan" && (
         <div className="space-y-1.5">
-          <Label>Commune</Label>
+          <Label>{t("filters.commune")}</Label>
           <Select value={commune} onChange={(e) => update("commune", e.target.value)}>
-            <option value="">Toutes</option>
+            <option value="">{t("filters.all")}</option>
             {COMMUNES_ABIDJAN.map((c) => <option key={c} value={c}>{c}</option>)}
           </Select>
         </div>
       )}
 
       <div className="space-y-1.5">
-        <Label>Budget max (FCFA/mois)</Label>
+        <Label>{t("filters.budgetMax")}</Label>
         <Input
           type="number"
           inputMode="numeric"
           min={0}
           value={salaireMax}
           onChange={(e) => update("salaireMax", e.target.value)}
-          placeholder="Ex. 80000"
+          placeholder={t("filters.budgetPlaceholder")}
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label>Disponibilité</Label>
+        <Label>{t("filters.availability")}</Label>
         <Select value={tempsPlein} onChange={(e) => update("tempsPlein", e.target.value)}>
-          <option value="">Peu importe</option>
-          <option value="true">Temps plein</option>
-          <option value="false">Temps partiel</option>
+          <option value="">{t("filters.any")}</option>
+          <option value="true">{t("filters.fullTime")}</option>
+          <option value="false">{t("filters.partTime")}</option>
         </Select>
       </div>
     </div>

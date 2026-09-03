@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   LayoutDashboard,
   Search,
@@ -18,6 +19,7 @@ import {
 import { Logo } from "@/components/brand/logo";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { SignOutButton } from "@/features/auth/sign-out-button";
 import { cn } from "@/lib/utils";
 import type { ProfileRow } from "@/lib/supabase/database.types";
@@ -26,21 +28,22 @@ type Item = { href: string; label: string; icon: typeof Search; exact?: boolean;
 
 export function AppSidebar({ profile, unread, messagesUnread = 0 }: { profile: ProfileRow; unread: number; messagesUnread?: number }) {
   const pathname = usePathname();
+  const t = useTranslations();
 
   const items: Item[] = [
-    { href: "/app", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
-    { href: "/app/recherche", label: profile.role === "employer" ? "Chercher une nounou" : "Offres", icon: Search },
+    { href: "/app", label: t("appNav.dashboard"), icon: LayoutDashboard, exact: true },
+    { href: "/app/recherche", label: profile.role === "employer" ? t("appNav.searchNanny") : t("appNav.offers"), icon: Search },
     ...(profile.role === "employer"
       ? ([
-          { href: "/app/offres", label: "Mes offres", icon: Briefcase },
-          { href: "/app/favoris", label: "Favoris", icon: Heart },
+          { href: "/app/offres", label: t("appNav.myOffers"), icon: Briefcase },
+          { href: "/app/favoris", label: t("appNav.favorites"), icon: Heart },
         ] as Item[])
       : []),
-    { href: "/app/candidatures", label: profile.role === "employer" ? "Candidatures reçues" : "Mes candidatures", icon: FileText },
-    { href: "/app/messages", label: "Messages", icon: MessageCircle, badge: messagesUnread },
-    { href: "/app/notifications", label: "Notifications", icon: Bell, badge: unread },
-    { href: "/app/profil", label: "Profil", icon: User },
-    { href: "/app/parametres", label: "Paramètres", icon: Settings },
+    { href: "/app/candidatures", label: profile.role === "employer" ? t("appNav.applicationsReceived") : t("appNav.myApplications"), icon: FileText },
+    { href: "/app/messages", label: t("appNav.messages"), icon: MessageCircle, badge: messagesUnread },
+    { href: "/app/notifications", label: t("appNav.notifications"), icon: Bell, badge: unread },
+    { href: "/app/profil", label: t("appNav.profile"), icon: User },
+    { href: "/app/parametres", label: t("appNav.settings"), icon: Settings },
   ];
 
   return (
@@ -53,7 +56,7 @@ export function AppSidebar({ profile, unread, messagesUnread = 0 }: { profile: P
         <div className="px-4 pb-2">
           <Button asChild className="w-full shadow-sm">
             <Link href="/app/offres/nouvelle">
-              <PlusCircle className="size-4" /> Publier une offre
+              <PlusCircle className="size-4" /> {t("appNav.postOffer")}
             </Link>
           </Button>
         </div>
@@ -91,8 +94,11 @@ export function AppSidebar({ profile, unread, messagesUnread = 0 }: { profile: P
           href="/"
           className="mb-3 flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
         >
-          <Globe className="size-5" /> Accueil du site
+          <Globe className="size-5" /> {t("appNav.siteHome")}
         </Link>
+        <div className="mb-3 px-1">
+          <LanguageSwitcher />
+        </div>
         <Link
           href="/app/profil"
           className="mb-3 flex items-center gap-3 rounded-2xl p-2 transition-colors hover:bg-secondary"
@@ -100,10 +106,10 @@ export function AppSidebar({ profile, unread, messagesUnread = 0 }: { profile: P
           <Avatar src={profile.photo_url} nom={profile.nom} prenom={profile.prenom} className="size-10" />
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold">
-              {`${profile.prenom ?? ""} ${profile.nom ?? ""}`.trim() || "Mon profil"}
+              {`${profile.prenom ?? ""} ${profile.nom ?? ""}`.trim() || t("appNav.myProfile")}
             </p>
             <p className="truncate text-xs text-muted-foreground">
-              {profile.role === "employer" ? "Employeur" : "Candidate"}
+              {profile.role === "employer" ? t("roles.employer") : t("roles.candidate")}
             </p>
           </div>
         </Link>

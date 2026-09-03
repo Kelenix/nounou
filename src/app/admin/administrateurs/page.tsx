@@ -1,4 +1,5 @@
 import { UserPlus, ShieldCheck, Lock } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { requireSuperAdmin } from "@/lib/admin";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,11 +10,15 @@ import { StaffPermissions } from "@/features/admin/staff-permissions";
 import { UserActions } from "@/features/admin/user-actions";
 import { formatPhoneCi } from "@/lib/utils";
 
-export const metadata = { title: "Admin — Administrateurs" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("admin.metaAdmins") };
+}
 
 export default async function AdminAdminsPage() {
   const me = await requireSuperAdmin();
   const supabase = await createClient();
+  const t = await getTranslations();
   const { data: admins } = await supabase
     .from("profiles")
     .select("id, prenom, nom, phone, photo_url, is_super_admin, staff_permissions, is_suspended")
@@ -26,9 +31,9 @@ export default async function AdminAdminsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold tracking-tight">Administrateurs</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("admin.adminsTitle")}</h1>
         <p className="text-sm text-muted-foreground">
-          Créez des membres du staff et définissez précisément leurs accès. Vous êtes le Super Admin.
+          {t("admin.adminsSubtitle")}
         </p>
       </div>
 
@@ -38,8 +43,8 @@ export default async function AdminAdminsPage() {
           <div className="flex items-center gap-2">
             <span className="flex size-9 items-center justify-center rounded-xl bg-primary-soft text-primary"><UserPlus className="size-5" /></span>
             <div>
-              <h2 className="font-bold">Ajouter un administrateur</h2>
-              <p className="text-xs text-muted-foreground">Le compte se connecte par téléphone (OTP). Vous lui attribuez ensuite ses permissions.</p>
+              <h2 className="font-bold">{t("admin.addAdmin")}</h2>
+              <p className="text-xs text-muted-foreground">{t("admin.addAdminHint")}</p>
             </div>
           </div>
           <CreateAdminForm />
@@ -48,9 +53,9 @@ export default async function AdminAdminsPage() {
 
       {/* Liste */}
       <div className="space-y-4">
-        <h2 className="font-bold">Comptes administrateurs ({list.length})</h2>
+        <h2 className="font-bold">{t("admin.adminAccounts", { count: list.length })}</h2>
         {list.map((a) => {
-          const name = `${a.prenom ?? ""} ${a.nom ?? ""}`.trim() || "Administrateur";
+          const name = `${a.prenom ?? ""} ${a.nom ?? ""}`.trim() || t("admin.adminFallback");
           return (
             <Card key={a.id}>
               <CardContent className="space-y-4 p-5">
@@ -61,16 +66,16 @@ export default async function AdminAdminsPage() {
                     <p className="truncate text-xs text-muted-foreground">{formatPhoneCi(a.phone)}</p>
                   </div>
                   {a.is_super_admin ? (
-                    <Badge className="bg-amber-100 text-amber-800"><ShieldCheck className="size-3" /> Super Admin</Badge>
+                    <Badge className="bg-amber-100 text-amber-800"><ShieldCheck className="size-3" /> {t("admin.superAdmin")}</Badge>
                   ) : (
-                    <Badge className="bg-primary-soft text-primary">Staff</Badge>
+                    <Badge className="bg-primary-soft text-primary">{t("admin.staff")}</Badge>
                   )}
-                  {a.is_suspended && <Badge className="bg-red-100 text-red-700">Suspendu</Badge>}
+                  {a.is_suspended && <Badge className="bg-red-100 text-red-700">{t("admin.suspended")}</Badge>}
                 </div>
 
                 {a.is_super_admin ? (
                   <p className="inline-flex items-center gap-1.5 rounded-2xl bg-secondary/60 px-3 py-2 text-xs text-muted-foreground">
-                    <Lock className="size-3.5" /> Compte protégé : ne peut être ni modifié, ni suspendu, ni supprimé.
+                    <Lock className="size-3.5" /> {t("admin.protectedAccount")}
                   </p>
                 ) : (
                   <>

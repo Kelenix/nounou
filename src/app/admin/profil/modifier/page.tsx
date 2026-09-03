@@ -1,7 +1,11 @@
+import { getTranslations } from "next-intl/server";
 import { requireRole } from "@/lib/auth";
 import { ProfileEditForm } from "@/features/profiles/profile-edit-form";
 
-export const metadata = { title: "Modifier mon profil" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("profileEdit.title") };
+}
 
 /**
  * Édition du profil d'un administrateur / membre du staff.

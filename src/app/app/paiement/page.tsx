@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Check, Sparkles, CreditCard } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getPricing } from "@/features/settings/queries";
@@ -9,12 +10,16 @@ import { PayForm } from "@/features/payments/pay-form";
 import { formatFcfa } from "@/lib/utils";
 import type { PaymentType } from "@/lib/supabase/database.types";
 
-export const metadata = { title: "Paiement" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("payment.metaTitle") };
+}
 
 export default async function PaiementPage() {
   const profile = await requireProfile();
   const supabase = await createClient();
   const pricing = await getPricing();
+  const t = await getTranslations();
 
   if (profile.role === "candidate") {
     const { data: cand } = await supabase
@@ -22,17 +27,17 @@ export default async function PaiementPage() {
       .select("is_active_paid")
       .eq("user_id", profile.id)
       .maybeSingle();
-    if (cand?.is_active_paid) return <AlreadyDone label="Votre profil est déjà activé." />;
+    if (cand?.is_active_paid) return <AlreadyDone label={t("payment.alreadyActivated")} backLabel={t("payment.backHome")} />;
     return (
       <Checkout
         type="activation_candidate"
-        title="Activer mon profil candidate"
+        title={t("payment.activateTitle")}
         montant={pricing.activationCandidate}
         icon={<Sparkles className="size-6" />}
         features={[
-          "Votre profil devient visible des employeurs",
-          "Candidatures illimitées",
-          "Badge « profil actif »",
+          t("payment.activateFeature1"),
+          t("payment.activateFeature2"),
+          t("payment.activateFeature3"),
         ]}
         phone={profile.phone}
       />
@@ -45,24 +50,24 @@ export default async function PaiementPage() {
       .select("is_premium")
       .eq("user_id", profile.id)
       .maybeSingle();
-    if (emp?.is_premium) return <AlreadyDone label="Votre accès premium est déjà actif." />;
+    if (emp?.is_premium) return <AlreadyDone label={t("payment.alreadyPremium")} backLabel={t("payment.backHome")} />;
     return (
       <Checkout
         type="premium_employeur"
-        title="Passer en Premium"
+        title={t("payment.premiumTitle")}
         montant={pricing.premiumEmployeur}
         icon={<CreditCard className="size-6" />}
         features={[
-          "Recherche avancée de candidates",
-          "Contact direct des candidates",
-          "Mise en avant de vos offres",
+          t("payment.premiumFeature1"),
+          t("payment.premiumFeature2"),
+          t("payment.premiumFeature3"),
         ]}
         phone={profile.phone}
       />
     );
   }
 
-  return <AlreadyDone label="Aucun paiement requis pour ce compte." />;
+  return <AlreadyDone label={t("payment.noPaymentNeeded")} backLabel={t("payment.backHome")} />;
 }
 
 function Checkout({
@@ -105,7 +110,7 @@ function Checkout({
   );
 }
 
-function AlreadyDone({ label }: { label: string }) {
+function AlreadyDone({ label, backLabel }: { label: string; backLabel: string }) {
   return (
     <div className="space-y-4">
       <Card>
@@ -114,7 +119,7 @@ function AlreadyDone({ label }: { label: string }) {
             <Check className="size-7" />
           </span>
           <p className="text-sm text-muted-foreground">{label}</p>
-          <Button asChild><Link href="/app">Retour à l&apos;accueil</Link></Button>
+          <Button asChild><Link href="/app">{backLabel}</Link></Button>
         </CardContent>
       </Card>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Camera } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar } from "@/components/ui/avatar";
@@ -26,6 +27,7 @@ export function AvatarUpload({
 }) {
   const supabase = createClient();
   const { toast } = useToast();
+  const t = useTranslations();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -33,7 +35,7 @@ export function AvatarUpload({
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      toast("Image trop lourde (max 5 Mo)", "error");
+      toast(t("avatar.tooLarge"), "error");
       return;
     }
     setUploading(true);
@@ -44,13 +46,13 @@ export function AvatarUpload({
       .upload(path, file, { upsert: true });
     if (error) {
       setUploading(false);
-      toast("Échec de l'upload de la photo", "error");
+      toast(t("avatar.uploadFailed"), "error");
       return;
     }
     const { data } = supabase.storage.from("avatars").getPublicUrl(path);
     setUploading(false);
     onChange(data.publicUrl);
-    toast("Photo mise à jour", "success");
+    toast(t("avatar.updated"), "success");
   }
 
   return (
@@ -59,7 +61,7 @@ export function AvatarUpload({
         type="button"
         onClick={() => inputRef.current?.click()}
         className="relative"
-        aria-label="Changer la photo"
+        aria-label={t("avatar.change")}
       >
         <Avatar src={value} nom={nom} prenom={prenom} className="size-24" />
         <span className="absolute bottom-0 right-0 flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow">
@@ -73,7 +75,7 @@ export function AvatarUpload({
         className="hidden"
         onChange={handleFile}
       />
-      <span className="text-xs text-muted-foreground">Photo de profil (optionnelle)</span>
+      <span className="text-xs text-muted-foreground">{t("avatar.hint")}</span>
     </div>
   );
 }

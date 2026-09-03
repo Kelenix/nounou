@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { SearchX } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +10,10 @@ import { OfferCard } from "@/features/offers/offer-card";
 import { CandidateCard, type CandidateListItem } from "@/features/candidates/candidate-card";
 import type { ServiceType, PublicProfileRow } from "@/lib/supabase/database.types";
 
-export const metadata = { title: "Rechercher" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("search.metaTitle") };
+}
 
 const PAGE_SIZE = 12;
 type SP = Record<string, string | string[] | undefined>;
@@ -21,6 +25,7 @@ export default async function RecherchePage({
 }) {
   const profile = await requireProfile();
   const supabase = await createClient();
+  const t = await getTranslations();
   const sp = await searchParams;
   const get = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : "");
 
@@ -44,7 +49,7 @@ export default async function RecherchePage({
 
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-extrabold tracking-tight">Trouver une offre</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("search.findOffer")}</h1>
         <Suspense fallback={null}><SearchFilters role="candidate" /></Suspense>
         {offers && offers.length > 0 ? (
           <>
@@ -54,7 +59,7 @@ export default async function RecherchePage({
             <Pagination basePath="/app/recherche" page={page} totalPages={totalPages} params={linkParams} />
           </>
         ) : (
-          <EmptyState label="Aucune offre ne correspond à votre recherche." />
+          <EmptyState label={t("search.noOffers")} />
         )}
       </div>
     );
@@ -114,7 +119,7 @@ export default async function RecherchePage({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-extrabold tracking-tight">Trouver une candidate</h1>
+      <h1 className="text-2xl font-extrabold tracking-tight">{t("search.findCandidate")}</h1>
       <Suspense fallback={null}><SearchFilters role="employer" /></Suspense>
       {items.length > 0 ? (
         <>
@@ -124,7 +129,7 @@ export default async function RecherchePage({
           <Pagination basePath="/app/recherche" page={page} totalPages={totalPages} params={linkParams} />
         </>
       ) : (
-        <EmptyState label="Aucune candidate ne correspond à votre recherche." />
+        <EmptyState label={t("search.noCandidates")} />
       )}
     </div>
   );

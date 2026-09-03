@@ -1,47 +1,46 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Logo } from "@/components/brand/logo";
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const t = await getTranslations();
   return (
     <footer className="border-t border-border bg-background">
       <div className="container grid gap-8 py-10 md:grid-cols-4">
         <div className="space-y-3">
           <Logo />
-          <p className="text-sm text-muted-foreground">
-            La confiance avant tout. Mise en relation entre familles et aides à
-            domicile en Côte d&apos;Ivoire.
-          </p>
+          <p className="text-sm text-muted-foreground">{t("footer.tagline")}</p>
         </div>
         <FooterCol
-          title="Explorer"
+          title={t("footer.explore")}
           links={[
-            { href: "/nounous", label: "Nounous" },
-            { href: "/offres", label: "Offres d'emploi" },
-            { href: "/comment-ca-marche", label: "Comment ça marche" },
-            { href: "/tarifs", label: "Tarifs" },
+            { href: "/nounous", label: t("nav.nounous") },
+            { href: "/offres", label: t("nav.offresEmploi") },
+            { href: "/comment-ca-marche", label: t("nav.howItWorks") },
+            { href: "/tarifs", label: t("nav.pricing") },
           ]}
         />
         <FooterCol
-          title="Entreprise"
+          title={t("footer.company")}
           links={[
-            { href: "/contact", label: "Contact" },
-            { href: "/faq", label: "FAQ" },
-            { href: "/cgu", label: "CGU" },
-            { href: "/confidentialite", label: "Confidentialité" },
+            { href: "/contact", label: t("nav.contact") },
+            { href: "/faq", label: t("nav.faq") },
+            { href: "/cgu", label: t("nav.cgu") },
+            { href: "/confidentialite", label: t("nav.privacy") },
           ]}
         />
         <FooterCol
-          title="Commencer"
+          title={t("footer.start")}
           links={[
-            { href: "/inscription?role=employer", label: "Chercher une nounou" },
-            { href: "/inscription?role=candidate", label: "Devenir nounou" },
-            { href: "/connexion", label: "Se connecter" },
+            { href: "/inscription?role=employer", label: t("footer.findNanny") },
+            { href: "/inscription?role=candidate", label: t("footer.becomeNanny") },
+            { href: "/connexion", label: t("common.login") },
           ]}
         />
       </div>
       <div className="border-t border-border py-4">
         <p className="container text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} J&apos;ai ma nounou — Côte d&apos;Ivoire.
+          {t("footer.rights", { year: new Date().getFullYear() })}
         </p>
       </div>
     </footer>

@@ -40,7 +40,7 @@ export default async function AppLayout({
         </main>
 
         <div className="lg:hidden">
-          <BottomNav />
+          <BottomNav messagesUnread={messagesUnread} />
         </div>
       </div>
     </div>
