@@ -15,7 +15,7 @@ export default async function ContactPage() {
 
       <div className="mt-8 space-y-4">
         <Row icon={<Phone className="size-5" />} label={t("contact.phone")} value="+225 07 00 00 00 00" />
-        <Row icon={<Mail className="size-5" />} label={t("contact.email")} value="contact@jaimanounou.ci" />
+        <Row icon={<Mail className="size-5" />} label={t("contact.email")} value="lionelkelenix@gmail.com" />
         <Row icon={<MapPin className="size-5" />} label={t("contact.address")} value={t("contact.addressValue")} />
       </div>
 

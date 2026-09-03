@@ -4,11 +4,13 @@
 
 ## Snapshot
 
-- **Phase courante** : 6 — Mise en production (phases 0→5 terminées : MVP + P1/P2 + qualité vertes). Reste : déploiement + CI.
-- **Dernière mise à jour** : 2026-09-02
-- **Santé** : 🟢 OK — **build prod vert (42 routes), typecheck vert, lint vert, 9 tests unitaires
-  verts, 12 tests E2E Playwright verts.** Vérifié en local (Docker + navigateur) sur les parcours
-  clés. Protections Super Admin testées en base (trigger + index unique) **et via E2E (API 403)**.
+- **Phase courante** : 6 — Mise en production (phases 0→5 terminées : MVP + P1/P2 + qualité vertes ;
+  **lot de durcissement sécurité S1/S4/S5/S6/S8/S9 appliqué**, CI en place). Reste : branchements
+  paiement/SMS réels + déploiement. **Synthèse claire fait/à-faire : voir `RAPPORT.md`.**
+- **Dernière mise à jour** : 2026-09-03
+- **Santé** : 🟢 OK — **typecheck vert, lint vert, 9 tests unitaires verts, 11 tests E2E Playwright
+  verts (+ setup/teardown, rejoués le 2026-09-03 sur la base locale).** Vérifié en local (Docker +
+  navigateur) sur les parcours clés. Protections Super Admin testées en base (trigger + index unique) **et via E2E (API 403)**.
 - **P1–P2 terminés** : notation mutuelle, messagerie interne, notifications temps réel (Realtime).
 - **Stack** : Next.js 15 (App Router) · TypeScript · Tailwind + shadcn-like · Supabase
   (Postgres + RLS + Auth téléphone/OTP + Storage + Edge/route handlers) · TanStack Query · Zod ·
@@ -61,7 +63,7 @@
 | 3 — Architecture & design   | ✅ fait | schéma + RLS + design system |
 | 4 — Implémentation          | ✅ fait | MVP + marketplace + admin + P1/P2 (notation, messagerie, Realtime). Reste : branchements réels paiement/SMS = tâches manuelles (comptes fournisseurs) |
 | 5 — Qualité                 | ✅ fait | build (42 routes), typecheck, lint, 9 tests unitaires **et 12 tests E2E Playwright** verts |
-| 6 — Mise en production      | ⬜ à faire | déploiement Vercel/VPS + Supabase cloud + CI (GitHub Actions à créer) |
+| 6 — Mise en production      | 🔄 en cours | CI GitHub Actions ✅ en place ; reste : branchements paiement/SMS réels + déploiement Vercel/VPS + Supabase cloud |
 | 7 — Documentation           | ✅ fait | README, PROJECT_STATE, DECISION_LOG, manual-tasks à jour (doc « pro/publiable » optionnelle non faite) |
 | 8 — Maintenance             | ⬜ à faire | passation après mise en prod |
 
@@ -104,6 +106,31 @@
 
 ## Journal de session (le plus récent en haut)
 
+- 2026-09-03 — **Paiement « prêt à recevoir les clés »** : couche multi-fournisseurs derrière
+  `PaymentProvider`. Sélection par moyen (carte → `PAYMENT_CARD_PROVIDER`, Mobile Money →
+  `PAYMENT_MOBILE_PROVIDER` ; mock par défaut). Squelettes **CinetPay / PayDunya / Stripe**
+  (initiation + `parseWebhook` signé, vérif Stripe HMAC précise), **route webhook**
+  `/api/paiement/webhook/[provider]`, helper partagé `confirm.ts` (activation **uniquement** sur
+  webhook, idempotent), moyen **`carte`** ajouté (migration `20260903000006` + enum local), variables
+  d'env documentées dans `.env.example`, formulaire (redirection + téléphone masqué pour la carte).
+  **Vérifié** : typecheck + lint + **build 44 routes** verts. Reste manuel : clés + finalisation par
+  fournisseur (non testable sans compte).
+- 2026-09-03 — **Correctif Realtime (notifications + messagerie)** : le socket ne portait pas le
+  JWT utilisateur avant de rejoindre le canal → la RLS bloquait la livraison (il fallait recharger
+  la page). Ajout de `supabase.realtime.setAuth(session.access_token)` **avant** `.subscribe()`
+  dans `realtime-notifications.tsx` et `realtime-messages.tsx`. Typecheck + lint verts.
+- 2026-09-03 — **Rapport remis à plat** : `RAPPORT.md` reconstruit à partir du code réel (fait ✅ /
+  reste ⬜), clair et scannable (l'ancien mélangeait verdict initial et correctifs → illisible ;
+  il avait aussi été supprimé au dernier commit). **Mentions légales complétées** : identité de
+  l'éditeur (« J'ai ma nounou », entreprise individuelle, en ligne), e-mail `lionelkelenix@gmail.com`
+  (CGU + confidentialité + page Contact), sous-traitants nommés (Supabase, Stripe/Djamo/PayDunya,
+  Hostinger). **Vérifié** : typecheck + lint + 9 tests unitaires verts.
+- 2026-09-03 — **Lot de durcissement sécurité (S1/S4/S5/S6/S8/S9)** suite à la revue de sécurité
+  (cf. `RAPPORT.md` + `DECISION_LOG.md`) : trigger anti-élévation de privilège sur `profiles` (S1),
+  en-têtes HTTP + CSP (S4), rate-limiting signalements + paiement (S5), révélation de téléphone
+  journalisée/plafonnée (S6), bucket `avatars` durci serveur (S8), table `otp_codes` supprimée (S9).
+  S7 conservé et documenté (risque faible accepté). CI GitHub Actions ajoutée. **Reste manuel** :
+  paiement réel (S2) + fournisseur SMS prod (S3).
 - 2026-09-03 — **Interface multilingue FR/EN** (next-intl, mode cookie sans préfixe d'URL,
   défaut FR). Sélecteur de langue (globe FR/EN) dans les 3 en-têtes (public, app, admin).
   **Tout le périmètre traduit** : public (accueil, catalogue, offres, fiches, tarifs, FAQ,

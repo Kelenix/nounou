@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
 import { phoneSchema, otpSchema } from "@/features/auth/schemas";
+import { GoogleButton } from "@/features/auth/google-button";
 import { toE164Ci, formatPhoneCi, cn } from "@/lib/utils";
 import type { UserRole } from "@/lib/supabase/database.types";
 
@@ -150,7 +151,8 @@ export function PhoneAuthForm({ mode }: { mode: "login" | "register" }) {
   }
 
   return (
-    <form onSubmit={sendOtp} className="space-y-4">
+    <div className="space-y-4">
+      <form onSubmit={sendOtp} className="space-y-4">
       <div className="space-y-1.5 text-center">
         <h1 className="text-2xl font-extrabold sm:text-3xl">
           {mode === "register" ? t("auth.registerTitle") : t("auth.welcome")}
@@ -204,7 +206,15 @@ export function PhoneAuthForm({ mode }: { mode: "login" | "register" }) {
           {t("auth.devHint")}
         </p>
       )}
-    </form>
+      </form>
+
+      <div className="flex items-center gap-3">
+        <span className="h-px flex-1 bg-border" />
+        <span className="text-xs text-muted-foreground">{t("auth.or")}</span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
+      <GoogleButton />
+    </div>
   );
 }
 

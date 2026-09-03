@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { CheckCircle2, ShieldCheck } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,21 +13,22 @@ import { PAYMENT_METHOD_LABELS } from "@/lib/constants";
 import { formatFcfa, toE164Ci } from "@/lib/utils";
 import type { PaymentMethod, PaymentType } from "@/lib/supabase/database.types";
 
-const METHODS = Object.entries(PAYMENT_METHOD_LABELS) as [PaymentMethod, string][];
-
 export function PayForm({
   type,
   montant,
   defaultPhone,
+  methods,
 }: {
   type: PaymentType;
   montant: number;
   defaultPhone: string;
+  /** Moyens réellement configurés (clés présentes) à proposer. */
+  methods: PaymentMethod[];
 }) {
   const router = useRouter();
   const { toast } = useToast();
   const t = useTranslations();
-  const [moyen, setMoyen] = useState<PaymentMethod>("orange_money");
+  const [moyen, setMoyen] = useState<PaymentMethod>(methods[0] ?? "orange_money");
   const [phone, setPhone] = useState(defaultPhone.replace(/^\+225/, ""));
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
@@ -35,10 +36,15 @@ export function PayForm({
 
   async function pay() {
     setError(null);
-    const e164 = toE164Ci(phone);
-    if (!e164) {
-      setError(t("payment.invalidNumber"));
-      return;
+    // Le Mobile Money exige un numéro ; la carte (Stripe) non.
+    let e164: string | undefined;
+    if (moyen !== "carte") {
+      const parsed = toE164Ci(phone);
+      if (!parsed) {
+        setError(t("payment.invalidNumber"));
+        return;
+      }
+      e164 = parsed;
     }
     setLoading(true);
     const res = await fetch("/api/paiement", {
@@ -47,6 +53,13 @@ export function PayForm({
       body: JSON.stringify({ type, moyen, phone: e164 }),
     });
     const data = await res.json().catch(() => null);
+
+    // Vrai fournisseur : redirection vers la page de paiement hébergée.
+    if (res.ok && data?.redirectUrl) {
+      window.location.href = data.redirectUrl;
+      return;
+    }
+
     setLoading(false);
     if (!res.ok || data?.status !== "reussi") {
       setError(data?.error ?? t("payment.failed"));
@@ -70,12 +83,22 @@ export function PayForm({
     );
   }
 
+  // Aucun moyen configuré (clés absentes) : ne rien afficher de non fonctionnel.
+  if (methods.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-6 text-center">
+        <Clock className="size-10 text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">{t("payment.unavailable")}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 rounded-2xl border border-border bg-card p-5">
       <div className="space-y-2">
         <Label>{t("payment.method")}</Label>
         <div className="grid grid-cols-2 gap-2">
-          {METHODS.map(([value, label]) => (
+          {methods.map((value) => (
             <button
               key={value}
               type="button"
@@ -86,27 +109,29 @@ export function PayForm({
                   : "border-border bg-background text-muted-foreground"
               }`}
             >
-              {label}
+              {PAYMENT_METHOD_LABELS[value]}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="momo-phone">{t("payment.momoNumber")}</Label>
-        <div className="flex items-center gap-2">
-          <span className="flex h-11 items-center rounded-2xl border border-input bg-secondary px-3 text-sm font-medium text-muted-foreground">
-            +225
-          </span>
-          <Input
-            id="momo-phone"
-            inputMode="numeric"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="07 00 00 00 00"
-          />
+      {moyen !== "carte" && (
+        <div className="space-y-2">
+          <Label htmlFor="momo-phone">{t("payment.momoNumber")}</Label>
+          <div className="flex items-center gap-2">
+            <span className="flex h-11 items-center rounded-2xl border border-input bg-secondary px-3 text-sm font-medium text-muted-foreground">
+              +225
+            </span>
+            <Input
+              id="momo-phone"
+              inputMode="numeric"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="07 00 00 00 00"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 

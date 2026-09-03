@@ -33,6 +33,7 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   mtn_momo: "MTN MoMo",
   moov_money: "Moov Money",
   wave: "Wave",
+  carte: "Carte bancaire",
 };
 
 /** Quelques villes/communes courantes de Côte d'Ivoire (liste non exhaustive). */

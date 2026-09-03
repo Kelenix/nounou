@@ -10,17 +10,28 @@ export function RealtimeMessages({ conversationId }: { conversationId: string })
 
   useEffect(() => {
     const supabase = createClient();
-    const channel = supabase
-      .channel(`messages:${conversationId}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${conversationId}` },
-        () => router.refresh(),
-      )
-      .subscribe();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let cancelled = false;
+
+    // Authentifier le socket Realtime (JWT utilisateur) avant de rejoindre : la RLS
+    // de `messages` filtre par participant, sinon aucun message n'est livré en direct.
+    void (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (cancelled) return;
+      supabase.realtime.setAuth(data.session?.access_token ?? null);
+      channel = supabase
+        .channel(`messages:${conversationId}`)
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${conversationId}` },
+          () => router.refresh(),
+        )
+        .subscribe();
+    })();
 
     return () => {
-      supabase.removeChannel(channel);
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
     };
   }, [conversationId, router]);
 

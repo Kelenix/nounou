@@ -29,7 +29,7 @@ export type ReportMotif =
   | "conditions_differentes"
   | "autre";
 export type ReportStatus = "ouvert" | "en_cours" | "traite" | "rejete";
-export type PaymentMethod = "orange_money" | "mtn_momo" | "moov_money" | "wave";
+export type PaymentMethod = "orange_money" | "mtn_momo" | "moov_money" | "wave" | "carte";
 export type PaymentStatus = "en_attente" | "reussi" | "echoue" | "annule";
 export type PaymentType = "activation_candidate" | "premium_employeur";
 export type RatingContext =
@@ -52,7 +52,7 @@ type Timestamps = { created_at: string; updated_at: string };
 
 export type ProfileRow = {
   id: string;
-  phone: string;
+  phone: string | null;
   phone_verified: boolean;
   role: UserRole | null;
   nom: string | null;

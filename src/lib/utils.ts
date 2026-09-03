@@ -27,7 +27,8 @@ export function toE164Ci(raw: string): string | null {
 
 /** Affiche joliment un numéro CI : +225 07 00 00 00 01.
  *  Accepte le format avec ou sans « + » (GoTrue stocke sans le « + »). */
-export function formatPhoneCi(phone: string): string {
+export function formatPhoneCi(phone: string | null | undefined): string {
+  if (!phone) return "—";
   const local = phone.replace(/^\+?225/, "");
   return `+225 ${local.replace(/(\d{2})(?=\d)/g, "$1 ").trim()}`;
 }

@@ -341,6 +341,9 @@
     "verifyCode": "Verify code",
     "resendCode": "Resend code",
     "devHint": "Dev: numbers 07 00 00 00 01/02/03 · code 123456",
+    "or": "or",
+    "continueWithGoogle": "Continue with Google",
+    "googleError": "Google sign-in failed. Please try again.",
     "errNameRequired": "Please enter your first and last name.",
     "errInvalidNumber": "Invalid number",
     "errSendFailed": "Could not send the code. Check the number.",
@@ -638,7 +641,8 @@
     "method": "Payment method",
     "momoNumber": "Mobile Money number",
     "pay": "Pay {amount}",
-    "secure": "Secure payment"
+    "secure": "Secure payment",
+    "unavailable": "Online payment will be available soon. Please try again later."
   },
   "settings": {
     "metaTitle": "Settings",
@@ -683,6 +687,9 @@
     "backToInfo": "Back to information",
     "nameRequired": "Please enter your first and last name.",
     "cityRequired": "Choose your city.",
+    "phone": "Phone",
+    "phoneRequired": "Please enter a valid phone number.",
+    "phoneTaken": "This number is already used by another account.",
     "error": "An error occurred. Try again.",
     "welcome": "Welcome to J'ai ma nounou!"
   },

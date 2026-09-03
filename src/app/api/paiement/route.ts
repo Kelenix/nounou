@@ -1,14 +1,19 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { getPaymentProvider } from "@/features/payments/provider";
-import { formatFcfa } from "@/lib/utils";
+import {
+  getPaymentProvider,
+  getAvailablePaymentMethods,
+  type InitiatePaymentResult,
+} from "@/features/payments/provider";
+import { applyPaymentSuccess } from "@/features/payments/confirm";
 import type { PaymentType } from "@/lib/supabase/database.types";
 
 const bodySchema = z.object({
   type: z.enum(["activation_candidate", "premium_employeur"]),
-  moyen: z.enum(["orange_money", "mtn_momo", "moov_money", "wave"]),
-  phone: z.string().trim().min(8).max(20),
+  moyen: z.enum(["orange_money", "mtn_momo", "moov_money", "wave", "carte"]),
+  // Le téléphone n'est requis que pour le Mobile Money (pas pour la carte).
+  phone: z.string().trim().min(8).max(20).optional(),
 });
 
 const SETTING_KEY: Record<PaymentType, string> = {
@@ -35,7 +40,19 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Requête invalide" }, { status: 400 });
   }
-  const { type, moyen, phone } = parsed.data;
+  const { type, moyen } = parsed.data;
+  const phone = parsed.data.phone ?? "";
+
+  // Refuse un moyen dont le fournisseur n'est pas configuré (empêche une activation
+  // « gratuite » via le mock en production si les clés sont absentes).
+  if (!getAvailablePaymentMethods().includes(moyen)) {
+    return NextResponse.json({ error: "Moyen de paiement indisponible." }, { status: 503 });
+  }
+
+  // Le Mobile Money exige un numéro ; la carte (Stripe) non.
+  if (moyen !== "carte" && phone.length < 8) {
+    return NextResponse.json({ error: "Numéro Mobile Money requis" }, { status: 400 });
+  }
 
   // Vérifie que le rôle correspond au type de paiement.
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
@@ -70,16 +87,16 @@ export async function POST(request: Request) {
     .maybeSingle();
   const montant = setting ? Number(setting.value) : DEFAULT_PRICE[type];
 
-  // Initiation via le provider (mock en dev).
-  const result = await getPaymentProvider().initiate({
-    userId: user.id,
-    montant,
-    moyen,
-    type,
-    phone,
-  });
+  // Initiation via le fournisseur (mock par défaut ; réel = CinetPay/PayDunya/Stripe).
+  let result: InitiatePaymentResult;
+  try {
+    result = await getPaymentProvider(moyen).initiate({ userId: user.id, montant, moyen, type, phone });
+  } catch (e) {
+    console.error("[paiement] initiation échouée", e);
+    return NextResponse.json({ error: "Paiement indisponible pour le moment." }, { status: 502 });
+  }
 
-  // Enregistre la transaction.
+  // Enregistre la transaction (statut = en_attente pour un vrai fournisseur, reussi pour le mock).
   await admin.from("payments").insert({
     user_id: user.id,
     montant,
@@ -89,19 +106,15 @@ export async function POST(request: Request) {
     statut: result.status,
   });
 
-  // Applique les effets si réussi (simule le callback de l'agrégateur).
+  // Vrai fournisseur : rediriger vers la page de paiement hébergée. L'activation se fera
+  // au retour du webhook signé (jamais sur la seule réponse d'initiation).
+  if (result.redirectUrl) {
+    return NextResponse.json({ status: result.status, redirectUrl: result.redirectUrl });
+  }
+
+  // Mock : paiement immédiatement réussi → appliquer les effets tout de suite.
   if (result.status === "reussi") {
-    if (type === "activation_candidate") {
-      await admin.from("candidate_profiles").update({ is_active_paid: true }).eq("user_id", user.id);
-    } else {
-      await admin.from("employer_profiles").update({ is_premium: true }).eq("user_id", user.id);
-    }
-    await admin.from("notifications").insert({
-      user_id: user.id,
-      type: "paiement_confirme",
-      titre: "Paiement confirmé",
-      message: `Votre paiement de ${formatFcfa(montant)} a été confirmé.`,
-    });
+    await applyPaymentSuccess(admin, user.id, type, montant);
   }
 
   return NextResponse.json({ status: result.status, montant });

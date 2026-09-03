@@ -21,6 +21,14 @@
 - [ ] **VPS Hostinger** : accès SSH, domaine, configuration Nginx (un guide sera fourni).
 - [ ] **Nom de domaine** + certificat TLS (Let's Encrypt via Nginx).
 
+## Connexion Google (OAuth)
+- [ ] **Identifiant OAuth Google** : créer un client OAuth « Web » sur
+  https://console.cloud.google.com/apis/credentials. Autoriser l'URI de redirection :
+  - local : `http://127.0.0.1:54331/auth/v1/callback`
+  - prod  : `https://<projet>.supabase.co/auth/v1/callback`
+  Renseigner `GOOGLE_CLIENT_ID` / `GOOGLE_SECRET` dans `.env.local` (local) et, en prod, dans
+  **Supabase > Auth > Providers > Google** (+ `Site URL` et `Redirect URLs` corrects).
+
 ## Nécessaire pour brancher le réel (différé — mock en dev pour l'instant)
 - [ ] **Fournisseur SMS OTP** (ex. LeTexto, agrégateur local, Twilio) : compte + clés API.
 - [ ] **Agrégateur Mobile Money** (ex. CinetPay, PayDunya, Djamo) : compte marchand + clés +

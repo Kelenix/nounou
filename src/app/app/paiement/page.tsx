@@ -7,8 +7,9 @@ import { getPricing } from "@/features/settings/queries";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PayForm } from "@/features/payments/pay-form";
+import { getAvailablePaymentMethods } from "@/features/payments/provider";
 import { formatFcfa } from "@/lib/utils";
-import type { PaymentType } from "@/lib/supabase/database.types";
+import type { PaymentMethod, PaymentType } from "@/lib/supabase/database.types";
 
 export async function generateMetadata() {
   const t = await getTranslations();
@@ -19,6 +20,7 @@ export default async function PaiementPage() {
   const profile = await requireProfile();
   const supabase = await createClient();
   const pricing = await getPricing();
+  const methods = getAvailablePaymentMethods();
   const t = await getTranslations();
 
   if (profile.role === "candidate") {
@@ -39,7 +41,8 @@ export default async function PaiementPage() {
           t("payment.activateFeature2"),
           t("payment.activateFeature3"),
         ]}
-        phone={profile.phone}
+        phone={profile.phone ?? ""}
+        methods={methods}
       />
     );
   }
@@ -62,7 +65,8 @@ export default async function PaiementPage() {
           t("payment.premiumFeature2"),
           t("payment.premiumFeature3"),
         ]}
-        phone={profile.phone}
+        phone={profile.phone ?? ""}
+        methods={methods}
       />
     );
   }
@@ -77,6 +81,7 @@ function Checkout({
   icon,
   features,
   phone,
+  methods,
 }: {
   type: PaymentType;
   title: string;
@@ -84,6 +89,7 @@ function Checkout({
   icon: React.ReactNode;
   features: string[];
   phone: string;
+  methods: PaymentMethod[];
 }) {
   return (
     <div className="space-y-5">
@@ -105,7 +111,7 @@ function Checkout({
         </CardContent>
       </Card>
 
-      <PayForm type={type} montant={montant} defaultPhone={phone} />
+      <PayForm type={type} montant={montant} defaultPhone={phone} methods={methods} />
     </div>
   );
 }

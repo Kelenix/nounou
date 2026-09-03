@@ -34,8 +34,9 @@ function CguFr() {
       <section>
         <h2>2. Éditeur</h2>
         <p>
-          Le service est édité par [Raison sociale], [forme juridique], siège à [adresse],
-          Côte d&apos;Ivoire. Contact : <a href="mailto:[email de contact]">[email de contact]</a>.
+          Le service est édité par « J&apos;ai ma nounou », entreprise individuelle exploitée en
+          Côte d&apos;Ivoire et exerçant en ligne. Contact :{" "}
+          <a href="mailto:lionelkelenix@gmail.com">lionelkelenix@gmail.com</a>.
         </p>
       </section>
 
@@ -142,8 +143,9 @@ function CguEn() {
       <section>
         <h2>2. Publisher</h2>
         <p>
-          The service is published by [Company name], [legal form], headquartered at [address],
-          Côte d&apos;Ivoire. Contact: <a href="mailto:[contact email]">[contact email]</a>.
+          The service is published by &quot;J&apos;ai ma nounou&quot;, a sole proprietorship operating
+          online in Côte d&apos;Ivoire. Contact:{" "}
+          <a href="mailto:lionelkelenix@gmail.com">lionelkelenix@gmail.com</a>.
         </p>
       </section>
 

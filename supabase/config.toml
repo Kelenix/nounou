@@ -66,5 +66,14 @@ auth_token = "dev-local-dummy-token"
 2250700000098 = "123456"
 2250700000099 = "123456"
 
+# --- Authentification Google (OAuth) ---
+# Renseignez GOOGLE_CLIENT_ID / GOOGLE_SECRET dans .env.local (local) ou dans le
+# tableau de bord Supabase (Auth > Providers > Google) en production.
+[auth.external.google]
+enabled = true
+client_id = "env(GOOGLE_CLIENT_ID)"
+secret = "env(GOOGLE_SECRET)"
+skip_nonce_check = true
+
 [edge_runtime]
 enabled = true

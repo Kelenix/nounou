@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Search, Briefcase, ArrowRight } from "lucide-react";
+import { Search, Briefcase, ArrowRight, Phone } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,8 @@ import { useToast } from "@/components/ui/toast";
 import { Logo } from "@/components/brand/logo";
 import { AvatarUpload } from "@/features/profiles/avatar-upload";
 import { VILLES_CI, COMMUNES_ABIDJAN } from "@/lib/constants";
+import { phoneSchema } from "@/features/auth/schemas";
+import { toE164Ci, formatPhoneCi } from "@/lib/utils";
 import type { ProfileRow, UserRole } from "@/lib/supabase/database.types";
 
 export function OnboardingForm({ profile }: { profile: ProfileRow }) {
@@ -28,6 +30,8 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
   const [nom, setNom] = useState(profile.nom ?? "");
   const [ville, setVille] = useState(profile.ville ?? "Abidjan");
   const [commune, setCommune] = useState(profile.commune ?? "");
+  const hasPhone = !!profile.phone;
+  const [phoneInput, setPhoneInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,6 +46,11 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
       setError(t("onboarding.cityRequired"));
       return;
     }
+    // Le téléphone est requis (contact) : demandé ici si le compte n'en a pas (Google).
+    if (!hasPhone && !toE164Ci(phoneSchema.safeParse({ phone: phoneInput }).success ? phoneInput : "")) {
+      setError(t("onboarding.phoneRequired"));
+      return;
+    }
     setStep("role");
   }
 
@@ -49,21 +58,23 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
     setLoading(true);
     setError(null);
 
-    const { error: upErr } = await supabase
-      .from("profiles")
-      .update({
-        prenom: prenom.trim(),
-        nom: nom.trim(),
-        ville,
-        commune: commune.trim() || null,
-        photo_url: photoUrl,
-        role,
-      })
-      .eq("id", profile.id);
+    const patch: Partial<ProfileRow> = {
+      prenom: prenom.trim(),
+      nom: nom.trim(),
+      ville,
+      commune: commune.trim() || null,
+      photo_url: photoUrl,
+      role,
+    };
+    // Renseigne le téléphone la première fois (compte Google sans numéro).
+    if (!hasPhone) patch.phone = toE164Ci(phoneInput) ?? null;
+
+    const { error: upErr } = await supabase.from("profiles").update(patch).eq("id", profile.id);
 
     if (upErr) {
       setLoading(false);
-      setError(t("onboarding.error"));
+      // 23505 = violation d'unicité (numéro déjà utilisé par un autre compte).
+      setError(upErr.code === "23505" ? t("onboarding.phoneTaken") : t("onboarding.error"));
       return;
     }
 
@@ -140,6 +151,27 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
                     value={commune}
                     onChange={(e) => setCommune(e.target.value)}
                   />
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone">{t("onboarding.phone")}</Label>
+                {hasPhone ? (
+                  <Input id="phone" value={formatPhoneCi(profile.phone)} disabled />
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-10 items-center rounded-2xl border border-input bg-secondary px-3 text-sm font-medium text-muted-foreground">
+                      +225
+                    </span>
+                    <Input
+                      id="phone"
+                      inputMode="numeric"
+                      autoComplete="tel"
+                      placeholder="07 00 00 00 00"
+                      value={phoneInput}
+                      onChange={(e) => setPhoneInput(e.target.value)}
+                    />
+                  </div>
                 )}
               </div>
 

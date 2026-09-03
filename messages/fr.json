@@ -341,6 +341,9 @@
     "verifyCode": "Vérifier le code",
     "resendCode": "Renvoyer le code",
     "devHint": "Dev : numéros 07 00 00 00 01/02/03 · code 123456",
+    "or": "ou",
+    "continueWithGoogle": "Continuer avec Google",
+    "googleError": "La connexion Google a échoué. Réessayez.",
     "errNameRequired": "Renseignez votre prénom et votre nom.",
     "errInvalidNumber": "Numéro invalide",
     "errSendFailed": "Impossible d'envoyer le code. Vérifiez le numéro.",
@@ -638,7 +641,8 @@
     "method": "Moyen de paiement",
     "momoNumber": "Numéro Mobile Money",
     "pay": "Payer {amount}",
-    "secure": "Paiement sécurisé"
+    "secure": "Paiement sécurisé",
+    "unavailable": "Le paiement en ligne sera bientôt disponible. Réessayez plus tard."
   },
   "settings": {
     "metaTitle": "Paramètres",
@@ -683,6 +687,9 @@
     "backToInfo": "Revenir aux informations",
     "nameRequired": "Renseignez votre nom et prénom.",
     "cityRequired": "Choisissez votre ville.",
+    "phone": "Téléphone",
+    "phoneRequired": "Renseignez un numéro de téléphone valide.",
+    "phoneTaken": "Ce numéro est déjà utilisé par un autre compte.",
     "error": "Une erreur est survenue. Réessayez.",
     "welcome": "Bienvenue sur J'ai ma nounou !"
   },

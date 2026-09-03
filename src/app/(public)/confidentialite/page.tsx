@@ -23,9 +23,9 @@ function PrivacyFr() {
       <section>
         <h2>1. Responsable du traitement</h2>
         <p>
-          Le responsable du traitement des données est [Raison sociale de l&apos;éditeur],
-          [forme juridique], dont le siège est situé à [adresse], Côte d&apos;Ivoire.
-          Contact : <a href="mailto:[email de contact]">[email de contact]</a>.
+          Le responsable du traitement des données est « J&apos;ai ma nounou », entreprise
+          individuelle exploitée en Côte d&apos;Ivoire et exerçant en ligne.
+          Contact : <a href="mailto:lionelkelenix@gmail.com">lionelkelenix@gmail.com</a>.
         </p>
       </section>
 
@@ -72,10 +72,9 @@ function PrivacyFr() {
         <h2>5. Sous-traitants et hébergement</h2>
         <p>Nous faisons appel à des prestataires techniques agissant pour notre compte :</p>
         <ul>
-          <li><strong>Supabase</strong> — hébergement de la base de données, authentification et stockage des photos.</li>
-          <li><strong>[Fournisseur SMS]</strong> — envoi des codes de vérification (OTP).</li>
-          <li><strong>[Agrégateur Mobile Money]</strong> — traitement des paiements.</li>
-          <li><strong>[Hébergeur / CDN]</strong> — diffusion de l&apos;application.</li>
+          <li><strong>Supabase</strong> — hébergement de la base de données, authentification (envoi des codes de vérification OTP par SMS) et stockage des photos.</li>
+          <li><strong>Stripe, Djamo, PayDunya</strong> — prestataires de paiement (Mobile Money et carte bancaire).</li>
+          <li><strong>Hostinger</strong> — hébergement et diffusion de l&apos;application (VPS, serveur Nginx).</li>
         </ul>
         <p>Nous ne vendons pas vos données et ne les partageons pas à des fins publicitaires.</p>
       </section>
@@ -106,7 +105,7 @@ function PrivacyFr() {
           à la protection des données à caractère personnel) et aux principes du RGPD, vous disposez
           des droits d&apos;accès, de rectification, d&apos;effacement, de limitation et
           d&apos;opposition. Vous pouvez supprimer vous-même votre compte depuis vos paramètres, ou
-          nous écrire à <a href="mailto:[email de contact]">[email de contact]</a>. Vous pouvez
+          nous écrire à <a href="mailto:lionelkelenix@gmail.com">lionelkelenix@gmail.com</a>. Vous pouvez
           également saisir l&apos;autorité de protection des données compétente (ARTCI).
         </p>
       </section>
@@ -142,8 +141,8 @@ function PrivacyEn() {
       <section>
         <h2>1. Data controller</h2>
         <p>
-          The data controller is [Publisher company name], [legal form], headquartered at [address],
-          Côte d&apos;Ivoire. Contact: <a href="mailto:[contact email]">[contact email]</a>.
+          The data controller is &quot;J&apos;ai ma nounou&quot;, a sole proprietorship operating
+          online in Côte d&apos;Ivoire. Contact: <a href="mailto:lionelkelenix@gmail.com">lionelkelenix@gmail.com</a>.
         </p>
       </section>
 
@@ -190,10 +189,9 @@ function PrivacyEn() {
         <h2>5. Processors and hosting</h2>
         <p>We rely on technical providers acting on our behalf:</p>
         <ul>
-          <li><strong>Supabase</strong> — database hosting, authentication and photo storage.</li>
-          <li><strong>[SMS provider]</strong> — sending verification codes (OTP).</li>
-          <li><strong>[Mobile Money aggregator]</strong> — payment processing.</li>
-          <li><strong>[Host / CDN]</strong> — application delivery.</li>
+          <li><strong>Supabase</strong> — database hosting, authentication (sending OTP verification codes by SMS) and photo storage.</li>
+          <li><strong>Stripe, Djamo, PayDunya</strong> — payment providers (Mobile Money and bank card).</li>
+          <li><strong>Hostinger</strong> — application hosting and delivery (VPS, Nginx server).</li>
         </ul>
         <p>We do not sell your data and do not share it for advertising purposes.</p>
       </section>
@@ -223,7 +221,7 @@ function PrivacyEn() {
           In accordance with the regulations applicable in Côte d&apos;Ivoire (Law No. 2013-450 on the
           protection of personal data) and the principles of the GDPR, you have the rights of access,
           rectification, erasure, restriction and objection. You can delete your own account from your
-          settings, or write to us at <a href="mailto:[contact email]">[contact email]</a>. You may
+          settings, or write to us at <a href="mailto:lionelkelenix@gmail.com">lionelkelenix@gmail.com</a>. You may
           also refer the matter to the competent data protection authority (ARTCI).
         </p>
       </section>
