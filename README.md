@@ -14,8 +14,8 @@ Nounou · ménage · cuisine · garde d'enfants · aide aux personnes âgées �
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20RLS-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8?logo=pwa&logoColor=white)](#-progressive-web-app-pwa)
-[![Tests](https://img.shields.io/badge/tests-unit%20%2B%20e2e-brightgreen)](#-tests)
+[![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8?logo=pwa&logoColor=white)](#progressive-web-app-pwa)
+[![Tests](https://img.shields.io/badge/tests-unit%20%2B%20e2e-brightgreen)](#tests)
 
 </div>
 
@@ -23,33 +23,33 @@ Nounou · ménage · cuisine · garde d'enfants · aide aux personnes âgées �
 
 ## Table des matières
 
-- [Présentation](#-présentation)
-- [Fonctionnalités](#-fonctionnalités)
-- [Stack technique](#-stack-technique)
-- [Rôles &amp; hiérarchie d'administration](#-rôles--hiérarchie-dadministration)
-- [Prise en main](#-prise-en-main)
-- [Comptes de démonstration](#-comptes-de-démonstration-dev)
-- [Scripts npm](#-scripts-npm)
-- [Tests](#-tests)
-- [Structure du projet](#-structure-du-projet)
-- [Sécurité](#-sécurité)
-- [Progressive Web App (PWA)](#-progressive-web-app-pwa)
-- [Déploiement](#-déploiement)
-- [État du projet &amp; feuille de route](#-état-du-projet--feuille-de-route)
-- [Tâches manuelles restantes](#-tâches-manuelles-restantes)
-- [Documentation du dépôt](#-documentation-du-dépôt)
+- [Présentation](#présentation)
+- [Fonctionnalités](#fonctionnalités)
+- [Stack technique](#stack-technique)
+- [Rôles et hiérarchie d'administration](#rôles-et-hiérarchie-dadministration)
+- [Prise en main](#prise-en-main)
+- [Comptes de démonstration](#comptes-de-démonstration-dev)
+- [Scripts npm](#scripts-npm)
+- [Tests](#tests)
+- [Structure du projet](#structure-du-projet)
+- [Sécurité](#sécurité)
+- [Progressive Web App (PWA)](#progressive-web-app-pwa)
+- [Déploiement](#déploiement)
+- [État du projet et feuille de route](#état-du-projet-et-feuille-de-route)
+- [Tâches manuelles restantes](#tâches-manuelles-restantes)
+- [Documentation du dépôt](#documentation-du-dépôt)
 
 ---
 
-## 🎯 Présentation
+## Présentation
 
 **J'ai ma nounou** est une application web **mobile-first** (PWA) pensée pour le marché ivoirien.
 Elle fonctionne comme une marketplace : on **consulte librement** les profils de nounous et les
 offres, et on ne se connecte **que pour agir** (contacter, postuler, mettre en favori). L'expérience
 est entièrement en **français**, avec la monnaie **FCFA** et les numéros au format **+225**.
 
-Le fil conducteur du produit est **la confiance** : profils vérifiés, notation mutuelle, messagerie
-interne, contact protégé, et un back-office d'administration doté d'une hiérarchie de rôles avec
+Le fil conducteur du produit est **la confiance** : profils détaillés, notation mutuelle, messagerie
+interne, contact protégé, et un back-office d'administration doté d'une hiérarchie de rôles avec des
 protections appliquées **au niveau de la base de données**.
 
 | | |
@@ -61,7 +61,7 @@ protections appliquées **au niveau de la base de données**.
 
 ---
 
-## ✨ Fonctionnalités
+## Fonctionnalités
 
 ### Pour tout le monde (sans compte)
 - **Accueil marketplace** : recherche, services présentés avec descriptions, catalogue de nounous.
@@ -87,7 +87,7 @@ protections appliquées **au niveau de la base de données**.
 
 ---
 
-## 🧱 Stack technique
+## Stack technique
 
 | Domaine | Choix |
 |---|---|
@@ -103,7 +103,7 @@ protections appliquées **au niveau de la base de données**.
 
 ---
 
-## 🛡️ Rôles &amp; hiérarchie d'administration
+## Rôles et hiérarchie d'administration
 
 Trois niveaux, avec des protections **appliquées côté base** (non contournables via l'interface **ou** une requête API directe) :
 
@@ -131,19 +131,19 @@ Super Admin  ──▶  Staff / Admin  ──▶  Utilisateur
 | Traçabilité des actions sensibles | Table `admin_audit_log` (lecture admins, écriture `service_role` uniquement) → page `/admin/journal` |
 | Le staff ne voit pas le Super Admin | Filtrage serveur des listes et du comptage |
 
-Pages associées : `/admin/administrateurs` (gestion des admins &amp; permissions) et `/admin/journal`
+Pages associées : `/admin/administrateurs` (gestion des admins et permissions) et `/admin/journal`
 (audit), réservées au Super Admin.
 
 ---
 
-## 🚀 Prise en main
+## Prise en main
 
 ### Prérequis
 - **Node.js 20+** et **npm**
 - **Docker Desktop** (pour la stack Supabase locale)
 - Supabase CLI — utilisé via `npx supabase …` (aucune installation globale requise)
 
-### Installation &amp; lancement
+### Installation et lancement
 
 ```bash
 # 1) Dépendances
@@ -163,12 +163,12 @@ cp .env.example .env.local
 npm run dev            # http://localhost:3000
 ```
 
-> **Ports locaux (décalés** pour cohabiter avec d'autres stacks Supabase**)** : API `54331` ·
+> **Ports locaux** (décalés pour cohabiter avec d'autres stacks Supabase) : API `54331` ·
 > DB `54332` · Studio `54333` · Mailpit `54334`. Voir [`supabase/config.toml`](supabase/config.toml).
 
 ---
 
-## 👤 Comptes de démonstration (dev)
+## Comptes de démonstration (dev)
 
 | Rôle | Numéro | Code OTP |
 |---|---|---|
@@ -186,7 +186,7 @@ npm run dev            # http://localhost:3000
 
 ---
 
-## 📜 Scripts npm
+## Scripts npm
 
 | Script | Rôle |
 |---|---|
@@ -204,7 +204,7 @@ npm run dev            # http://localhost:3000
 
 ---
 
-## 🧪 Tests
+## Tests
 
 **Qualité vérifiée :** build de production vert (42 routes), `typecheck` vert, `lint` vert,
 **tests unitaires** (Vitest) et **tests E2E** (Playwright) verts.
@@ -237,7 +237,7 @@ promu comme staff de test est restauré en fin de suite (`e2e/global.teardown.ts
 
 ---
 
-## 🗂️ Structure du projet
+## Structure du projet
 
 ```
 src/
@@ -268,7 +268,7 @@ e2e/                   # Tests Playwright (setup d'auth, teardown, specs)
 
 ---
 
-## 🔒 Sécurité
+## Sécurité
 
 - **RLS activée sur toutes les tables** : chaque utilisateur n'accède qu'à ses données ; l'admin a
   un accès élargi via `public.is_admin()`. La vue `public_profiles` expose les champs publics **sans
@@ -284,7 +284,7 @@ e2e/                   # Tests Playwright (setup d'auth, teardown, specs)
 
 ---
 
-## 📱 Progressive Web App (PWA)
+## Progressive Web App (PWA)
 
 L'application est **installable** (écran d'accueil mobile) grâce à un `manifest` et un service worker
 écrit à la main (mise en cache basique / offline). Le design est **mobile-first** : sidebar sur
@@ -292,7 +292,7 @@ desktop, bottom-nav sur mobile.
 
 ---
 
-## ☁️ Déploiement
+## Déploiement
 
 **Vercel (recommandé)**
 1. Connecter le dépôt à Vercel.
@@ -308,7 +308,7 @@ desktop, bottom-nav sur mobile.
 
 ---
 
-## 📈 État du projet &amp; feuille de route
+## État du projet et feuille de route
 
 Phases 0 → 5 **terminées** (produit MVP + marketplace + P1/P2 + qualité). Reste la **mise en
 production**. Suivi détaillé dans [`PROJECT_STATE.md`](PROJECT_STATE.md).
@@ -324,7 +324,7 @@ production**. Suivi détaillé dans [`PROJECT_STATE.md`](PROJECT_STATE.md).
 
 ---
 
-## 🧰 Tâches manuelles restantes
+## Tâches manuelles restantes
 
 Voir [`docs/manual-tasks.md`](docs/manual-tasks.md) : fournisseur **SMS** et **agrégateur Mobile
 Money** réels (mock en dev, `PaymentProvider` swappable), hébergement (Vercel ou VPS), relecture
@@ -332,7 +332,7 @@ juridique des CGU / confidentialité.
 
 ---
 
-## 📚 Documentation du dépôt
+## Documentation du dépôt
 
 | Fichier | Contenu |
 |---|---|
@@ -346,6 +346,6 @@ juridique des CGU / confidentialité.
 
 <div align="center">
 
- **J'ai ma nounou**.
+<sub>Fait pour les familles ivoiriennes — <strong>J'ai ma nounou</strong>.</sub>
 
 </div>
