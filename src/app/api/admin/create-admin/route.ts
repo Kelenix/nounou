@@ -30,56 +30,64 @@ export async function POST(request: Request) {
   }
   const { prenom, nom } = parsed.data;
   const email = parsed.data.email.toLowerCase();
-  const phone = parsed.data.phone;
+
+  // Validation email (si fourni).
+  if (email && !z.string().email().safeParse(email).success) {
+    return NextResponse.json({ error: "Email invalide" }, { status: 400 });
+  }
+
+  // Validation téléphone (si fourni). `e164` = +225… ; `storedPhone` = sans le « + ».
+  let e164: string | null = null;
+  let storedPhone: string | null = null;
+  if (parsed.data.phone) {
+    e164 = toE164Ci(parsed.data.phone);
+    if (!e164) {
+      return NextResponse.json({ error: "Numéro invalide (10 chiffres)" }, { status: 400 });
+    }
+    storedPhone = e164.replace(/^\+/, ""); // GoTrue stocke sans le « + »
+  }
 
   const admin = createAdminClient();
-  const adminFields = { role: "admin" as const, prenom, nom, verification_level: "verified" as const };
+  // Le téléphone est écrit explicitement pour qu'il apparaisse même via la voie email.
+  const adminFields = {
+    role: "admin" as const,
+    prenom,
+    nom,
+    verification_level: "verified" as const,
+    ...(storedPhone ? { phone: storedPhone } : {}),
+  };
 
-  // ---------- Voie EMAIL : l'admin se connectera avec Google (même email) ----------
+  // --- Compte déjà existant ? On le retrouve par email (Google) puis par téléphone. ---
+  let targetId: string | null = null;
   if (email) {
-    if (!z.string().email().safeParse(email).success) {
-      return NextResponse.json({ error: "Email invalide" }, { status: 400 });
-    }
-
-    // Un compte existe déjà avec cet email ? → on le promeut administrateur.
-    const { data: existingId } = await admin.rpc("admin_user_id_by_email", { p_email: email });
-    if (existingId) {
-      await admin.from("profiles").update(adminFields).eq("id", existingId);
-      await logAudit(me, "create_admin", { targetId: existingId, targetName: `${prenom} ${nom}`, details: { promoted: true, via: "email" } });
-      return NextResponse.json({ ok: true, promoted: true });
-    }
-
-    // Sinon on pré-crée le compte (email confirmé) : à sa 1ʳᵉ connexion Google
-    // avec ce même email, Supabase relie l'identité et il arrive déjà admin.
-    const { data: created, error } = await admin.auth.admin.createUser({ email, email_confirm: true });
-    if (error || !created?.user) {
-      return NextResponse.json({ error: "Création impossible (email déjà utilisé ?)" }, { status: 500 });
-    }
-    await admin.from("profiles").update(adminFields).eq("id", created.user.id);
-    await logAudit(me, "create_admin", { targetId: created.user.id, targetName: `${prenom} ${nom}`, details: { created: true, via: "email" } });
-    return NextResponse.json({ ok: true, created: true });
+    const { data } = await admin.rpc("admin_user_id_by_email", { p_email: email });
+    targetId = data ?? null;
+  }
+  if (!targetId && storedPhone) {
+    const { data } = await admin.from("profiles").select("id").eq("phone", storedPhone).maybeSingle();
+    targetId = data?.id ?? null;
   }
 
-  // ---------- Voie TÉLÉPHONE : connexion par OTP SMS ----------
-  const e164 = toE164Ci(phone); // +225XXXXXXXXXX
-  if (!e164) {
-    return NextResponse.json({ error: "Numéro invalide (10 chiffres)" }, { status: 400 });
-  }
-  const stored = e164.replace(/^\+/, ""); // GoTrue stocke sans le « + »
-
-  const { data: existing } = await admin.from("profiles").select("id").eq("phone", stored).maybeSingle();
-  if (existing) {
-    await admin.from("profiles").update(adminFields).eq("id", existing.id);
-    await logAudit(me, "create_admin", { targetId: existing.id, targetName: `${prenom} ${nom}`, details: { promoted: true, via: "phone" } });
+  if (targetId) {
+    const { error } = await admin.from("profiles").update(adminFields).eq("id", targetId);
+    if (error) {
+      const msg = error.code === "23505" ? "Ce numéro est déjà utilisé par un autre compte." : "Promotion impossible.";
+      return NextResponse.json({ error: msg }, { status: 400 });
+    }
+    await logAudit(me, "create_admin", { targetId, targetName: `${prenom} ${nom}`, details: { promoted: true } });
     return NextResponse.json({ ok: true, promoted: true });
   }
 
-  const { data: created, error } = await admin.auth.admin.createUser({ phone: e164, phone_confirm: true });
+  // --- Sinon on crée le compte (email confirmé et/ou téléphone confirmé). ---
+  const { data: created, error } = await admin.auth.admin.createUser({
+    ...(email ? { email, email_confirm: true } : {}),
+    ...(e164 ? { phone: e164, phone_confirm: true } : {}),
+  });
   if (error || !created?.user) {
-    return NextResponse.json({ error: "Création impossible (numéro déjà utilisé ?)" }, { status: 500 });
+    return NextResponse.json({ error: "Création impossible (email ou numéro déjà utilisé ?)" }, { status: 500 });
   }
   await admin.from("profiles").update(adminFields).eq("id", created.user.id);
-  await logAudit(me, "create_admin", { targetId: created.user.id, targetName: `${prenom} ${nom}`, details: { created: true, via: "phone" } });
+  await logAudit(me, "create_admin", { targetId: created.user.id, targetName: `${prenom} ${nom}`, details: { created: true } });
 
   return NextResponse.json({ ok: true, created: true });
 }
