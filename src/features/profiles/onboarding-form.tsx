@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Search, Briefcase, ArrowRight, Phone } from "lucide-react";
+import { Search, Briefcase, ArrowRight, ArrowLeft, Phone } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,13 +91,10 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-secondary">
-      <div className="container flex flex-1 flex-col py-8">
-        <div className="mb-6 flex justify-center">
-          <Logo />
-        </div>
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-secondary px-4 py-10">
+      <Logo />
 
-        <div className="mx-auto w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
           {step === "infos" ? (
             <form onSubmit={goToRole} className="space-y-5">
               <div className="text-center">
@@ -217,14 +214,13 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
               <button
                 type="button"
                 onClick={() => setStep("infos")}
-                className="w-full text-center text-sm text-muted-foreground"
+                className="inline-flex w-full items-center justify-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
-                {t("onboarding.backToInfo")}
+                <ArrowLeft className="size-4" /> {t("onboarding.backToInfo")}
               </button>
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 }
