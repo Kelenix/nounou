@@ -21,12 +21,14 @@ export async function GET(request: Request) {
   const origin = `${proto}://${host}`;
 
   if (!code) {
+    console.error("[auth/callback] Aucun code reçu. Paramètres:", Object.fromEntries(url.searchParams));
     return NextResponse.redirect(new URL("/connexion?error=oauth", origin));
   }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
+    console.error("[auth/callback] Échec de l'échange du code:", error.status, error.message);
     return NextResponse.redirect(new URL("/connexion?error=oauth", origin));
   }
 
