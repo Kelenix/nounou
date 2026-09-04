@@ -106,6 +106,19 @@
 
 ## Journal de session (le plus récent en haut)
 
+- 2026-09-04 — **Préparation du déploiement VPS (Docker) + login Google opérationnel.**
+  Login Google branché et vérifié en local (Supabase local + console Google). Correctif base :
+  fonction de garde `profiles_guard_self_update` réalignée sur la migration (autorise la 1ʳᵉ
+  saisie du téléphone à l'onboarding) — débloque le choix de rôle. **Scaffolding de déploiement**
+  ajouté : `next.config` en `output: "standalone"`, `sharp` installé (optimisation images
+  auto-hébergée), `Dockerfile` multi-étapes + `.dockerignore`, `deploy/deploy.sh` (build+run en
+  une commande, port `127.0.0.1:3002`), `deploy/nginx/jaimanounou.com.conf` (reverse proxy),
+  `.env.production.example`, `.gitignore` durci (`.env.production`). Runbook complet :
+  `docs/deploiement-vps.md`. **Build prod vérifié vert (44 routes).** Cible : app sur VPS Hostinger,
+  base sur Supabase Cloud `lssqjjqszhwqetcifdpu`, domaine `jaimanounou.com`, **lancement Google-only**
+  (SMS différé). Reste manuel (toi) : push migrations cloud, config Auth Google cloud, DNS, exécution
+  sur le VPS (blocs A→E du runbook).
+
 - 2026-09-03 — **Paiement « prêt à recevoir les clés »** : couche multi-fournisseurs derrière
   `PaymentProvider`. Sélection par moyen (carte → `PAYMENT_CARD_PROVIDER`, Mobile Money →
   `PAYMENT_MOBILE_PROVIDER` ; mock par défaut). Squelettes **CinetPay / PayDunya / Stripe**

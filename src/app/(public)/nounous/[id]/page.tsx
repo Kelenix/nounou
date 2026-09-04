@@ -50,20 +50,40 @@ export default async function PublicProviderPage({
           </div>
 
           {/* Infos principales */}
-          <CardContent className="flex flex-col justify-center p-6">
-            <h1 className="text-2xl font-extrabold">{name}</h1>
-            <p className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground">
-              <MapPin className="size-4" />
-              {[profile.commune, profile.ville].filter(Boolean).join(", ") || t("card.country")}
-            </p>
-            <div className="mt-3 flex flex-wrap items-center gap-3">
+          <CardContent className="flex flex-col justify-center gap-4 p-6">
+            <div>
+              <h1 className="text-2xl font-extrabold">{name}</h1>
+              <p className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground">
+                <MapPin className="size-4" />
+                {[profile.commune, profile.ville].filter(Boolean).join(", ") || t("card.country")}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
               <RatingStars value={rating.average} count={rating.count} size="md" />
               <VerificationBadge level={profile.verification_level} />
             </div>
+
+            {/* Faits clés en pastilles pour équilibrer le panneau */}
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-medium text-foreground">
+                <Briefcase className="size-3.5 text-primary" />
+                {t("nounouDetail.experienceYears", { years: candidate.experience_annees })}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-medium text-foreground">
+                <Clock className="size-3.5 text-primary" />
+                {candidate.disponibilite || (candidate.temps_plein ? t("nounouDetail.fullTime") : t("nounouDetail.partTime"))}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-medium text-foreground">
+                <CalendarDays className="size-3.5 text-primary" />
+                {t("nounouDetail.memberSince", { year: new Date(createdAt).getFullYear() })}
+              </span>
+            </div>
+
             {candidate.salaire_souhaite != null && (
-              <div className="mt-4">
+              <div className="flex items-baseline gap-1.5 rounded-2xl border border-primary/20 bg-primary-soft/40 px-4 py-3">
                 <span className="text-2xl font-extrabold text-primary">{formatFcfa(candidate.salaire_souhaite)}</span>
-                <span className="text-sm text-muted-foreground">{t("nounouDetail.perMonth")}</span>
+                <span className="text-sm font-medium text-muted-foreground">{t("nounouDetail.perMonth")}</span>
               </div>
             )}
           </CardContent>
@@ -95,12 +115,6 @@ export default async function PublicProviderPage({
               </div>
             </div>
           )}
-
-          <div className="flex flex-wrap gap-x-6 gap-y-2 border-t border-border/60 pt-3 text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5"><Briefcase className="size-4 text-primary" /> {t("nounouDetail.experienceYears", { years: candidate.experience_annees })}</span>
-            <span className="inline-flex items-center gap-1.5"><Clock className="size-4 text-primary" /> {candidate.disponibilite || (candidate.temps_plein ? t("nounouDetail.fullTime") : t("nounouDetail.partTime"))}</span>
-            <span className="inline-flex items-center gap-1.5"><CalendarDays className="size-4 text-primary" /> {t("nounouDetail.memberSince", { year: new Date(createdAt).getFullYear() })}</span>
-          </div>
 
           {candidate.description && (
             <div>

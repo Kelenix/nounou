@@ -22,12 +22,23 @@
 - [ ] **Nom de domaine** + certificat TLS (Let's Encrypt via Nginx).
 
 ## Connexion Google (OAuth)
-- [ ] **Identifiant OAuth Google** : créer un client OAuth « Web » sur
-  https://console.cloud.google.com/apis/credentials. Autoriser l'URI de redirection :
+- [x] **Identifiant OAuth Google (local)** : client OAuth « Web » créé. `GOOGLE_CLIENT_ID` /
+  `GOOGLE_SECRET` renseignés dans `.env.local`. Supabase local vérifié : provider Google actif,
+  redirection vers Google OK.
+- [ ] **Dans la console Google**, s'assurer que ces **URI de redirection autorisés** sont bien
+  enregistrés (sinon erreur `redirect_uri_mismatch`) :
   - local : `http://127.0.0.1:54331/auth/v1/callback`
-  - prod  : `https://<projet>.supabase.co/auth/v1/callback`
-  Renseigner `GOOGLE_CLIENT_ID` / `GOOGLE_SECRET` dans `.env.local` (local) et, en prod, dans
-  **Supabase > Auth > Providers > Google** (+ `Site URL` et `Redirect URLs` corrects).
+  - prod  : `https://lssqjjqszhwqetcifdpu.supabase.co/auth/v1/callback`
+  Et ces **origines JavaScript** : `http://localhost:3000`, `https://jaimanounou.com`,
+  `https://www.jaimanounou.com`.
+- [ ] **Prod (le jour du déploiement)** — dans le tableau de bord Supabase Cloud du projet
+  `lssqjjqszhwqetcifdpu` :
+  - Auth → Providers → Google : activer + coller `Client ID` / `Client Secret`.
+  - Auth → URL Configuration : Site URL = `https://jaimanounou.com` ;
+    Redirect URLs = `https://jaimanounou.com/auth/callback` (+ variante `www`).
+  - `.env` de prod de l'app : `NEXT_PUBLIC_APP_URL=https://jaimanounou.com`,
+    `NEXT_PUBLIC_SUPABASE_URL=https://lssqjjqszhwqetcifdpu.supabase.co` (les clés Google ne
+    vont PAS dans le `.env` de l'app en prod — c'est Supabase qui gère Google).
 
 ## Nécessaire pour brancher le réel (différé — mock en dev pour l'instant)
 - [ ] **Fournisseur SMS OTP** (ex. LeTexto, agrégateur local, Twilio) : compte + clés API.

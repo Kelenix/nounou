@@ -36,6 +36,9 @@ const securityHeaders = [
 
 const nextConfig = {
   reactStrictMode: true,
+  // Sortie autonome : produit `.next/standalone` (serveur Node minimal) pour un
+  // conteneur Docker léger en production (déploiement VPS).
+  output: "standalone",
   images: {
     // Supabase Storage sert les photos ; autoriser l'hôte du projet.
     remotePatterns: [
