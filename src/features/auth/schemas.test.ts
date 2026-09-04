@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { phoneSchema, otpSchema } from "@/features/auth/schemas";
+import { phoneSchema, emailSchema, passwordSchema } from "@/features/auth/schemas";
 
 describe("phoneSchema", () => {
   it("accepte 10 chiffres avec ou sans espaces", () => {
@@ -12,10 +12,21 @@ describe("phoneSchema", () => {
   });
 });
 
-describe("otpSchema", () => {
-  it("accepte exactement 6 chiffres", () => {
-    expect(otpSchema.safeParse({ code: "123456" }).success).toBe(true);
-    expect(otpSchema.safeParse({ code: "12345" }).success).toBe(false);
-    expect(otpSchema.safeParse({ code: "abcdef" }).success).toBe(false);
+describe("emailSchema", () => {
+  it("accepte un email valide et normalise en minuscules", () => {
+    const parsed = emailSchema.safeParse({ email: "Contact@Exemple.CI" });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) expect(parsed.data.email).toBe("contact@exemple.ci");
+  });
+
+  it("rejette un email invalide", () => {
+    expect(emailSchema.safeParse({ email: "pas-un-email" }).success).toBe(false);
+  });
+});
+
+describe("passwordSchema", () => {
+  it("exige au moins 8 caractères", () => {
+    expect(passwordSchema.safeParse({ password: "12345678" }).success).toBe(true);
+    expect(passwordSchema.safeParse({ password: "court" }).success).toBe(false);
   });
 });

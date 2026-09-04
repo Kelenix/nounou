@@ -11,9 +11,14 @@ export const phoneSchema = z.object({
     }),
 });
 
-export const otpSchema = z.object({
-  code: z.string().trim().regex(/^\d{6}$/u, "Le code contient 6 chiffres"),
+export const emailSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Adresse email invalide"),
+});
+
+export const passwordSchema = z.object({
+  password: z.string().min(8, "8 caractères minimum"),
 });
 
 export type PhoneInput = z.infer<typeof phoneSchema>;
-export type OtpInput = z.infer<typeof otpSchema>;
+export type EmailInput = z.infer<typeof emailSchema>;
+export type PasswordInput = z.infer<typeof passwordSchema>;

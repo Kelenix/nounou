@@ -67,7 +67,7 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
       role,
     };
     // Renseigne le téléphone la première fois (compte Google sans numéro).
-    if (!hasPhone) patch.phone = toE164Ci(phoneInput) ?? null;
+    if (!hasPhone) patch.phone = toE164Ci(phoneInput)?.replace(/^\+/, "") ?? null;
 
     const { error: upErr } = await supabase.from("profiles").update(patch).eq("id", profile.id);
 
