@@ -15,7 +15,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # --- Dépendances (couche cache) ---
 FROM base AS deps
 COPY package.json package-lock.json ./
-RUN npm ci
+# npm install (et non `npm ci`) : tolère les petites différences de lockfile entre
+# plateformes (ex. binaires natifs de `sharp`) lors du build Linux.
+RUN npm install
 
 # --- Build ---
 FROM base AS builder

@@ -14,14 +14,20 @@ export async function GET(request: Request) {
   const redirectParam = url.searchParams.get("redirect");
   const safeRedirect = redirectParam && redirectParam.startsWith("/") ? redirectParam : "/app";
 
+  // Derrière un reverse proxy (Nginx), `url.origin` peut valoir l'adresse interne
+  // (0.0.0.0:3000). On reconstruit l'origine publique depuis les en-têtes du proxy.
+  const proto = request.headers.get("x-forwarded-proto") ?? url.protocol.replace(":", "");
+  const host = request.headers.get("host") ?? url.host;
+  const origin = `${proto}://${host}`;
+
   if (!code) {
-    return NextResponse.redirect(new URL("/connexion?error=oauth", url.origin));
+    return NextResponse.redirect(new URL("/connexion?error=oauth", origin));
   }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
-    return NextResponse.redirect(new URL("/connexion?error=oauth", url.origin));
+    return NextResponse.redirect(new URL("/connexion?error=oauth", origin));
   }
 
   const {
@@ -41,5 +47,5 @@ export async function GET(request: Request) {
   if (!profile?.role) dest = "/onboarding";
   else if (profile.role === "admin") dest = "/admin";
 
-  return NextResponse.redirect(new URL(dest, url.origin));
+  return NextResponse.redirect(new URL(dest, origin));
 }

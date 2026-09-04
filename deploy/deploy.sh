@@ -26,7 +26,7 @@ echo "♻️  Redémarrage du conteneur…"
 docker stop jaimanounou 2>/dev/null || true
 docker rm jaimanounou 2>/dev/null || true
 docker run -d --name jaimanounou --restart unless-stopped \
-  -p 127.0.0.1:3002:3000 \
+  -p 127.0.0.1:3003:3000 \
   --env-file .env.production \
   jaimanounou:latest
 
