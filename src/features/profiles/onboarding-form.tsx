@@ -94,7 +94,7 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-secondary px-4 py-10">
       <Logo />
 
-      <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
+      <div className="w-full max-w-xl rounded-2xl border border-border bg-card p-8 shadow-sm sm:p-10">
           {step === "infos" ? (
             <form onSubmit={goToRole} className="space-y-5">
               <div className="text-center">
@@ -179,24 +179,24 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
               </Button>
             </form>
           ) : (
-            <div className="space-y-5">
+            <div className="space-y-6">
               <div className="text-center">
-                <h1 className="text-xl font-extrabold">{t("onboarding.whatLooking")}</h1>
-                <p className="text-sm text-muted-foreground">
+                <h1 className="text-2xl font-extrabold sm:text-3xl">{t("onboarding.whatLooking")}</h1>
+                <p className="mt-1 text-base text-muted-foreground">
                   {t("onboarding.completeLater")}
                 </p>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <RoleCard
-                  icon={<Search className="size-6" />}
+                  icon={<Search className="size-7" />}
                   title={t("onboarding.candidateTitle")}
                   subtitle={t("onboarding.candidateSub")}
                   onClick={() => chooseRole("candidate")}
                   disabled={loading}
                 />
                 <RoleCard
-                  icon={<Briefcase className="size-6" />}
+                  icon={<Briefcase className="size-7" />}
                   title={t("onboarding.employerTitle")}
                   subtitle={t("onboarding.employerSub")}
                   onClick={() => chooseRole("employer")}
@@ -214,9 +214,9 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
               <button
                 type="button"
                 onClick={() => setStep("infos")}
-                className="inline-flex w-full items-center justify-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className="inline-flex w-full items-center justify-center gap-2 text-base font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
-                <ArrowLeft className="size-4" /> {t("onboarding.backToInfo")}
+                <ArrowLeft className="size-5" /> {t("onboarding.backToInfo")}
               </button>
             </div>
           )}
@@ -243,16 +243,16 @@ function RoleCard({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex w-full items-center gap-4 rounded-2xl border border-border bg-background p-4 text-left transition-colors hover:border-primary hover:bg-primary-soft/40 disabled:opacity-50"
+      className="flex w-full items-center gap-5 rounded-2xl border border-border bg-background p-5 text-left transition-colors hover:border-primary hover:bg-primary-soft/40 disabled:opacity-50 sm:p-6"
     >
-      <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary">
+      <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary">
         {icon}
       </span>
       <span className="flex-1">
-        <span className="block font-bold">{title}</span>
-        <span className="block text-sm text-muted-foreground">{subtitle}</span>
+        <span className="block text-lg font-bold">{title}</span>
+        <span className="block text-base text-muted-foreground">{subtitle}</span>
       </span>
-      <ArrowRight className="size-5 text-muted-foreground" />
+      <ArrowRight className="size-6 text-muted-foreground" />
     </button>
   );
 }
