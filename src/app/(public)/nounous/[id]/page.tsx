@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MapPin, Briefcase, Clock, Sparkles, MessageCircle, LogIn, ArrowLeft, CalendarDays } from "lucide-react";
+import { MapPin, Briefcase, Clock, Sparkles, MessageCircle, LogIn, ArrowLeft, CalendarDays, Cake } from "lucide-react";
 import { getPublicProvider } from "@/features/catalog/queries";
 import { ProviderPhoto } from "@/features/catalog/provider-photo";
 import { getCurrentProfile } from "@/lib/auth";
@@ -66,6 +66,12 @@ export default async function PublicProviderPage({
 
             {/* Faits clés en pastilles pour équilibrer le panneau */}
             <div className="flex flex-wrap gap-2">
+              {profile.age != null && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-medium text-foreground">
+                  <Cake className="size-3.5 text-primary" />
+                  {t("card.age", { age: profile.age })}
+                </span>
+              )}
               <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-medium text-foreground">
                 <Briefcase className="size-3.5 text-primary" />
                 {t("nounouDetail.experienceYears", { years: candidate.experience_annees })}

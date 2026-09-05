@@ -16,6 +16,7 @@ import { ServicePicker } from "@/components/ui/service-picker";
 import { useToast } from "@/components/ui/toast";
 import { AvatarUpload } from "@/features/profiles/avatar-upload";
 import { VILLES_CI, COMMUNES_ABIDJAN } from "@/lib/constants";
+import { ageFromDob } from "@/lib/utils";
 import type {
   ProfileRow,
   CandidateProfileRow,
@@ -46,6 +47,8 @@ export function ProfileEditForm({
   const [nom, setNom] = useState(profile.nom ?? "");
   const [ville, setVille] = useState(profile.ville ?? "Abidjan");
   const [commune, setCommune] = useState(profile.commune ?? "");
+  const [dob, setDob] = useState(profile.date_naissance ?? "");
+  const maxDob = new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().slice(0, 10);
 
   // Candidate
   const [services, setServices] = useState<ServiceType[]>(candidate?.services ?? []);
@@ -80,6 +83,10 @@ export function ProfileEditForm({
       setError(t("profileEdit.nameRequired"));
       return;
     }
+    if (dob && (ageFromDob(dob) ?? 0) < 18) {
+      setError(t("profileEdit.ageRequired"));
+      return;
+    }
     setLoading(true);
 
     const { error: pErr } = await supabase
@@ -90,6 +97,7 @@ export function ProfileEditForm({
         ville,
         commune: commune.trim() || null,
         photo_url: photoUrl,
+        date_naissance: dob || null,
       })
       .eq("id", profile.id);
 
@@ -160,6 +168,10 @@ export function ProfileEditForm({
         ) : (
           <Input value={commune} onChange={(e) => setCommune(e.target.value)} placeholder={t("profileEdit.communePlaceholder")} />
         )}
+      </Field>
+
+      <Field label={t("profileEdit.dob")}>
+        <Input type="date" max={maxDob} value={dob} onChange={(e) => setDob(e.target.value)} />
       </Field>
 
       {profile.role === "candidate" && (

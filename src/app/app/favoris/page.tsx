@@ -28,7 +28,7 @@ export default async function FavorisPage() {
   if (ids.length > 0) {
     const { data: profs } = await supabase
       .from("public_profiles")
-      .select("id, nom, prenom, photo_url, ville, commune, verification_level")
+      .select("id, nom, prenom, photo_url, ville, commune, verification_level, age")
       .in("id", ids);
     const { data: cands } = await supabase
       .from("candidate_profiles")

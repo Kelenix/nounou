@@ -272,6 +272,7 @@
     "verified": "Verified",
     "perMonth": "/month",
     "country": "Côte d'Ivoire",
+    "age": "{age} yrs",
     "years": "{years, plural, one {# year} other {# years}}",
     "see": "View"
   },
@@ -367,7 +368,10 @@
     "errSignUp": "Sign-up failed. Please try again.",
     "errEmailInUse": "An account already exists with this email.",
     "errPhoneTaken": "This number is already used by another account.",
-    "checkEmail": "Account created! Check your email to activate it."
+    "checkEmail": "Account created! Check your email to activate it.",
+    "dob": "Date of birth",
+    "dobHint": "You must be at least 18 years old.",
+    "errAge": "You must be at least 18 years old."
   },
   "legal": {
     "updated": "Last updated",
@@ -706,6 +710,9 @@
     "cityRequired": "Choose your city.",
     "phone": "Phone",
     "phoneRequired": "Please enter a valid phone number.",
+    "dob": "Date of birth",
+    "dobHint": "You must be at least 18 years old.",
+    "ageRequired": "You must be at least 18 years old.",
     "phoneTaken": "This number is already used by another account.",
     "error": "An error occurred. Try again.",
     "welcome": "Welcome to J'ai ma nounou!"
@@ -726,6 +733,8 @@
     "communeQuartier": "District / neighborhood",
     "select": "Select…",
     "communePlaceholder": "District or neighborhood",
+    "dob": "Date of birth",
+    "ageRequired": "Minimum age is 18.",
     "candidateInfo": "Candidate information",
     "servicesOffered": "Services offered",
     "experienceYears": "Experience (years)",

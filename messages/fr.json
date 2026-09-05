@@ -272,6 +272,7 @@
     "verified": "Vérifié",
     "perMonth": "/mois",
     "country": "Côte d'Ivoire",
+    "age": "{age} ans",
     "years": "{years, plural, one {# an} other {# ans}}",
     "see": "Voir"
   },
@@ -367,7 +368,10 @@
     "errSignUp": "Inscription impossible. Réessayez.",
     "errEmailInUse": "Un compte existe déjà avec cet email.",
     "errPhoneTaken": "Ce numéro est déjà utilisé par un autre compte.",
-    "checkEmail": "Compte créé ! Vérifiez votre email pour l'activer."
+    "checkEmail": "Compte créé ! Vérifiez votre email pour l'activer.",
+    "dob": "Date de naissance",
+    "dobHint": "Vous devez avoir au moins 18 ans.",
+    "errAge": "Vous devez avoir au moins 18 ans."
   },
   "legal": {
     "updated": "Dernière mise à jour",
@@ -706,6 +710,9 @@
     "cityRequired": "Choisissez votre ville.",
     "phone": "Téléphone",
     "phoneRequired": "Renseignez un numéro de téléphone valide.",
+    "dob": "Date de naissance",
+    "dobHint": "Vous devez avoir au moins 18 ans.",
+    "ageRequired": "Vous devez avoir au moins 18 ans.",
     "phoneTaken": "Ce numéro est déjà utilisé par un autre compte.",
     "error": "Une erreur est survenue. Réessayez.",
     "welcome": "Bienvenue sur J'ai ma nounou !"
@@ -726,6 +733,8 @@
     "communeQuartier": "Commune / quartier",
     "select": "Sélectionner…",
     "communePlaceholder": "Commune ou quartier",
+    "dob": "Date de naissance",
+    "ageRequired": "L'âge minimum est 18 ans.",
     "candidateInfo": "Informations candidate",
     "servicesOffered": "Services proposés",
     "experienceYears": "Expérience (années)",

@@ -55,6 +55,7 @@ export async function ProviderCard({ item }: { item: ProviderItem }) {
         <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
           <MapPin className="size-3.5" />
           {[profile.commune, profile.ville].filter(Boolean).join(", ") || t("card.country")}
+          {profile.age != null && ` · ${t("card.age", { age: profile.age })}`}
         </p>
 
         <div className="mt-3 flex flex-wrap gap-1.5">

@@ -15,7 +15,7 @@ import { Logo } from "@/components/brand/logo";
 import { AvatarUpload } from "@/features/profiles/avatar-upload";
 import { VILLES_CI, COMMUNES_ABIDJAN } from "@/lib/constants";
 import { phoneSchema } from "@/features/auth/schemas";
-import { toE164Ci, formatPhoneCi } from "@/lib/utils";
+import { toE164Ci, formatPhoneCi, ageFromDob } from "@/lib/utils";
 import type { ProfileRow, UserRole } from "@/lib/supabase/database.types";
 
 export function OnboardingForm({ profile }: { profile: ProfileRow }) {
@@ -32,8 +32,12 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
   const [commune, setCommune] = useState(profile.commune ?? "");
   const hasPhone = !!profile.phone;
   const [phoneInput, setPhoneInput] = useState("");
+  const [dob, setDob] = useState(profile.date_naissance ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Date maximale = il y a 18 ans.
+  const maxDob = new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().slice(0, 10);
 
   function goToRole(e: React.FormEvent) {
     e.preventDefault();
@@ -49,6 +53,11 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
     // Le téléphone est requis (contact) : demandé ici si le compte n'en a pas (Google).
     if (!hasPhone && !toE164Ci(phoneSchema.safeParse({ phone: phoneInput }).success ? phoneInput : "")) {
       setError(t("onboarding.phoneRequired"));
+      return;
+    }
+    const age = ageFromDob(dob);
+    if (age === null || age < 18) {
+      setError(t("onboarding.ageRequired"));
       return;
     }
     setStep("role");
@@ -68,6 +77,7 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
     };
     // Renseigne le téléphone la première fois (compte Google sans numéro).
     if (!hasPhone) patch.phone = toE164Ci(phoneInput)?.replace(/^\+/, "") ?? null;
+    patch.date_naissance = dob || null;
 
     const { error: upErr } = await supabase.from("profiles").update(patch).eq("id", profile.id);
 
@@ -170,6 +180,12 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
                     />
                   </div>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="dob">{t("onboarding.dob")}</Label>
+                <Input id="dob" type="date" max={maxDob} value={dob} onChange={(e) => setDob(e.target.value)} />
+                <p className="text-xs text-muted-foreground">{t("onboarding.dobHint")}</p>
               </div>
 
               {error && <p className="text-sm text-destructive">{error}</p>}

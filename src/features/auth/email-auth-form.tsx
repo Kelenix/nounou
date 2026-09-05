@@ -12,7 +12,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
 import { emailSchema, passwordSchema, phoneSchema } from "@/features/auth/schemas";
 import { GoogleButton } from "@/features/auth/google-button";
-import { toE164Ci, cn } from "@/lib/utils";
+import { toE164Ci, cn, ageFromDob } from "@/lib/utils";
 import type { UserRole } from "@/lib/supabase/database.types";
 
 /** Connexion / inscription par email + mot de passe (+ Google). */
@@ -31,8 +31,12 @@ export function EmailAuthForm({ mode }: { mode: "login" | "register" }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phoneInput, setPhoneInput] = useState("");
+  const [dob, setDob] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Date maximale = il y a 18 ans (les nounous sont des adultes).
+  const maxDob = new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().slice(0, 10);
 
   function destForRole(r?: string | null) {
     if (!r) return "/onboarding";
@@ -84,6 +88,11 @@ export function EmailAuthForm({ mode }: { mode: "login" | "register" }) {
       setError(t("auth.errInvalidNumber"));
       return;
     }
+    const age = ageFromDob(dob);
+    if (age === null || age < 18) {
+      setError(t("auth.errAge"));
+      return;
+    }
 
     setLoading(true);
     const { data, error: err } = await supabase.auth.signUp({ email: normalizedEmail, password });
@@ -100,7 +109,7 @@ export function EmailAuthForm({ mode }: { mode: "login" | "register" }) {
     }
     const { error: upErr } = await supabase
       .from("profiles")
-      .update({ prenom: prenom.trim(), nom: nom.trim(), role, phone: e164.replace(/^\+/, "") })
+      .update({ prenom: prenom.trim(), nom: nom.trim(), role, phone: e164.replace(/^\+/, ""), date_naissance: dob })
       .eq("id", data.user.id);
     if (upErr) {
       setLoading(false);
@@ -176,6 +185,14 @@ export function EmailAuthForm({ mode }: { mode: "login" | "register" }) {
                 <Input id="phone" inputMode="numeric" autoComplete="tel" placeholder={t("auth.phonePlaceholder")} className="h-12 pl-11 text-base" value={phoneInput} onChange={(e) => setPhoneInput(e.target.value)} />
               </div>
             </div>
+          </div>
+        )}
+
+        {mode === "register" && (
+          <div className="space-y-2">
+            <Label htmlFor="dob" className="text-base">{t("auth.dob")}</Label>
+            <Input id="dob" type="date" max={maxDob} className="h-12 text-base" value={dob} onChange={(e) => setDob(e.target.value)} />
+            <p className="text-xs text-muted-foreground">{t("auth.dobHint")}</p>
           </div>
         )}
 

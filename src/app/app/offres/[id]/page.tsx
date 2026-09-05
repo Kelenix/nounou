@@ -77,7 +77,7 @@ export default async function OfferDetailPage({
     if (ids.length > 0) {
       const { data: cands } = await supabase
         .from("public_profiles")
-        .select("id, nom, prenom, photo_url, ville, commune, role, verification_level, is_active, is_suspended, created_at")
+        .select("id, nom, prenom, photo_url, ville, commune, role, verification_level, is_active, is_suspended, created_at, age")
         .in("id", ids);
       for (const c of cands ?? []) candidatesById.set(c.id, c);
     }

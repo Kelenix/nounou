@@ -33,7 +33,7 @@ export default async function CandidateDetailPage({
 
   const { data: profile } = await supabase
     .from("public_profiles")
-    .select("id, nom, prenom, photo_url, ville, commune, verification_level, role, is_suspended, created_at")
+    .select("id, nom, prenom, photo_url, ville, commune, verification_level, role, is_suspended, created_at, age")
     .eq("id", id)
     .maybeSingle();
   if (!profile || profile.role !== "candidate") notFound();
@@ -115,6 +115,7 @@ export default async function CandidateDetailPage({
             <h1 className="text-xl font-extrabold">{name}</h1>
             <p className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground">
               <MapPin className="size-4" />{[profile.commune, profile.ville].filter(Boolean).join(", ") || "—"}
+              {profile.age != null && ` · ${t("card.age", { age: profile.age })}`}
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <RatingStars value={rating.average} count={rating.count} size="md" />
