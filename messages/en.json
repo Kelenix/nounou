@@ -16,9 +16,33 @@
     "admin": "Admin"
   },
   "verification": {
-    "phone": "Phone verified",
+    "phone": "Registered",
     "identity": "Identity verified",
     "verified": "Verified profile"
+  },
+  "identity": {
+    "sectionTitle": "Identity verification",
+    "explain": "Upload an ID document (national ID, passport). An administrator reviews it, then your profile shows the “Identity verified” badge.",
+    "upload": "Upload my ID",
+    "replace": "Replace document",
+    "pending": "Document under review.",
+    "verified": "Identity verified ✓",
+    "uploaded": "Document sent. Awaiting review.",
+    "uploadFailed": "Upload failed. Please try again.",
+    "tooLarge": "File too large (max 5 MB)."
+  },
+  "verifications": {
+    "metaTitle": "Identity verifications",
+    "title": "Identity verifications",
+    "subtitle": "Review the ID documents uploaded by nannies.",
+    "empty": "No documents awaiting review.",
+    "candidate": "Candidate",
+    "viewDoc": "View document",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approved": "Identity approved.",
+    "rejected": "Document rejected.",
+    "actionFailed": "Action failed. Please try again."
   },
   "rating": {
     "noRating": "No rating yet",
@@ -192,6 +216,7 @@
   "adminNav": {
     "dashboard": "Dashboard",
     "users": "Users",
+    "verifications": "Verifications",
     "offers": "Offers",
     "reports": "Reports",
     "settings": "Settings",

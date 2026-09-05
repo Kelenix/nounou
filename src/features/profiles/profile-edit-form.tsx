@@ -15,6 +15,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { ServicePicker } from "@/components/ui/service-picker";
 import { useToast } from "@/components/ui/toast";
 import { AvatarUpload } from "@/features/profiles/avatar-upload";
+import { IdentityDocUpload } from "@/features/profiles/identity-doc-upload";
 import { VILLES_CI, COMMUNES_ABIDJAN } from "@/lib/constants";
 import { ageFromDob } from "@/lib/utils";
 import type {
@@ -201,6 +202,11 @@ export function ProfileEditForm({
           <Field label={t("profileEdit.aboutMe")}>
             <Textarea value={candDesc} onChange={(e) => setCandDesc(e.target.value)} placeholder={t("profileEdit.aboutMePlaceholder")} />
           </Field>
+
+          <div className="border-t border-border/60 pt-4">
+            <h3 className="mb-2 font-semibold">{t("identity.sectionTitle")}</h3>
+            <IdentityDocUpload userId={profile.id} hasDoc={!!profile.identity_doc_path} level={profile.verification_level} />
+          </div>
         </div>
       )}
 

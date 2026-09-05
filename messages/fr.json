@@ -16,9 +16,33 @@
     "admin": "Admin"
   },
   "verification": {
-    "phone": "Téléphone vérifié",
+    "phone": "Inscrit",
     "identity": "Identité vérifiée",
     "verified": "Profil vérifié"
+  },
+  "identity": {
+    "sectionTitle": "Vérification d'identité",
+    "explain": "Téléversez une pièce d'identité (CNI, passeport). Un administrateur la vérifie, puis votre profil affiche le badge « Identité vérifiée ».",
+    "upload": "Téléverser ma pièce",
+    "replace": "Remplacer le document",
+    "pending": "Document en cours de vérification.",
+    "verified": "Identité vérifiée ✓",
+    "uploaded": "Document envoyé. En attente de vérification.",
+    "uploadFailed": "Échec de l'envoi. Réessayez.",
+    "tooLarge": "Fichier trop lourd (max 5 Mo)."
+  },
+  "verifications": {
+    "metaTitle": "Vérifications d'identité",
+    "title": "Vérifications d'identité",
+    "subtitle": "Validez les pièces d'identité téléversées par les nounous.",
+    "empty": "Aucune pièce en attente de vérification.",
+    "candidate": "Candidate",
+    "viewDoc": "Voir le document",
+    "approve": "Valider",
+    "reject": "Rejeter",
+    "approved": "Identité validée.",
+    "rejected": "Document rejeté.",
+    "actionFailed": "Action impossible. Réessayez."
   },
   "rating": {
     "noRating": "Pas encore de note",
@@ -192,6 +216,7 @@
   "adminNav": {
     "dashboard": "Tableau de bord",
     "users": "Utilisateurs",
+    "verifications": "Vérifications",
     "offers": "Offres",
     "reports": "Signalements",
     "settings": "Paramètres",

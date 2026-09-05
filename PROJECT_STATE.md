@@ -106,6 +106,19 @@
 
 ## Journal de session (le plus récent en haut)
 
+- 2026-09-05 — **Refonte auth + profil + confiance (Phases A/B/C).**
+  **A** : suppression de l'OTP SMS ; connexion/inscription par **email + mot de passe** (+ Google
+  conservé) ; téléphone devenu champ de contact (non vérifié), normalisé sans « + ». **B** :
+  **date de naissance** (colonne `profiles.date_naissance`) collectée à l'inscription/onboarding/
+  modif profil (validation ≥ 18) ; **âge calculé** exposé via la vue `public_profiles` (date brute
+  jamais exposée) et affiché sur catalogue/fiches. **C** : **vérification d'identité** — bucket privé
+  `identity-docs`, upload de la pièce par la nounou, page admin `/admin/verifications` (URL signées)
+  + route `verify-identity` (service_role) → passage `verification_level` à `identity` → badge
+  « Identité vérifiée ». Badge de base relibellé « Inscrit ». SMS : décision de passer par **Twilio**
+  (natif Supabase, config tableau de bord) ; le hook SMS Pro Africa reste inactif. Migrations
+  `20260905000001` (date_naissance) et `20260905000002` (identity) à pousser. Typecheck/lint/tests/
+  build verts.
+
 - 2026-09-04 — **Préparation du déploiement VPS (Docker) + login Google opérationnel.**
   Login Google branché et vérifié en local (Supabase local + console Google). Correctif base :
   fonction de garde `profiles_guard_self_update` réalignée sur la migration (autorise la 1ʳᵉ

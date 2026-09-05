@@ -61,6 +61,7 @@ export type ProfileRow = {
   ville: string | null;
   commune: string | null;
   date_naissance: string | null;
+  identity_doc_path: string | null;
   verification_level: VerificationLevel;
   is_active: boolean;
   is_suspended: boolean;
