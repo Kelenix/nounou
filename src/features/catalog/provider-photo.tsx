@@ -43,8 +43,12 @@ export function ProviderPhoto({
 
   if (src) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={src} alt={name} loading="lazy" className={cn("size-full object-cover", className)} />
+      // Fond dégradé doux derrière l'image affichée en entier (object-contain),
+      // pour combler les bords sans rogner ni agrandir le cadre.
+      <div className={cn("flex size-full items-center justify-center overflow-hidden bg-gradient-to-br", pick(seed), className)}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={src} alt={name} loading="lazy" className="size-full object-contain" />
+      </div>
     );
   }
   return (
