@@ -18,7 +18,9 @@ import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { CatalogSearchBar } from "@/features/catalog/catalog-search-bar";
 import { ProviderCard } from "@/features/catalog/provider-card";
+import { OfferCard } from "@/features/offers/offer-card";
 import { listPublicProviders, countActiveProviders } from "@/features/catalog/queries";
+import { createClient } from "@/lib/supabase/server";
 import type { ServiceType } from "@/lib/supabase/database.types";
 
 const CATEGORIES: { key: ServiceType; icon: typeof Sparkles; color: string }[] = [
@@ -35,6 +37,14 @@ const CATEGORIES: { key: ServiceType; icon: typeof Sparkles; color: string }[] =
 export default async function HomePage() {
   const providers = await listPublicProviders({}, 8);
   const totalProviders = await countActiveProviders();
+  const supabase = await createClient();
+  const { data: recentOffers } = await supabase
+    .from("offers")
+    .select("*")
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
+    .limit(8);
+  const offers = recentOffers ?? [];
   const t = await getTranslations();
 
   return (
@@ -127,6 +137,26 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+
+      {/* ================= DERNIÈRES ANNONCES ================= */}
+      {offers.length > 0 && (
+        <section className="border-t border-border/50 py-16">
+          <div className="container">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-extrabold tracking-tight md:text-3xl">{t("home.offersTitle")}</h2>
+                <p className="mt-1 text-muted-foreground">{t("home.offersSubtitle")}</p>
+              </div>
+              <Button asChild variant="secondary" className="shrink-0">
+                <Link href="/offres">{t("home.seeAllOffers")} <ArrowRight className="size-4" /></Link>
+              </Button>
+            </div>
+            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {offers.map((o) => <OfferCard key={o.id} offer={o} basePath="/offres" />)}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ================= TOUTES LES CATÉGORIES ================= */}
       <section className="py-16">
