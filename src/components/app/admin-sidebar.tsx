@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { LayoutDashboard, Users, FileText, Flag, Globe, ShieldCheck, Settings, UserCog, ScrollText, BadgeCheck } from "lucide-react";
+import { LayoutDashboard, Users, FileText, Flag, Globe, ShieldCheck, Settings, UserCog, ScrollText, BadgeCheck, Activity } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Avatar } from "@/components/ui/avatar";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
@@ -25,6 +25,7 @@ export function AdminSidebar({ profile }: { profile: ProfileRow }) {
     { href: "/admin/parametres", label: t("adminNav.settings"), icon: Settings, show: canAccess(profile, "settings") },
     { href: "/admin/administrateurs", label: t("adminNav.admins"), icon: UserCog, show: profile.is_super_admin },
     { href: "/admin/journal", label: t("adminNav.auditLog"), icon: ScrollText, show: profile.is_super_admin },
+    { href: "/admin/systeme", label: t("adminNav.system"), icon: Activity, show: profile.is_super_admin },
   ].filter((i) => i.show);
 
   return (
