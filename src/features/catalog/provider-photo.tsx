@@ -43,11 +43,13 @@ export function ProviderPhoto({
 
   if (src) {
     return (
-      // Fond dégradé doux derrière l'image affichée en entier (object-contain),
-      // pour combler les bords sans rogner ni agrandir le cadre.
-      <div className={cn("flex size-full items-center justify-center overflow-hidden bg-gradient-to-br", pick(seed), className)}>
+      // Image entière (object-contain), les bords comblés par une version floutée
+      // de la même photo — aucune bordure colorée, aucun espace vide.
+      <div className={cn("relative size-full overflow-hidden bg-secondary", className)}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt={name} loading="lazy" className="size-full object-contain" />
+        <img src={src} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 size-full scale-110 object-cover opacity-60 blur-xl" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={src} alt={name} loading="lazy" className="relative size-full object-contain" />
       </div>
     );
   }
