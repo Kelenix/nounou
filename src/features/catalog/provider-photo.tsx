@@ -43,14 +43,10 @@ export function ProviderPhoto({
 
   if (src) {
     return (
-      // Image entière (object-contain), les bords comblés par une version floutée
-      // de la même photo — aucune bordure colorée, aucun espace vide.
-      <div className={cn("relative size-full overflow-hidden bg-secondary", className)}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 size-full scale-110 object-cover opacity-60 blur-xl" />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt={name} loading="lazy" className="relative size-full object-contain" />
-      </div>
+      // Remplissage complet du cadre (aucune bordure), cadré vers le haut pour
+      // préserver le visage.
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={src} alt={name} loading="lazy" className={cn("size-full object-cover object-top", className)} />
     );
   }
   return (
