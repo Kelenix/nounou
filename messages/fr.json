@@ -303,6 +303,7 @@
     "country": "Côte d'Ivoire",
     "age": "{age} ans",
     "years": "{years, plural, one {# an} other {# ans}}",
+    "beginner": "Débutant·e",
     "see": "Voir"
   },
   "filters": {

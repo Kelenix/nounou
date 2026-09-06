@@ -70,7 +70,8 @@ export async function ProviderCard({ item }: { item: ProviderItem }) {
         <div className="mt-4 flex items-center justify-between gap-2 border-t border-border/60 pt-3">
           <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">
-              <Briefcase className="size-3.5 shrink-0 text-primary" /> {t("card.years", { years: candidate.experience_annees })}
+              <Briefcase className="size-3.5 shrink-0 text-primary" />
+              {candidate.experience_annees > 0 ? t("card.years", { years: candidate.experience_annees }) : t("card.beginner")}
             </span>
             <span className="inline-flex items-center gap-1">
               <Clock className="size-3.5 shrink-0 text-primary" />
