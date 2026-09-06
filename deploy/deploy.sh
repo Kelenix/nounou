@@ -20,6 +20,8 @@ docker build \
   --build-arg NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL" \
   --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY" \
   --build-arg NEXT_PUBLIC_APP_URL="$NEXT_PUBLIC_APP_URL" \
+  --build-arg NEXT_PUBLIC_ANALYTICS_DOMAIN="${NEXT_PUBLIC_ANALYTICS_DOMAIN:-}" \
+  --build-arg NEXT_PUBLIC_ANALYTICS_SRC="${NEXT_PUBLIC_ANALYTICS_SRC:-}" \
   -t jaimanounou:latest .
 
 echo "♻️  Redémarrage du conteneur…"
