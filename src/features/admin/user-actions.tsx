@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Ban, RotateCcw, CreditCard, Trash2, UserCog, AlertTriangle } from "lucide-react";
+import { Ban, RotateCcw, CreditCard, Trash2, UserCog, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -20,7 +20,7 @@ export type SubscriptionInfo = {
   date: string | null;
 };
 
-type Dialog = "suspend" | "cancel" | "delete" | "role" | null;
+type Dialog = "suspend" | "cancel" | "activate" | "delete" | "role" | null;
 
 export function UserActions({
   userId,
@@ -61,7 +61,7 @@ export function UserActions({
     }
   }
 
-  async function callApi(action: "cancel_subscription" | "delete" | "set_role" | "suspend", extra?: Record<string, unknown>) {
+  async function callApi(action: "cancel_subscription" | "activate_subscription" | "delete" | "set_role" | "suspend", extra?: Record<string, unknown>) {
     setLoading(true);
     const res = await fetch("/api/admin/users", {
       method: "POST",
@@ -94,6 +94,15 @@ export function UserActions({
     }
   }
 
+  async function confirmActivate() {
+    if (await callApi("activate_subscription")) {
+      setHasSub(true);
+      setDialog(null);
+      toast(t("admin.toastActivated"), "success");
+      router.refresh();
+    }
+  }
+
   async function confirmDelete() {
     if (await callApi("delete")) {
       setDialog(null);
@@ -105,11 +114,15 @@ export function UserActions({
   return (
     <>
       <div className="flex flex-wrap items-center justify-end gap-2">
-        {hasSub && (
+        {hasSub ? (
           <Button variant="secondary" size="sm" onClick={() => setDialog("cancel")}>
             <CreditCard className="size-4" /> {t("admin.btnCancelSub")}
           </Button>
-        )}
+        ) : role !== "admin" ? (
+          <Button variant="secondary" size="sm" onClick={() => setDialog("activate")}>
+            <CheckCircle2 className="size-4" /> {t("admin.btnActivate")}
+          </Button>
+        ) : null}
         <Button variant="secondary" size="sm" onClick={() => { setNewRole(role ?? "candidate"); setDialog("role"); }}>
           <UserCog className="size-4" /> {t("admin.btnRole")}
         </Button>
@@ -169,6 +182,17 @@ export function UserActions({
           />
         </div>
       </ConfirmDialog>
+
+      {/* Activer le profil manuellement (accès offert, sans paiement) */}
+      <ConfirmDialog
+        open={dialog === "activate"}
+        onOpenChange={close}
+        title={t("admin.activateTitle")}
+        description={t("admin.activateDesc", { name })}
+        confirmLabel={t("admin.btnActivate")}
+        loading={loading}
+        onConfirm={confirmActivate}
+      />
 
       {/* Changer le rôle */}
       <ConfirmDialog
