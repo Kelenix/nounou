@@ -10,6 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { VerificationBadge } from "@/components/app/verification-badge";
 import { RatingStars } from "@/components/app/rating-stars";
+import { ProfileCompletenessCard } from "@/features/profiles/profile-completeness-card";
+import { profileCompleteness } from "@/features/profiles/completeness";
 import { formatFcfa, formatPhoneCi } from "@/lib/utils";
 
 export async function generateMetadata() {
@@ -32,8 +34,12 @@ export default async function ProfilPage() {
       ? await supabase.from("employer_profiles").select("*").eq("user_id", profile.id).maybeSingle()
       : { data: null };
 
+  const completeness = profileCompleteness(profile, candidate, employer);
+
   return (
     <div className="space-y-5">
+      <ProfileCompletenessCard percent={completeness.percent} missing={completeness.missing} />
+
       <Card>
         <CardContent className="p-5">
           <div className="flex items-start gap-4">
