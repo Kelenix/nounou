@@ -71,7 +71,7 @@ export async function ProviderCard({ item }: { item: ProviderItem }) {
           <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">
               <Briefcase className="size-3.5 shrink-0 text-primary" />
-              {candidate.experience_annees > 0 ? t("card.years", { years: candidate.experience_annees }) : t("card.beginner")}
+              {t("nounouDetail.experienceYears", { years: candidate.experience_annees })}
             </span>
             <span className="inline-flex items-center gap-1">
               <Clock className="size-3.5 shrink-0 text-primary" />
