@@ -12,8 +12,15 @@ if [ ! -f .env.production ]; then
   exit 1
 fi
 
-# Charger les variables (dont les NEXT_PUBLIC_* nécessaires au build)
-set -a; . ./.env.production; set +a
+# Extraction sûre des variables publiques nécessaires au build — SANS « source »,
+# pour tolérer des valeurs contenant espaces/apostrophes/chevrons (ex. EMAIL_FROM).
+# (Le runtime, lui, charge tout le fichier via `docker run --env-file`.)
+get_env() { { grep -E "^$1=" .env.production || true; } | head -n1 | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//'; }
+NEXT_PUBLIC_SUPABASE_URL="$(get_env NEXT_PUBLIC_SUPABASE_URL)"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="$(get_env NEXT_PUBLIC_SUPABASE_ANON_KEY)"
+NEXT_PUBLIC_APP_URL="$(get_env NEXT_PUBLIC_APP_URL)"
+NEXT_PUBLIC_ANALYTICS_DOMAIN="$(get_env NEXT_PUBLIC_ANALYTICS_DOMAIN)"
+NEXT_PUBLIC_ANALYTICS_SRC="$(get_env NEXT_PUBLIC_ANALYTICS_SRC)"
 
 echo "🔨 Build de l'image…"
 docker build \
