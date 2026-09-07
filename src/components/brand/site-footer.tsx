@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { Smartphone, Apple } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 
 export async function SiteFooter() {
@@ -10,6 +11,17 @@ export async function SiteFooter() {
         <div className="space-y-3">
           <Logo />
           <p className="text-sm text-muted-foreground">{t("footer.tagline")}</p>
+          <div className="space-y-1.5 pt-1">
+            <p className="text-xs font-semibold text-foreground">{t("footer.availableOn")}</p>
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-medium">
+                <Smartphone className="size-4 text-primary" /> Android
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-medium">
+                <Apple className="size-4 text-primary" /> iOS
+              </span>
+            </div>
+          </div>
         </div>
         <FooterCol
           title={t("footer.explore")}
