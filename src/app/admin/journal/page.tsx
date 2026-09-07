@@ -1,4 +1,4 @@
-import { ScrollText, UserPlus, UserCog, ShieldCheck, Ban, RotateCcw, Trash2, CreditCard } from "lucide-react";
+import { ScrollText, UserPlus, UserCog, ShieldCheck, Ban, RotateCcw, Trash2, CreditCard, RefreshCw } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { requireSuperAdmin } from "@/lib/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -22,6 +22,7 @@ const ACTION_ICON: Record<string, typeof UserCog> = {
   reactivate: RotateCcw,
   delete_user: Trash2,
   cancel_subscription: CreditCard,
+  reconcile_payments: RefreshCw,
 };
 
 export default async function AdminJournalPage({

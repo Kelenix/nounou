@@ -106,6 +106,16 @@
 
 ## Journal de session (le plus récent en haut)
 
+- 2026-09-07 — **Tableau de bord Revenus + réconciliation (Super Admin).** Nouvelle page
+  `/admin/revenus` (Super Admin only) : KPIs (total, ce mois, 30 j, ticket moyen, réussies, en
+  attente), répartition par type/moyen, transactions récentes. **Réconciliation CinetPay** :
+  `checkStatus(reference)` ajouté au `PaymentProvider` (factorise `/payment/check`), route
+  `POST /api/admin/paiements/reconcilier` qui re-vérifie une transaction ou toutes les « en attente »
+  de +10 min et rattrape les confirmations perdues, sans jamais revoquer un « réussi » (divergence
+  = signalée). Contrôle d'intégrité : paiements réussis sans effet appliqué mis en évidence. Entrée
+  sidebar + libellé d'audit `reconcile_payments`. i18n FR/EN. Typecheck + lint + 11 tests verts.
+  Cf. ADR-010. **Prérequis manuel** : compte CinetPay validé + `CINETPAY_API_KEY`/`CINETPAY_SITE_ID`
+  + `PAYMENT_MOBILE_PROVIDER=cinetpay` en prod pour que la vérification fournisseur soit active.
 - 2026-09-05 — **Refonte auth + profil + confiance (Phases A/B/C).**
   **A** : suppression de l'OTP SMS ; connexion/inscription par **email + mot de passe** (+ Google
   conservé) ; téléphone devenu champ de contact (non vérifié), normalisé sans « + ». **B** :

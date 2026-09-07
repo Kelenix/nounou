@@ -34,6 +34,11 @@ export interface PaymentProvider {
   initiate(input: InitiatePaymentInput): Promise<InitiatePaymentResult>;
   /** Vérifie la signature d'un webhook entrant et en extrait le statut. `null` = à ignorer. */
   parseWebhook(request: Request): Promise<PaymentWebhookEvent | null>;
+  /**
+   * Interroge le fournisseur sur le statut réel d'une transaction (réconciliation).
+   * `null` = statut non déterminable automatiquement (fournisseur sans API de contrôle).
+   */
+  checkStatus?(reference: string): Promise<PaymentWebhookEvent | null>;
 }
 
 // ---------------------------------------------------------------------------
@@ -82,6 +87,10 @@ class MockPaymentProvider implements PaymentProvider {
   async parseWebhook(): Promise<PaymentWebhookEvent | null> {
     return null;
   }
+
+  async checkStatus(reference: string): Promise<PaymentWebhookEvent | null> {
+    return { reference, success: true };
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -129,6 +138,10 @@ class CinetPayProvider implements PaymentProvider {
     if (!reference) return null;
     // Source de vérité : on re-vérifie le statut réel via l'API /payment/check
     // (recommandé par CinetPay plutôt que de se fier au seul webhook).
+    return this.checkStatus(reference);
+  }
+
+  async checkStatus(reference: string): Promise<PaymentWebhookEvent | null> {
     const { apikey, site_id } = this.creds();
     const res = await fetch(`${CinetPayProvider.BASE}/payment/check`, {
       method: "POST",
@@ -136,6 +149,8 @@ class CinetPayProvider implements PaymentProvider {
       body: JSON.stringify({ apikey, site_id, transaction_id: reference }),
     });
     const data = await res.json().catch(() => null);
+    // 627 = transaction en attente chez CinetPay : on renvoie « pas encore réussi »
+    // sans la marquer échouée (elle pourra aboutir plus tard).
     return { reference, success: data?.data?.status === "ACCEPTED" };
   }
 }

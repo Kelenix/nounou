@@ -5,6 +5,31 @@
 
 ---
 
+## ADR-010 — Tableau de bord Revenus + réconciliation fournisseur (Super Admin)
+- **Décideur** : Claude (à la demande du propriétaire)
+- **Contexte** : le compte marchand CinetPay est au nom du propriétaire (Europe) ; un partenaire
+  (Afrique) ne fait que la publicité. Besoin de **traçabilité totale** des revenus et d'un contrôle
+  entre ce que la plateforme a enregistré et ce que le fournisseur a réellement encaissé.
+- **Décisions** :
+  - Page **`/admin/revenus`** réservée au **Super Admin** (`requireSuperAdmin`, `force-dynamic`) :
+    KPIs (total, ce mois, 30 j, ticket moyen, réussies, en attente), répartitions par type et par
+    moyen, transactions récentes.
+  - **Réconciliation** via un nouvel `checkStatus(reference)` ajouté à `PaymentProvider` (factorise
+    l'appel CinetPay `/payment/check` déjà présent dans `parseWebhook`). Route
+    `POST /api/admin/paiements/reconcilier` (Super Admin) : re-vérifie une transaction précise ou
+    **toutes les « en attente » de +10 min** (webhook probablement perdu) et rattrape les
+    confirmations (activation/premium) manquantes. Action journalisée (`reconcile_payments`).
+  - **Politique de sûreté** : `reconcilePayment` ne **revoque jamais automatiquement** un paiement
+    déjà « réussi ». Une divergence (réussi chez nous mais non `ACCEPTED` côté fournisseur) est
+    **signalée** (`mismatch`) pour examen humain, pas corrigée en silence.
+  - **Contrôle d'intégrité interne** : détection des paiements « réussis » sans effet appliqué
+    (candidate non activée / employeur non premium), affichés en avertissement.
+- **Alternatives écartées** : mécanisme applicatif de « blocage des revenus » — **rejeté** : l'argent
+  réel est détenu par le compte marchand CinetPay, l'app ne peut pas le retenir ; la sécurité repose
+  sur le contrôle du compte + destination de retrait (au nom du propriétaire), pas sur du code.
+- **Vérifications** : typecheck + lint + 11 tests unitaires verts.
+- **Impact** : visibilité financière/qualité, réversible.
+
 ## ADR-009 — Interface multilingue FR/EN (next-intl, cookie sans routing)
 
 - **Date** : 2026-09-03
