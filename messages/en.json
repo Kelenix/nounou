@@ -10,6 +10,15 @@
     "previous": "Previous",
     "next": "Next"
   },
+  "pwa": {
+    "title": "Install the app",
+    "body": "Add “J'ai ma nounou” to your home screen for quick, full-screen access.",
+    "install": "Install",
+    "later": "Later",
+    "iosStep1": "Tap",
+    "iosStep2": "then",
+    "iosStep3": "“Add to Home Screen”"
+  },
   "roles": {
     "employer": "Employer",
     "candidate": "Candidate",

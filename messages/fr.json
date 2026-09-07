@@ -10,6 +10,15 @@
     "previous": "Précédent",
     "next": "Suivant"
   },
+  "pwa": {
+    "title": "Installer l'application",
+    "body": "Ajoutez « J'ai ma nounou » à votre écran d'accueil pour un accès rapide, en plein écran.",
+    "install": "Installer",
+    "later": "Plus tard",
+    "iosStep1": "Appuyez sur",
+    "iosStep2": "puis",
+    "iosStep3": "« Sur l'écran d'accueil »"
+  },
   "roles": {
     "employer": "Employeur",
     "candidate": "Candidate",

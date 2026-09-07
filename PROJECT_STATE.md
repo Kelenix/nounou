@@ -106,6 +106,11 @@
 
 ## Journal de session (le plus récent en haut)
 
+- 2026-09-07 — **PWA : bandeau d'installation mobile.** `PwaInstallPrompt` (monté dans `Providers`) :
+  Android/Chrome capture `beforeinstallprompt` → bouton « Installer » natif ; iOS/Safari affiche la
+  marche à suivre (Partager → Sur l'écran d'accueil). Masqué si déjà installée (`display-mode:
+  standalone`), refus mémorisé 30 j (localStorage), caché sur `/app` et `/admin` (n'gêne pas la
+  bottom-nav), mobile uniquement (`lg:hidden`). i18n FR/EN (section `pwa`). Build + typecheck + lint verts.
 - 2026-09-07 — **Revenus : filtre de période (calendrier).** Sélecteur de dates natif (`input[type=date]`,
   sans nouvelle dépendance) + raccourcis (Tout / Ce mois / 30 j / 90 j) sur `/admin/revenus`, filtrage
   via l'URL `?from=&to=` (server component). Tous les chiffres (revenu, réussies, ticket moyen, en
