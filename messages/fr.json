@@ -17,7 +17,10 @@
     "later": "Plus tard",
     "iosStep1": "Appuyez sur",
     "iosStep2": "puis",
-    "iosStep3": "« Sur l'écran d'accueil »"
+    "iosStep3": "« Sur l'écran d'accueil »",
+    "androidHint": "Ouvrez ce site sur Android avec Chrome, puis appuyez sur « Installer ».",
+    "iosHint": "Sur iPhone : ouvrez le site dans Safari, appuyez sur Partager puis « Sur l'écran d'accueil ».",
+    "already": "L'application est déjà installée."
   },
   "roles": {
     "employer": "Employeur",

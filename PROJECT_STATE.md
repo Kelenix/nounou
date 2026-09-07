@@ -106,6 +106,11 @@
 
 ## Journal de session (le plus récent en haut)
 
+- 2026-09-07 — **PWA : badges Android/iOS interactifs + « Disponible sur » dans le footer.** Contexte
+  partagé `PwaInstallProvider` (capture `beforeinstallprompt` une seule fois → bandeau ET badges le
+  réutilisent sans se le disputer). Badges cliquables (`FooterInstallBadges`) : Android lance
+  l'installation native si dispo, sinon toast d'aide ; iOS affiche la marche à suivre. Clés i18n
+  `pwa.androidHint/iosHint/already`. Build + typecheck + lint verts.
 - 2026-09-07 — **PWA : bandeau d'installation mobile.** `PwaInstallPrompt` (monté dans `Providers`) :
   Android/Chrome capture `beforeinstallprompt` → bouton « Installer » natif ; iOS/Safari affiche la
   marche à suivre (Partager → Sur l'écran d'accueil). Masqué si déjà installée (`display-mode:

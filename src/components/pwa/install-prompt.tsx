@@ -5,14 +5,10 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Download, Share, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePwaInstall } from "@/components/pwa/install-context";
 
 const DISMISS_KEY = "pwa-install-dismissed";
 const DISMISS_DAYS = 30;
-
-type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-};
 
 function recentlyDismissed(): boolean {
   try {
@@ -23,82 +19,52 @@ function recentlyDismissed(): boolean {
   }
 }
 
-function isStandalone(): boolean {
-  if (typeof window === "undefined") return false;
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    (window.navigator as unknown as { standalone?: boolean }).standalone === true
-  );
-}
-
 /**
  * Bandeau d'installation PWA (mobile).
- * - Android/Chrome : capture `beforeinstallprompt` → bouton « Installer » natif.
- * - iOS/Safari : affiche la marche à suivre (pas d'API d'installation sur iOS).
+ * - Android/Chrome : bouton « Installer » natif (via le prompt partagé).
+ * - iOS/Safari : marche à suivre (pas d'API d'installation sur iOS).
  * Masqué dans l'app connectée (/app, /admin) pour ne pas gêner la navigation.
  */
 export function PwaInstallPrompt() {
   const t = useTranslations();
   const pathname = usePathname();
-  const [mode, setMode] = useState<"android" | "ios" | null>(null);
-  const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
+  const { platform, isStandalone, canInstall, promptInstall } = usePwaInstall();
+  const [dismissed, setDismissed] = useState(true); // fermé tant que le montage n'a pas vérifié
+  const [iosReady, setIosReady] = useState(false);
+
+  useEffect(() => {
+    setDismissed(recentlyDismissed());
+    // iOS : laisser respirer avant d'afficher l'aide.
+    const timer = setTimeout(() => setIosReady(true), 2500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const hiddenRoute = pathname.startsWith("/app") || pathname.startsWith("/admin");
 
-  useEffect(() => {
-    if (isStandalone() || recentlyDismissed()) return;
-
-    const onBeforeInstall = (e: Event) => {
-      e.preventDefault();
-      setDeferred(e as BeforeInstallPromptEvent);
-      setMode("android");
-    };
-    const onInstalled = () => {
-      setMode(null);
-      try {
-        localStorage.setItem(DISMISS_KEY, String(Date.now()));
-      } catch {
-        /* stockage indisponible : sans effet */
-      }
-    };
-
-    window.addEventListener("beforeinstallprompt", onBeforeInstall);
-    window.addEventListener("appinstalled", onInstalled);
-
-    // iOS : pas de `beforeinstallprompt` → détection Safari iOS.
-    const ua = window.navigator.userAgent;
-    const isIOS = /iphone|ipad|ipod/i.test(ua);
-    const isSafari = /safari/i.test(ua) && !/crios|fxios|edgios/i.test(ua);
-    let iosTimer: ReturnType<typeof setTimeout> | undefined;
-    if (isIOS && isSafari) {
-      iosTimer = setTimeout(() => setMode((m) => m ?? "ios"), 2500);
-    }
-
-    return () => {
-      window.removeEventListener("beforeinstallprompt", onBeforeInstall);
-      window.removeEventListener("appinstalled", onInstalled);
-      if (iosTimer) clearTimeout(iosTimer);
-    };
-  }, []);
+  const mode: "android" | "ios" | null =
+    isStandalone || dismissed || hiddenRoute
+      ? null
+      : canInstall
+        ? "android"
+        : platform === "ios" && iosReady
+          ? "ios"
+          : null;
 
   function dismiss() {
-    setMode(null);
+    setDismissed(true);
     try {
       localStorage.setItem(DISMISS_KEY, String(Date.now()));
     } catch {
-      /* sans effet */
+      /* stockage indisponible : sans effet */
     }
   }
 
   async function install() {
-    if (!deferred) return;
-    await deferred.prompt();
-    await deferred.userChoice.catch(() => null);
-    setDeferred(null);
-    setMode(null);
+    await promptInstall();
+    setDismissed(true);
   }
 
-  if (!mode || hiddenRoute) return null;
+  if (!mode) return null;
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">

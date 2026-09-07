@@ -17,7 +17,10 @@
     "later": "Later",
     "iosStep1": "Tap",
     "iosStep2": "then",
-    "iosStep3": "“Add to Home Screen”"
+    "iosStep3": "“Add to Home Screen”",
+    "androidHint": "Open this site on Android with Chrome, then tap “Install”.",
+    "iosHint": "On iPhone: open the site in Safari, tap Share then “Add to Home Screen”.",
+    "already": "The app is already installed."
   },
   "roles": {
     "employer": "Employer",

@@ -4,6 +4,7 @@ import * as React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ToastProvider } from "@/components/ui/toast";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
+import { PwaInstallProvider } from "@/components/pwa/install-context";
 import { PwaInstallPrompt } from "@/components/pwa/install-prompt";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -23,9 +24,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
-        {children}
-        <ServiceWorkerRegister />
-        <PwaInstallPrompt />
+        <PwaInstallProvider>
+          {children}
+          <ServiceWorkerRegister />
+          <PwaInstallPrompt />
+        </PwaInstallProvider>
       </ToastProvider>
     </QueryClientProvider>
   );
