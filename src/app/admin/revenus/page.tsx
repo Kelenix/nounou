@@ -2,9 +2,7 @@ import {
   Wallet,
   Receipt,
   Clock,
-  XCircle,
   TrendingUp,
-  CalendarDays,
   AlertTriangle,
   CheckCircle2,
   Smartphone,
@@ -15,6 +13,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ReconcileButton } from "@/features/admin/reconcile-button";
+import { RevenueDateFilter } from "@/features/admin/revenue-date-filter";
 import { PAYMENT_METHOD_LABELS } from "@/lib/constants";
 import { formatFcfa, dateLocale } from "@/lib/utils";
 import type { PaymentMethod, PaymentStatus, PaymentType } from "@/lib/supabase/database.types";
@@ -35,11 +34,26 @@ const STATUS_META: Record<PaymentStatus, string> = {
   annule: "bg-muted text-muted-foreground",
 };
 
-export default async function RevenusPage() {
+const YMD = /^\d{4}-\d{2}-\d{2}$/;
+type SP = Record<string, string | string[] | undefined>;
+const oneParam = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
+
+export default async function RevenusPage({ searchParams }: { searchParams: Promise<SP> }) {
   await requireSuperAdmin();
   const t = await getTranslations();
   const dl = dateLocale(await getLocale());
   const admin = createAdminClient();
+
+  // Bornes de période depuis l'URL (?from=YYYY-MM-DD&to=YYYY-MM-DD).
+  const sp = await searchParams;
+  const from = YMD.test(oneParam(sp.from)) ? oneParam(sp.from) : "";
+  const to = YMD.test(oneParam(sp.to)) ? oneParam(sp.to) : "";
+  const fromDate = from ? new Date(`${from}T00:00:00`) : null;
+  const toDate = to ? new Date(`${to}T23:59:59.999`) : null;
+  const inPeriod = (iso: string) => {
+    const d = new Date(iso);
+    return (!fromDate || d >= fromDate) && (!toDate || d <= toDate);
+  };
 
   const { data: rowsRaw } = await admin
     .from("payments")
@@ -48,47 +62,39 @@ export default async function RevenusPage() {
     .limit(10000);
   const rows = rowsRaw ?? [];
 
-  const now = Date.now();
-  const monthStart = new Date();
-  monthStart.setDate(1);
-  monthStart.setHours(0, 0, 0, 0);
-  const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+  // Transactions de la période sélectionnée (par défaut : tout l'historique).
+  const periodRows = fromDate || toDate ? rows.filter((r) => inPeriod(r.created_at)) : rows;
+  const reussiPeriod = periodRows.filter((r) => r.statut === "reussi");
+  const pendingPeriod = periodRows.filter((r) => r.statut === "en_attente");
 
-  const reussi = rows.filter((r) => r.statut === "reussi");
-  const enAttente = rows.filter((r) => r.statut === "en_attente");
-  const echoues = rows.filter((r) => r.statut === "echoue" || r.statut === "annule");
+  const revenuePeriod = reussiPeriod.reduce((s, r) => s + Number(r.montant), 0);
+  const pendingAmount = pendingPeriod.reduce((s, r) => s + Number(r.montant), 0);
+  const ticketMoyen = reussiPeriod.length ? Math.round(revenuePeriod / reussiPeriod.length) : 0;
+  const revenueAllTime = rows.filter((r) => r.statut === "reussi").reduce((s, r) => s + Number(r.montant), 0);
 
-  const revenueTotal = reussi.reduce((s, r) => s + Number(r.montant), 0);
-  const pendingAmount = enAttente.reduce((s, r) => s + Number(r.montant), 0);
-  const revenue30 = reussi
-    .filter((r) => new Date(r.created_at).getTime() >= thirtyDaysAgo)
-    .reduce((s, r) => s + Number(r.montant), 0);
-  const revenueMonth = reussi
-    .filter((r) => new Date(r.created_at) >= monthStart)
-    .reduce((s, r) => s + Number(r.montant), 0);
-  const ticketMoyen = reussi.length ? Math.round(revenueTotal / reussi.length) : 0;
-
-  // Répartitions (transactions réussies uniquement).
+  // Répartitions (transactions réussies de la période).
   const byType = (["activation_candidate", "premium_employeur"] as PaymentType[]).map((type) => {
-    const sub = reussi.filter((r) => r.type === type);
+    const sub = reussiPeriod.filter((r) => r.type === type);
     return { type, count: sub.length, montant: sub.reduce((s, r) => s + Number(r.montant), 0) };
   });
   const byMethod = (Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[])
     .map((moyen) => {
-      const sub = reussi.filter((r) => r.moyen === moyen);
+      const sub = reussiPeriod.filter((r) => r.moyen === moyen);
       return { moyen, count: sub.length, montant: sub.reduce((s, r) => s + Number(r.montant), 0) };
     })
     .filter((m) => m.count > 0);
 
-  // Réconciliation — transactions « en attente » anciennes (webhook probablement perdu).
-  const stuck = enAttente.filter((r) => now - new Date(r.created_at).getTime() > STUCK_AFTER_MS);
-
-  // Intégrité interne — paiements réussis dont l'effet (activation/premium) n'a pas été appliqué.
+  // Réconciliation & intégrité — TOUJOURS sur tout l'historique (indépendant du filtre de vue).
+  const now = Date.now();
+  const stuck = rows.filter(
+    (r) => r.statut === "en_attente" && now - new Date(r.created_at).getTime() > STUCK_AFTER_MS,
+  );
+  const allReussi = rows.filter((r) => r.statut === "reussi");
   const candIds = Array.from(
-    new Set(reussi.filter((r) => r.type === "activation_candidate").map((r) => r.user_id)),
+    new Set(allReussi.filter((r) => r.type === "activation_candidate").map((r) => r.user_id)),
   );
   const empIds = Array.from(
-    new Set(reussi.filter((r) => r.type === "premium_employeur").map((r) => r.user_id)),
+    new Set(allReussi.filter((r) => r.type === "premium_employeur").map((r) => r.user_id)),
   );
   let effectMissing = 0;
   if (candIds.length) {
@@ -112,10 +118,19 @@ export default async function RevenusPage() {
     type === "activation_candidate" ? t("revenus.typeActivation") : t("revenus.typePremium");
   const fmtDate = (iso: string) =>
     new Date(iso).toLocaleString(dl, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  const fmtDay = (d: Date) => d.toLocaleDateString(dl, { day: "numeric", month: "short", year: "numeric" });
+  const periodLabel =
+    !fromDate && !toDate
+      ? t("revenus.periodAllLabel")
+      : fromDate && toDate
+        ? t("revenus.periodRange", { from: fmtDay(fromDate), to: fmtDay(toDate) })
+        : fromDate
+          ? t("revenus.periodSince", { from: fmtDay(fromDate) })
+          : t("revenus.periodUntil", { to: fmtDay(toDate!) });
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight">{t("revenus.title")}</h1>
           <p className="text-sm text-muted-foreground">{t("revenus.subtitle")}</p>
@@ -123,23 +138,26 @@ export default async function RevenusPage() {
         <ReconcileButton />
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
-        <Stat icon={<Wallet className="size-5" />} label={t("revenus.total")} value={formatFcfa(revenueTotal)} accent />
-        <Stat icon={<CalendarDays className="size-5" />} label={t("revenus.thisMonth")} value={formatFcfa(revenueMonth)} />
-        <Stat icon={<TrendingUp className="size-5" />} label={t("revenus.last30")} value={formatFcfa(revenue30)} />
-        <Stat icon={<Receipt className="size-5" />} label={t("revenus.successCount")} value={reussi.length} />
-        <Stat icon={<Wallet className="size-5" />} label={t("revenus.avgTicket")} value={formatFcfa(ticketMoyen)} />
-        <Stat
-          icon={<Clock className="size-5" />}
-          label={t("revenus.pending")}
-          value={`${enAttente.length}`}
-          sub={pendingAmount > 0 ? formatFcfa(pendingAmount) : undefined}
-          warn={stuck.length > 0}
-        />
+      <RevenueDateFilter from={from} to={to} />
+
+      {/* KPIs — chiffres de la période sélectionnée */}
+      <div>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{periodLabel}</p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+          <Stat icon={<Wallet className="size-5" />} label={t("revenus.periodRevenue")} value={formatFcfa(revenuePeriod)} accent />
+          <Stat icon={<Receipt className="size-5" />} label={t("revenus.successCount")} value={reussiPeriod.length} />
+          <Stat icon={<Wallet className="size-5" />} label={t("revenus.avgTicket")} value={formatFcfa(ticketMoyen)} />
+          <Stat
+            icon={<Clock className="size-5" />}
+            label={t("revenus.pending")}
+            value={`${pendingPeriod.length}`}
+            sub={pendingAmount > 0 ? formatFcfa(pendingAmount) : undefined}
+          />
+          <Stat icon={<TrendingUp className="size-5" />} label={t("revenus.allTime")} value={formatFcfa(revenueAllTime)} />
+        </div>
       </div>
 
-      {/* Réconciliation */}
+      {/* Réconciliation (tout l'historique) */}
       <Card className={stuck.length > 0 || effectMissing > 0 ? "border-amber-300" : ""}>
         <CardContent className="space-y-4 p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -203,7 +221,7 @@ export default async function RevenusPage() {
         </CardContent>
       </Card>
 
-      {/* Répartitions */}
+      {/* Répartitions (période) */}
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardContent className="p-5">
@@ -250,12 +268,17 @@ export default async function RevenusPage() {
         </Card>
       </div>
 
-      {/* Transactions récentes */}
+      {/* Transactions de la période */}
       <Card>
         <CardContent className="p-5">
-          <h2 className="mb-3 font-bold">{t("revenus.recent")}</h2>
-          {rows.length === 0 ? (
-            <p className="py-3 text-sm text-muted-foreground">{t("revenus.noData")}</p>
+          <h2 className="mb-3 flex flex-wrap items-baseline justify-between gap-2 font-bold">
+            {t("revenus.recent")}
+            <span className="text-xs font-normal text-muted-foreground">
+              {t("revenus.txTotal", { count: periodRows.length })}
+            </span>
+          </h2>
+          {periodRows.length === 0 ? (
+            <p className="py-3 text-sm text-muted-foreground">{t("revenus.noneInPeriod")}</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -269,7 +292,7 @@ export default async function RevenusPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60">
-                  {rows.slice(0, 25).map((r) => (
+                  {periodRows.slice(0, 50).map((r) => (
                     <tr key={r.id}>
                       <td className="whitespace-nowrap py-2 pr-3 text-muted-foreground">{fmtDate(r.created_at)}</td>
                       <td className="py-2 pr-3">{typeLabel(r.type)}</td>
@@ -282,6 +305,9 @@ export default async function RevenusPage() {
                   ))}
                 </tbody>
               </table>
+              {periodRows.length > 50 && (
+                <p className="mt-3 text-xs text-muted-foreground">{t("revenus.showingFirst", { count: 50 })}</p>
+              )}
             </div>
           )}
         </CardContent>

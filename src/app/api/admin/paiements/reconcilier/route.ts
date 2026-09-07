@@ -4,11 +4,11 @@ import { getCurrentProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/server";
 import { logAudit } from "@/lib/admin";
 import { getPaymentProvider } from "@/features/payments/provider";
-import { reconcilePayment, type ReconcileOutcome } from "@/features/payments/confirm";
-
-// Transactions « en attente » plus vieilles que ce délai = webhook probablement perdu.
-const STUCK_AFTER_MS = 10 * 60 * 1000;
-const MAX_BATCH = 100;
+import {
+  reconcilePayment,
+  reconcileStuckPayments,
+  type ReconcileCounts,
+} from "@/features/payments/confirm";
 
 const bodySchema = z.object({
   // Réconcilier une transaction précise, ou toutes les transactions bloquées si absent.
@@ -27,43 +27,36 @@ export async function POST(request: Request) {
   }
 
   const admin = createAdminClient();
+  const reference = parsed.data.reference;
 
-  // Sélection des transactions à réconcilier.
-  let query = admin
-    .from("payments")
-    .select("id, moyen, statut, reference_transaction")
-    .not("reference_transaction", "is", null)
-    .limit(MAX_BATCH);
-  if (parsed.data.reference) {
-    query = query.eq("reference_transaction", parsed.data.reference);
-  } else {
-    // Lot : uniquement les paiements « en attente » assez anciens pour être considérés bloqués.
-    const cutoff = new Date(Date.now() - STUCK_AFTER_MS).toISOString();
-    query = query.eq("statut", "en_attente").lte("created_at", cutoff);
-  }
-  const { data: payments } = await query;
+  let checked: number;
+  let counts: ReconcileCounts;
 
-  const counts: Record<ReconcileOutcome, number> = {
-    confirmed: 0,
-    failed: 0,
-    consistent: 0,
-    mismatch: 0,
-    unverifiable: 0,
-  };
-
-  for (const p of payments ?? []) {
-    try {
-      const r = await reconcilePayment(admin, getPaymentProvider(p.moyen), p);
-      counts[r.outcome] += 1;
-    } catch (e) {
-      console.error("[reconciliation] échec pour", p.reference_transaction, e);
-      counts.unverifiable += 1;
+  if (reference) {
+    // Vérification d'une transaction précise.
+    const { data: payment } = await admin
+      .from("payments")
+      .select("moyen, statut, reference_transaction")
+      .eq("reference_transaction", reference)
+      .maybeSingle();
+    counts = { confirmed: 0, failed: 0, consistent: 0, mismatch: 0, unverifiable: 0 };
+    if (payment) {
+      try {
+        const r = await reconcilePayment(admin, getPaymentProvider(payment.moyen), payment);
+        counts[r.outcome] += 1;
+      } catch (e) {
+        console.error("[reconciliation] échec pour", reference, e);
+        counts.unverifiable += 1;
+      }
     }
+    checked = payment ? 1 : 0;
+  } else {
+    // Lot : toutes les transactions « en attente » bloquées.
+    ({ checked, counts } = await reconcileStuckPayments(admin));
   }
 
-  const checked = (payments ?? []).length;
   await logAudit(me, "reconcile_payments", {
-    details: { scope: parsed.data.reference ?? "pending", checked, ...counts },
+    details: { scope: reference ?? "pending", checked, ...counts },
   });
 
   return NextResponse.json({ ok: true, checked, counts });

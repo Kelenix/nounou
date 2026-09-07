@@ -106,6 +106,11 @@
 
 ## Journal de session (le plus récent en haut)
 
+- 2026-09-07 — **Revenus : filtre de période (calendrier).** Sélecteur de dates natif (`input[type=date]`,
+  sans nouvelle dépendance) + raccourcis (Tout / Ce mois / 30 j / 90 j) sur `/admin/revenus`, filtrage
+  via l'URL `?from=&to=` (server component). Tous les chiffres (revenu, réussies, ticket moyen, en
+  attente, répartitions, liste) suivent la période ; la **réconciliation reste sur tout l'historique**
+  (pour ne jamais masquer une transaction bloquée). Build + typecheck + lint + 11 tests verts.
 - 2026-09-07 — **Tableau de bord Revenus + réconciliation (Super Admin).** Nouvelle page
   `/admin/revenus` (Super Admin only) : KPIs (total, ce mois, 30 j, ticket moyen, réussies, en
   attente), répartition par type/moyen, transactions récentes. **Réconciliation CinetPay** :
@@ -116,6 +121,11 @@
   sidebar + libellé d'audit `reconcile_payments`. i18n FR/EN. Typecheck + lint + 11 tests verts.
   Cf. ADR-010. **Prérequis manuel** : compte CinetPay validé + `CINETPAY_API_KEY`/`CINETPAY_SITE_ID`
   + `PAYMENT_MOBILE_PROVIDER=cinetpay` en prod pour que la vérification fournisseur soit active.
+- 2026-09-07 — **Réconciliation automatique (cron quotidien).** Endpoint `GET /api/cron/reconcilier`
+  protégé par `CRON_SECRET`, logique de lot factorisée (`reconcileStuckPayments`), acteur d'audit
+  « Système (cron) ». Script VPS `deploy/cron-reconcile.sh` + `CRON_SECRET` ajouté aux `.env(.production).example`.
+  **À faire à l'installation** (cf. `docs/manual-tasks.md`) : générer `CRON_SECRET`, ajouter la ligne
+  crontab (03h15 quotidien). Typecheck + lint + 11 tests verts.
 - 2026-09-05 — **Refonte auth + profil + confiance (Phases A/B/C).**
   **A** : suppression de l'OTP SMS ; connexion/inscription par **email + mot de passe** (+ Google
   conservé) ; téléphone devenu champ de contact (non vérifié), normalisé sans « + ». **B** :

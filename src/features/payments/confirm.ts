@@ -2,10 +2,14 @@ import "server-only";
 
 import type { createAdminClient } from "@/lib/supabase/server";
 import type { PaymentRow, PaymentType } from "@/lib/supabase/database.types";
-import type { PaymentProvider } from "@/features/payments/provider";
+import { getPaymentProvider, type PaymentProvider } from "@/features/payments/provider";
 import { formatFcfa } from "@/lib/utils";
 
 type Admin = ReturnType<typeof createAdminClient>;
+
+/** Transactions « en attente » plus vieilles que ce délai = webhook probablement perdu. */
+export const STUCK_PAYMENT_AFTER_MS = 10 * 60 * 1000;
+const RECONCILE_BATCH_MAX = 200;
 
 /**
  * Applique les effets d'un paiement réussi : activation du profil + notification.
@@ -93,4 +97,37 @@ export async function reconcilePayment(
     return { reference, outcome: "failed", changed: true };
   }
   return { reference, outcome: "consistent", changed: false };
+}
+
+export type ReconcileCounts = Record<ReconcileOutcome, number>;
+export type ReconcileBatchResult = { checked: number; counts: ReconcileCounts };
+
+/**
+ * Réconcilie en lot toutes les transactions « en attente » assez anciennes pour être
+ * considérées bloquées (webhook perdu). Utilisé par l'action manuelle et le cron quotidien.
+ */
+export async function reconcileStuckPayments(
+  admin: Admin,
+  olderThanMs = STUCK_PAYMENT_AFTER_MS,
+): Promise<ReconcileBatchResult> {
+  const cutoff = new Date(Date.now() - olderThanMs).toISOString();
+  const { data: payments } = await admin
+    .from("payments")
+    .select("id, moyen, statut, reference_transaction")
+    .eq("statut", "en_attente")
+    .not("reference_transaction", "is", null)
+    .lte("created_at", cutoff)
+    .limit(RECONCILE_BATCH_MAX);
+
+  const counts: ReconcileCounts = { confirmed: 0, failed: 0, consistent: 0, mismatch: 0, unverifiable: 0 };
+  for (const p of payments ?? []) {
+    try {
+      const r = await reconcilePayment(admin, getPaymentProvider(p.moyen), p);
+      counts[r.outcome] += 1;
+    } catch (e) {
+      console.error("[reconciliation] échec pour", p.reference_transaction, e);
+      counts.unverifiable += 1;
+    }
+  }
+  return { checked: (payments ?? []).length, counts };
 }

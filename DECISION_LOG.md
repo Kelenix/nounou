@@ -24,6 +24,12 @@
     **signalée** (`mismatch`) pour examen humain, pas corrigée en silence.
   - **Contrôle d'intégrité interne** : détection des paiements « réussis » sans effet appliqué
     (candidate non activée / employeur non premium), affichés en avertissement.
+  - **Réconciliation automatique (cron quotidien)** : endpoint `GET /api/cron/reconcilier` protégé
+    par `CRON_SECRET` (Bearer, comparaison à temps constant), acteur d'audit « Système (cron) ».
+    Logique de lot factorisée dans `reconcileStuckPayments()` (partagée avec l'action manuelle).
+    Stack VPS Docker (pas de cron serverless) → cron système via `deploy/cron-reconcile.sh`
+    (lit le secret dans `.env.production`, appelle `127.0.0.1:3003`). Choisi plutôt qu'un scheduler
+    applicatif in-process (fragile au redémarrage du conteneur) ou un cron Vercel (non applicable).
 - **Alternatives écartées** : mécanisme applicatif de « blocage des revenus » — **rejeté** : l'argent
   réel est détenu par le compte marchand CinetPay, l'app ne peut pas le retenir ; la sécurité repose
   sur le contrôle du compte + destination de retrait (au nom du propriétaire), pas sur du code.

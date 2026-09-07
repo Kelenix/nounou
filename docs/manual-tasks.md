@@ -45,6 +45,17 @@
 - [ ] **Agrégateur Mobile Money** (ex. CinetPay, PayDunya, Djamo) : compte marchand + clés +
   URL de callback. Orange Money / MTN MoMo / Moov Money / Wave.
 
+## Réconciliation automatique des paiements (cron VPS)
+- [ ] **Générer le secret** : `openssl rand -hex 32` → coller dans `.env.production` :
+  `CRON_SECRET=<valeur>` (puis relancer `bash deploy/deploy.sh` pour que le conteneur le charge).
+- [ ] **Installer le cron** sur le VPS (réconciliation quotidienne à 03h15) : `crontab -e` puis
+  ajouter (adapter le chemin du projet) :
+  `15 3 * * * /chemin/vers/projet/deploy/cron-reconcile.sh >> /var/log/jaimanounou-cron.log 2>&1`
+- [ ] **Vérifier** manuellement une fois : `bash deploy/cron-reconcile.sh` doit répondre
+  `{"ok":true,...}`. Les exécutions apparaissent dans le **journal d'audit** (acteur « Système (cron) »).
+- Note : la vérification interroge réellement le fournisseur uniquement si `PAYMENT_MOBILE_PROVIDER=cinetpay`
+  et les clés CinetPay sont renseignées ; sinon le cron tourne sans effet (aucune transaction réelle).
+
 ## Légal (Côte d'Ivoire)
 - [ ] Valider les textes **CGU** et **Politique de confidentialité** (données perso + paiement).
   Claude fournira des gabarits ; une relecture juridique reste recommandée.
