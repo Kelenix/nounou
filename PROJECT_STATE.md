@@ -106,6 +106,18 @@
 
 ## Journal de session (le plus récent en haut)
 
+- 2026-09-03 — **Connexion/inscription Google (OAuth)** : bouton « Continuer avec Google » sur
+  connexion + inscription, route `/auth/callback` (échange PKCE → onboarding si profil incomplet,
+  sinon /app ou /admin), provider `[auth.external.google]` dans `config.toml` (clés en env).
+  Google ne fournit pas de téléphone → `profiles.phone` rendu **nullable** (reste unique), garde S1
+  assoupli pour autoriser **la première** saisie du téléphone, `handle_new_user` préremplit
+  nom/prénom/photo depuis Google (migration `20260903000007`). **Téléphone désormais demandé à
+  l'onboarding** (requis). `formatPhoneCi` tolère null. **Vérifié** : typecheck + lint + build +
+  **14 E2E verts**. Tâche manuelle : identifiants Google OAuth (cf. `docs/manual-tasks.md`).
+- 2026-09-03 — **Moyens de paiement affichés seulement si configurés** : `getAvailablePaymentMethods()`
+  n'expose un moyen que si son fournisseur a ses clés (mock = dev uniquement). Le formulaire masque
+  les moyens non fonctionnels (et affiche « bientôt disponible » si aucun) ; l'API refuse (503) un
+  moyen non configuré → **plus d'activation gratuite via le mock en prod**. Ajout du moyen « carte ».
 - 2026-09-03 — **Paiement « prêt à recevoir les clés »** : couche multi-fournisseurs derrière
   `PaymentProvider`. Sélection par moyen (carte → `PAYMENT_CARD_PROVIDER`, Mobile Money →
   `PAYMENT_MOBILE_PROVIDER` ; mock par défaut). Squelettes **CinetPay / PayDunya / Stripe**
