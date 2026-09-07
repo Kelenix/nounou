@@ -16,7 +16,7 @@ export default async function FaqPage() {
   ];
 
   return (
-    <div className="container max-w-2xl py-14">
+    <div className="container max-w-4xl py-14">
       <h1 className="text-3xl font-extrabold md:text-4xl">{t("faq.title")}</h1>
       <div className="mt-8 space-y-4">
         {faq.map((item) => (

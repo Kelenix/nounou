@@ -23,11 +23,11 @@ export default async function CommentCaMarchePage() {
   ];
 
   return (
-    <div className="container max-w-3xl py-14">
+    <div className="container max-w-5xl py-14">
       <h1 className="text-3xl font-extrabold md:text-4xl">{t("howItWorks.title")}</h1>
       <p className="mt-3 text-muted-foreground">{t("howItWorks.subtitle")}</p>
 
-      <div className="mt-10 grid gap-8 md:grid-cols-2">
+      <div className="mt-10 grid gap-8 md:grid-cols-2 md:gap-14">
         <Column title={t("howItWorks.employersTitle")} steps={stepsEmployeur} />
         <Column title={t("howItWorks.candidatesTitle")} steps={stepsCandidate} />
       </div>
