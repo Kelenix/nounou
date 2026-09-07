@@ -72,7 +72,7 @@ export default async function RecherchePage({
 
   let pq = supabase
     .from("public_profiles")
-    .select("id, nom, prenom, photo_url, ville, commune, verification_level")
+    .select("id, nom, prenom, photo_url, ville, commune, verification_level, age")
     .eq("role", "candidate")
     .eq("is_suspended", false);
   if (ville) pq = pq.eq("ville", ville);

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, Briefcase, ArrowRight, Star, BadgeCheck } from "lucide-react";
+import { MapPin, Briefcase, ArrowRight, Star, BadgeCheck, Clock } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { ProviderPhoto } from "@/features/catalog/provider-photo";
@@ -55,6 +55,7 @@ export async function ProviderCard({ item }: { item: ProviderItem }) {
         <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
           <MapPin className="size-3.5" />
           {[profile.commune, profile.ville].filter(Boolean).join(", ") || t("card.country")}
+          {profile.age != null && ` · ${t("card.age", { age: profile.age })}`}
         </p>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
@@ -66,11 +67,18 @@ export async function ProviderCard({ item }: { item: ProviderItem }) {
           )}
         </div>
 
-        <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3">
-          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-            <Briefcase className="size-3.5" /> {t("card.years", { years: candidate.experience_annees })}
-          </span>
-          <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition-all group-hover:gap-2">
+        <div className="mt-4 flex items-center justify-between gap-2 border-t border-border/60 pt-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1">
+              <Briefcase className="size-3.5 shrink-0 text-primary" />
+              {t("nounouDetail.experienceYears", { years: candidate.experience_annees })}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Clock className="size-3.5 shrink-0 text-primary" />
+              {candidate.disponibilite || (candidate.temps_plein ? t("nounouDetail.fullTime") : t("nounouDetail.partTime"))}
+            </span>
+          </div>
+          <span className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-primary transition-all group-hover:gap-2">
             {t("card.see")} <ArrowRight className="size-4" />
           </span>
         </div>

@@ -1,0 +1,29 @@
+# Dépendances et build (réinstallés/reconstruits dans l'image)
+node_modules
+.next
+out
+build
+
+# Environnement local & secrets (ne JAMAIS mettre dans l'image)
+.env
+.env.local
+.env.*.local
+
+# Outils / dev
+.git
+.github
+.vscode
+.claude
+coverage
+playwright-report
+test-results
+e2e
+supabase/.branches
+supabase/.temp
+
+# Divers
+*.log
+npm-debug.log*
+.DS_Store
+README.md
+docs

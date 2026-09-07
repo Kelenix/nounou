@@ -33,7 +33,7 @@ export async function AuthShell({
 
       {/* Formulaire */}
       <div className="flex items-center justify-center px-6 py-10 sm:px-12">
-        <div className="w-full max-w-xl">
+        <div className="w-full max-w-2xl">
           {/* Logo compact sur mobile */}
           <Link href="/" className="mb-8 flex justify-center lg:hidden">
             <Image src="/logo.png" alt="J'ai ma nounou" width={240} height={160} priority className="h-28 w-auto object-contain" />

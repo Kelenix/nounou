@@ -19,7 +19,7 @@ export type ProviderFilters = {
 export type ProviderItem = {
   profile: Pick<
     PublicProfileRow,
-    "id" | "nom" | "prenom" | "photo_url" | "ville" | "commune" | "verification_level"
+    "id" | "nom" | "prenom" | "photo_url" | "ville" | "commune" | "verification_level" | "age"
   >;
   candidate: Pick<
     CandidateProfileRow,
@@ -76,7 +76,7 @@ export async function listPublicProviders(
 
   let pq = supabase
     .from("public_profiles")
-    .select("id, nom, prenom, photo_url, ville, commune, verification_level, created_at")
+    .select("id, nom, prenom, photo_url, ville, commune, verification_level, created_at, age")
     .eq("role", "candidate")
     .eq("is_suspended", false);
   if (filters.ville) pq = pq.eq("ville", filters.ville);
@@ -129,7 +129,7 @@ export async function getPublicProvider(id: string): Promise<ProviderItem | null
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from("public_profiles")
-    .select("id, nom, prenom, photo_url, ville, commune, verification_level, created_at")
+    .select("id, nom, prenom, photo_url, ville, commune, verification_level, created_at, age")
     .eq("id", id)
     .eq("role", "candidate")
     .maybeSingle();

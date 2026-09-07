@@ -60,6 +60,8 @@ export type ProfileRow = {
   photo_url: string | null;
   ville: string | null;
   commune: string | null;
+  date_naissance: string | null;
+  identity_doc_path: string | null;
   verification_level: VerificationLevel;
   is_active: boolean;
   is_suspended: boolean;
@@ -92,6 +94,7 @@ export type PublicProfileRow = {
   is_active: boolean;
   is_suspended: boolean;
   created_at: string;
+  age: number | null;
 };
 
 export type CandidateProfileRow = Timestamps & {
@@ -254,6 +257,7 @@ export interface Database {
       is_super_admin: { Args: Record<string, never>; Returns: boolean };
       app_current_role: { Args: Record<string, never>; Returns: UserRole };
       candidate_phone: { Args: { candidate: string }; Returns: string | null };
+      admin_user_id_by_email: { Args: { p_email: string }; Returns: string | null };
     };
     Enums: {
       user_role: UserRole;

@@ -7,6 +7,14 @@ import createNextIntlPlugin from "next-intl/plugin";
 const isProd = process.env.NODE_ENV === "production";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 
+// Origine du script d'analytics (Plausible/Umami) à autoriser dans la CSP, si configuré.
+let analyticsOrigin = "";
+try {
+  analyticsOrigin = process.env.NEXT_PUBLIC_ANALYTICS_SRC ? new URL(process.env.NEXT_PUBLIC_ANALYTICS_SRC).origin : "";
+} catch {
+  analyticsOrigin = "";
+}
+
 const csp = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -16,8 +24,8 @@ const csp = [
   "img-src 'self' data: blob: https: http://127.0.0.1:* http://localhost:*",
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
-  `script-src 'self' 'unsafe-inline'${isProd ? "" : " 'unsafe-eval'"}`,
-  `connect-src 'self' ${supabaseUrl} https://*.supabase.co wss://*.supabase.co ws://127.0.0.1:* http://127.0.0.1:* http://localhost:*`,
+  `script-src 'self' 'unsafe-inline'${isProd ? "" : " 'unsafe-eval'"} ${analyticsOrigin}`.trim(),
+  `connect-src 'self' ${supabaseUrl} https://*.supabase.co wss://*.supabase.co ws://127.0.0.1:* http://127.0.0.1:* http://localhost:* ${analyticsOrigin}`.trim(),
   ...(isProd ? ["upgrade-insecure-requests"] : []),
 ].join("; ");
 
@@ -36,6 +44,9 @@ const securityHeaders = [
 
 const nextConfig = {
   reactStrictMode: true,
+  // Sortie autonome : produit `.next/standalone` (serveur Node minimal) pour un
+  // conteneur Docker léger en production (déploiement VPS).
+  output: "standalone",
   images: {
     // Supabase Storage sert les photos ; autoriser l'hôte du projet.
     remotePatterns: [

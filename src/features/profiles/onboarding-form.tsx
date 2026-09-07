@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Search, Briefcase, ArrowRight, Phone } from "lucide-react";
+import { Search, Briefcase, ArrowRight, ArrowLeft, Phone } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ import { Logo } from "@/components/brand/logo";
 import { AvatarUpload } from "@/features/profiles/avatar-upload";
 import { VILLES_CI, COMMUNES_ABIDJAN } from "@/lib/constants";
 import { phoneSchema } from "@/features/auth/schemas";
-import { toE164Ci, formatPhoneCi } from "@/lib/utils";
+import { toE164Ci, formatPhoneCi, ageFromDob } from "@/lib/utils";
 import type { ProfileRow, UserRole } from "@/lib/supabase/database.types";
 
 export function OnboardingForm({ profile }: { profile: ProfileRow }) {
@@ -32,8 +32,12 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
   const [commune, setCommune] = useState(profile.commune ?? "");
   const hasPhone = !!profile.phone;
   const [phoneInput, setPhoneInput] = useState("");
+  const [dob, setDob] = useState(profile.date_naissance ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Date maximale = il y a 18 ans.
+  const maxDob = new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().slice(0, 10);
 
   function goToRole(e: React.FormEvent) {
     e.preventDefault();
@@ -49,6 +53,11 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
     // Le téléphone est requis (contact) : demandé ici si le compte n'en a pas (Google).
     if (!hasPhone && !toE164Ci(phoneSchema.safeParse({ phone: phoneInput }).success ? phoneInput : "")) {
       setError(t("onboarding.phoneRequired"));
+      return;
+    }
+    const age = ageFromDob(dob);
+    if (age === null || age < 18) {
+      setError(t("onboarding.ageRequired"));
       return;
     }
     setStep("role");
@@ -67,7 +76,8 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
       role,
     };
     // Renseigne le téléphone la première fois (compte Google sans numéro).
-    if (!hasPhone) patch.phone = toE164Ci(phoneInput) ?? null;
+    if (!hasPhone) patch.phone = toE164Ci(phoneInput)?.replace(/^\+/, "") ?? null;
+    patch.date_naissance = dob || null;
 
     const { error: upErr } = await supabase.from("profiles").update(patch).eq("id", profile.id);
 
@@ -91,13 +101,10 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-secondary">
-      <div className="container flex flex-1 flex-col py-8">
-        <div className="mb-6 flex justify-center">
-          <Logo />
-        </div>
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-secondary px-4 py-10">
+      <Logo />
 
-        <div className="mx-auto w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <div className="w-full max-w-xl rounded-2xl border border-border bg-card p-8 shadow-sm sm:p-10">
           {step === "infos" ? (
             <form onSubmit={goToRole} className="space-y-5">
               <div className="text-center">
@@ -175,6 +182,12 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
                 )}
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="dob">{t("onboarding.dob")}</Label>
+                <Input id="dob" type="date" max={maxDob} value={dob} onChange={(e) => setDob(e.target.value)} />
+                <p className="text-xs text-muted-foreground">{t("onboarding.dobHint")}</p>
+              </div>
+
               {error && <p className="text-sm text-destructive">{error}</p>}
 
               <Button type="submit" className="w-full">
@@ -182,24 +195,24 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
               </Button>
             </form>
           ) : (
-            <div className="space-y-5">
+            <div className="space-y-6">
               <div className="text-center">
-                <h1 className="text-xl font-extrabold">{t("onboarding.whatLooking")}</h1>
-                <p className="text-sm text-muted-foreground">
+                <h1 className="text-2xl font-extrabold sm:text-3xl">{t("onboarding.whatLooking")}</h1>
+                <p className="mt-1 text-base text-muted-foreground">
                   {t("onboarding.completeLater")}
                 </p>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <RoleCard
-                  icon={<Search className="size-6" />}
+                  icon={<Search className="size-7" />}
                   title={t("onboarding.candidateTitle")}
                   subtitle={t("onboarding.candidateSub")}
                   onClick={() => chooseRole("candidate")}
                   disabled={loading}
                 />
                 <RoleCard
-                  icon={<Briefcase className="size-6" />}
+                  icon={<Briefcase className="size-7" />}
                   title={t("onboarding.employerTitle")}
                   subtitle={t("onboarding.employerSub")}
                   onClick={() => chooseRole("employer")}
@@ -217,14 +230,13 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
               <button
                 type="button"
                 onClick={() => setStep("infos")}
-                className="w-full text-center text-sm text-muted-foreground"
+                className="inline-flex w-full items-center justify-center gap-2 text-base font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
-                {t("onboarding.backToInfo")}
+                <ArrowLeft className="size-5" /> {t("onboarding.backToInfo")}
               </button>
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 }
@@ -247,16 +259,16 @@ function RoleCard({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex w-full items-center gap-4 rounded-2xl border border-border bg-background p-4 text-left transition-colors hover:border-primary hover:bg-primary-soft/40 disabled:opacity-50"
+      className="flex w-full items-center gap-5 rounded-2xl border border-border bg-background p-5 text-left transition-colors hover:border-primary hover:bg-primary-soft/40 disabled:opacity-50 sm:p-6"
     >
-      <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary">
+      <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary">
         {icon}
       </span>
       <span className="flex-1">
-        <span className="block font-bold">{title}</span>
-        <span className="block text-sm text-muted-foreground">{subtitle}</span>
+        <span className="block text-lg font-bold">{title}</span>
+        <span className="block text-base text-muted-foreground">{subtitle}</span>
       </span>
-      <ArrowRight className="size-5 text-muted-foreground" />
+      <ArrowRight className="size-6 text-muted-foreground" />
     </button>
   );
 }

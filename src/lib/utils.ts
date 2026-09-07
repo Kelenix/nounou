@@ -37,3 +37,15 @@ export function formatPhoneCi(phone: string | null | undefined): string {
 export function dateLocale(locale: string): string {
   return locale === "en" ? "en-US" : "fr-FR";
 }
+
+/** Âge en années révolues à partir d'une date de naissance (ISO « AAAA-MM-JJ » ou Date). */
+export function ageFromDob(dob: string | Date | null | undefined): number | null {
+  if (!dob) return null;
+  const d = typeof dob === "string" ? new Date(dob) : dob;
+  if (Number.isNaN(d.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age -= 1;
+  return age;
+}

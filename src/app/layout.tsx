@@ -12,13 +12,17 @@ const poppins = Poppins({
   display: "swap",
 });
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://jaimanounou.com";
+const SITE_DESCRIPTION =
+  "Plateforme de mise en relation entre familles et aides à domicile en Côte d'Ivoire. Nounou, ménage, cuisine, garde d'enfants. La confiance avant tout.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(APP_URL),
   title: {
     default: "J'ai ma nounou — Trouvez la nounou idéale",
     template: "%s · J'ai ma nounou",
   },
-  description:
-    "Plateforme de mise en relation entre familles et aides à domicile en Côte d'Ivoire. Nounou, ménage, cuisine, garde d'enfants. La confiance avant tout.",
+  description: SITE_DESCRIPTION,
   applicationName: "J'ai ma nounou",
   manifest: "/manifest.webmanifest",
   icons: {
@@ -27,6 +31,21 @@ export const metadata: Metadata = {
   },
   appleWebApp: { capable: true, statusBarStyle: "default", title: "Nounou" },
   formatDetection: { telephone: false },
+  openGraph: {
+    type: "website",
+    siteName: "J'ai ma nounou",
+    title: "J'ai ma nounou — Trouvez la nounou idéale",
+    description: SITE_DESCRIPTION,
+    url: APP_URL,
+    locale: "fr_FR",
+    images: [{ url: "/logo.png", width: 420, height: 280, alt: "J'ai ma nounou" }],
+  },
+  twitter: {
+    card: "summary",
+    title: "J'ai ma nounou — Trouvez la nounou idéale",
+    description: SITE_DESCRIPTION,
+    images: ["/logo.png"],
+  },
 };
 
 export const viewport: Viewport = {
@@ -42,12 +61,19 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const locale = await getLocale();
   const messages = await getMessages();
+  const analyticsSrc = process.env.NEXT_PUBLIC_ANALYTICS_SRC;
+  const analyticsDomain = process.env.NEXT_PUBLIC_ANALYTICS_DOMAIN;
   return (
     <html lang={locale} className={poppins.variable}>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>
+        {/* Analytics respectueux de la vie privée (Plausible / Umami) — actif si configuré. */}
+        {analyticsSrc && analyticsDomain && (
+          // eslint-disable-next-line @next/next/no-sync-scripts
+          <script defer data-domain={analyticsDomain} src={analyticsSrc} />
+        )}
       </body>
     </html>
   );

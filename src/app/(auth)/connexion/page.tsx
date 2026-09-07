@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { AuthShell } from "@/features/auth/auth-shell";
-import { PhoneAuthForm } from "@/features/auth/phone-auth-form";
+import { EmailAuthForm } from "@/features/auth/email-auth-form";
 import { FullPageSpinner } from "@/components/ui/spinner";
 
 export async function generateMetadata() {
@@ -22,7 +22,7 @@ export default async function ConnexionPage() {
       }
     >
       <Suspense fallback={<FullPageSpinner />}>
-        <PhoneAuthForm mode="login" />
+        <EmailAuthForm mode="login" />
       </Suspense>
     </AuthShell>
   );

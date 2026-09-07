@@ -43,8 +43,10 @@ export function ProviderPhoto({
 
   if (src) {
     return (
+      // Remplissage complet du cadre (aucune bordure), cadré vers le haut pour
+      // préserver le visage.
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={src} alt={name} loading="lazy" className={cn("size-full object-cover", className)} />
+      <img src={src} alt={name} loading="lazy" className={cn("size-full object-cover object-top", className)} />
     );
   }
   return (

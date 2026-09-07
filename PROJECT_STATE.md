@@ -106,6 +106,32 @@
 
 ## Journal de session (le plus récent en haut)
 
+- 2026-09-05 — **Refonte auth + profil + confiance (Phases A/B/C).**
+  **A** : suppression de l'OTP SMS ; connexion/inscription par **email + mot de passe** (+ Google
+  conservé) ; téléphone devenu champ de contact (non vérifié), normalisé sans « + ». **B** :
+  **date de naissance** (colonne `profiles.date_naissance`) collectée à l'inscription/onboarding/
+  modif profil (validation ≥ 18) ; **âge calculé** exposé via la vue `public_profiles` (date brute
+  jamais exposée) et affiché sur catalogue/fiches. **C** : **vérification d'identité** — bucket privé
+  `identity-docs`, upload de la pièce par la nounou, page admin `/admin/verifications` (URL signées)
+  + route `verify-identity` (service_role) → passage `verification_level` à `identity` → badge
+  « Identité vérifiée ». Badge de base relibellé « Inscrit ». SMS : décision de passer par **Twilio**
+  (natif Supabase, config tableau de bord) ; le hook SMS Pro Africa reste inactif. Migrations
+  `20260905000001` (date_naissance) et `20260905000002` (identity) à pousser. Typecheck/lint/tests/
+  build verts.
+
+- 2026-09-04 — **Préparation du déploiement VPS (Docker) + login Google opérationnel.**
+  Login Google branché et vérifié en local (Supabase local + console Google). Correctif base :
+  fonction de garde `profiles_guard_self_update` réalignée sur la migration (autorise la 1ʳᵉ
+  saisie du téléphone à l'onboarding) — débloque le choix de rôle. **Scaffolding de déploiement**
+  ajouté : `next.config` en `output: "standalone"`, `sharp` installé (optimisation images
+  auto-hébergée), `Dockerfile` multi-étapes + `.dockerignore`, `deploy/deploy.sh` (build+run en
+  une commande, port `127.0.0.1:3002`), `deploy/nginx/jaimanounou.com.conf` (reverse proxy),
+  `.env.production.example`, `.gitignore` durci (`.env.production`). Runbook complet :
+  `docs/deploiement-vps.md`. **Build prod vérifié vert (44 routes).** Cible : app sur VPS Hostinger,
+  base sur Supabase Cloud `lssqjjqszhwqetcifdpu`, domaine `jaimanounou.com`, **lancement Google-only**
+  (SMS différé). Reste manuel (toi) : push migrations cloud, config Auth Google cloud, DNS, exécution
+  sur le VPS (blocs A→E du runbook).
+
 - 2026-09-03 — **Connexion/inscription Google (OAuth)** : bouton « Continuer avec Google » sur
   connexion + inscription, route `/auth/callback` (échange PKCE → onboarding si profil incomplet,
   sinon /app ou /admin), provider `[auth.external.google]` dans `config.toml` (clés en env).

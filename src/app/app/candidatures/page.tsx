@@ -133,7 +133,7 @@ export default async function CandidaturesPage({
     if (candIds.length > 0) {
       const { data: cands } = await supabase
         .from("public_profiles")
-        .select("id, nom, prenom, photo_url, ville, commune, role, verification_level, is_active, is_suspended, created_at")
+        .select("id, nom, prenom, photo_url, ville, commune, role, verification_level, is_active, is_suspended, created_at, age")
         .in("id", candIds);
       for (const c of cands ?? []) candById.set(c.id, c);
     }

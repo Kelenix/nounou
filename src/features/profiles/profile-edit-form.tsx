@@ -15,7 +15,9 @@ import { Spinner } from "@/components/ui/spinner";
 import { ServicePicker } from "@/components/ui/service-picker";
 import { useToast } from "@/components/ui/toast";
 import { AvatarUpload } from "@/features/profiles/avatar-upload";
+import { IdentityDocUpload } from "@/features/profiles/identity-doc-upload";
 import { VILLES_CI, COMMUNES_ABIDJAN } from "@/lib/constants";
+import { ageFromDob } from "@/lib/utils";
 import type {
   ProfileRow,
   CandidateProfileRow,
@@ -46,6 +48,8 @@ export function ProfileEditForm({
   const [nom, setNom] = useState(profile.nom ?? "");
   const [ville, setVille] = useState(profile.ville ?? "Abidjan");
   const [commune, setCommune] = useState(profile.commune ?? "");
+  const [dob, setDob] = useState(profile.date_naissance ?? "");
+  const maxDob = new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().slice(0, 10);
 
   // Candidate
   const [services, setServices] = useState<ServiceType[]>(candidate?.services ?? []);
@@ -80,6 +84,10 @@ export function ProfileEditForm({
       setError(t("profileEdit.nameRequired"));
       return;
     }
+    if (dob && (ageFromDob(dob) ?? 0) < 18) {
+      setError(t("profileEdit.ageRequired"));
+      return;
+    }
     setLoading(true);
 
     const { error: pErr } = await supabase
@@ -90,6 +98,7 @@ export function ProfileEditForm({
         ville,
         commune: commune.trim() || null,
         photo_url: photoUrl,
+        date_naissance: dob || null,
       })
       .eq("id", profile.id);
 
@@ -162,6 +171,10 @@ export function ProfileEditForm({
         )}
       </Field>
 
+      <Field label={t("profileEdit.dob")}>
+        <Input type="date" max={maxDob} value={dob} onChange={(e) => setDob(e.target.value)} />
+      </Field>
+
       {profile.role === "candidate" && (
         <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
           <h2 className="font-bold">{t("profileEdit.candidateInfo")}</h2>
@@ -189,6 +202,11 @@ export function ProfileEditForm({
           <Field label={t("profileEdit.aboutMe")}>
             <Textarea value={candDesc} onChange={(e) => setCandDesc(e.target.value)} placeholder={t("profileEdit.aboutMePlaceholder")} />
           </Field>
+
+          <div className="border-t border-border/60 pt-4">
+            <h3 className="mb-2 font-semibold">{t("identity.sectionTitle")}</h3>
+            <IdentityDocUpload userId={profile.id} hasDoc={!!profile.identity_doc_path} level={profile.verification_level} />
+          </div>
         </div>
       )}
 

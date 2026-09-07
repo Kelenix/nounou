@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { logAudit } from "@/lib/admin";
 
 const bodySchema = z.object({
-  action: z.enum(["delete", "cancel_subscription", "set_role", "suspend"]),
+  action: z.enum(["delete", "cancel_subscription", "activate_subscription", "set_role", "suspend"]),
   userId: z.string().uuid(),
   role: z.enum(["candidate", "employer", "admin"]).optional(),
   suspended: z.boolean().optional(),
@@ -79,6 +79,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Suppression impossible" }, { status: 500 });
     }
     await logAudit(me, "delete_user", { targetId: userId, targetName });
+    return NextResponse.json({ ok: true });
+  }
+
+  // activate_subscription : activation MANUELLE par un admin (accès offert, sans paiement).
+  if (action === "activate_subscription") {
+    if (target.role === "candidate") {
+      await admin.from("candidate_profiles").upsert({ user_id: userId, is_active_paid: true });
+    } else if (target.role === "employer") {
+      await admin.from("employer_profiles").upsert({ user_id: userId, is_premium: true });
+    } else {
+      return NextResponse.json({ error: "Activation réservée aux candidates/employeurs" }, { status: 400 });
+    }
+    await logAudit(me, "activate_subscription", { targetId: userId, targetName, details: { manual: true } });
     return NextResponse.json({ ok: true });
   }
 

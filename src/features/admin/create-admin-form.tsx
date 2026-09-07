@@ -16,6 +16,7 @@ export function CreateAdminForm() {
   const t = useTranslations();
   const [prenom, setPrenom] = useState("");
   const [nom, setNom] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -25,11 +26,15 @@ export function CreateAdminForm() {
       toast(t("admin.createAdminInvalid"), "error");
       return;
     }
+    if (email.trim().length === 0 && phone.trim().length === 0) {
+      toast(t("admin.createAdminNeedContact"), "error");
+      return;
+    }
     setLoading(true);
     const res = await fetch("/api/admin/create-admin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prenom: prenom.trim(), nom: nom.trim(), phone }),
+      body: JSON.stringify({ prenom: prenom.trim(), nom: nom.trim(), email: email.trim(), phone }),
     });
     const data = await res.json().catch(() => null);
     setLoading(false);
@@ -40,6 +45,7 @@ export function CreateAdminForm() {
     toast(data?.promoted ? t("admin.createAdminPromoted") : t("admin.createAdminSuccess"), "success");
     setPrenom("");
     setNom("");
+    setEmail("");
     setPhone("");
     router.refresh();
   }
@@ -56,6 +62,20 @@ export function CreateAdminForm() {
           <Input id="a-nom" value={nom} onChange={(e) => setNom(e.target.value)} />
         </div>
       </div>
+      <div className="space-y-2">
+        <Label htmlFor="a-email">{t("admin.createAdminEmailLabel")}</Label>
+        <Input id="a-email" type="email" inputMode="email" placeholder="admin@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <p className="text-xs text-muted-foreground">
+          {t("admin.createAdminEmailHint")}
+        </p>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <span className="h-px flex-1 bg-border" />
+        <span className="text-xs text-muted-foreground">{t("admin.createAdminOr")}</span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="a-phone">{t("admin.createAdminPhoneLabel")}</Label>
         <div className="flex items-center gap-2">
