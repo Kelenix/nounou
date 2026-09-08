@@ -4,6 +4,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import {
   getPaymentProvider,
   getAvailablePaymentMethods,
+  paydunyaSoftpayActive,
   type InitiatePaymentResult,
 } from "@/features/payments/provider";
 import { applyPaymentSuccess } from "@/features/payments/confirm";
@@ -70,8 +71,9 @@ export async function POST(request: Request) {
   }
 
   // SOFTPAY Orange Money CI exige un code OTP (généré par le client via #144*82#).
+  // Uniquement en production (en test, c'est le checkout hébergé qui est utilisé, sans OTP).
   const provider = getPaymentProvider(moyen);
-  if (provider.name === "paydunya" && moyen === "orange_money" && (parsed.data.otp ?? "").length < 4) {
+  if (paydunyaSoftpayActive() && moyen === "orange_money" && (parsed.data.otp ?? "").length < 4) {
     return NextResponse.json(
       { error: "Code Orange Money requis. Composez #144*82# (option 2) pour l'obtenir." },
       { status: 400 },

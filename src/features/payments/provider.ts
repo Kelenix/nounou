@@ -267,11 +267,20 @@ class PayDunyaProvider implements PaymentProvider {
     });
     const inv = await invRes.json().catch(() => null);
     const token = inv?.token as string | undefined;
+    const invoiceUrl = inv?.response_text as string | undefined;
     if (inv?.response_code !== "00" || !token) {
       throw new Error(`PayDunya : création de facture échouée (${inv?.response_text ?? invRes.status})`);
     }
 
-    // 2. SOFTPAY : débit direct via l'opérateur (sans redirection, sauf Wave qui renvoie une URL).
+    // SOFTPAY (paiement in-app) n'existe QU'EN PRODUCTION chez PayDunya (aucun endpoint sandbox).
+    // En mode test, seul le checkout hébergé (redirection) fonctionne → on l'utilise pour tester
+    // le flux de bout en bout. L'IPN signé confirme le paiement dans les deux cas.
+    if (process.env.PAYDUNYA_MODE !== "live") {
+      if (!invoiceUrl) throw new Error("PayDunya : URL de facture manquante.");
+      return { reference, status: "en_attente", redirectUrl: invoiceUrl, providerToken: token };
+    }
+
+    // 2. SOFTPAY (production) : débit direct via l'opérateur (sans redirection, sauf Wave qui renvoie une URL).
     const name = input.customerName?.trim() || "Client";
     const email = input.customerEmail?.trim() || `${input.userId}@jaimanounou.com`;
     const endpoint = PayDunyaProvider.SOFTPAY_CI[input.moyen];
@@ -423,6 +432,15 @@ export function getPaymentProvider(moyen: PaymentMethod): PaymentProvider {
       ? (process.env.PAYMENT_CARD_PROVIDER ?? "mock")
       : (process.env.PAYMENT_MOBILE_PROVIDER ?? "mock");
   return (PROVIDERS[key] ?? PROVIDERS.mock)();
+}
+
+/**
+ * SOFTPAY (paiement in-app sans redirection) est-il réellement actif ?
+ * Uniquement avec PayDunya en PRODUCTION (le sandbox ne supporte que la redirection).
+ * Pilote l'affichage/obligation du champ OTP Orange Money côté formulaire.
+ */
+export function paydunyaSoftpayActive(): boolean {
+  return process.env.PAYMENT_MOBILE_PROVIDER === "paydunya" && process.env.PAYDUNYA_MODE === "live";
 }
 
 /** Fournisseur nommé (pour router un webhook entrant `/api/paiement/webhook/<name>`). */

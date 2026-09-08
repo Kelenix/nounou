@@ -21,12 +21,15 @@ export function PayForm({
   montant,
   defaultPhone,
   methods,
+  softpay = false,
 }: {
   type: PaymentType;
   montant: number;
   defaultPhone: string;
   /** Moyens réellement configurés (clés présentes) à proposer. */
   methods: PaymentMethod[];
+  /** SOFTPAY actif (PayDunya live) : le paiement se fait in-app avec OTP pour Orange Money. */
+  softpay?: boolean;
 }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -94,7 +97,7 @@ export function PayForm({
       }
       e164 = parsed;
     }
-    if (moyen === "orange_money" && otp.trim().length < 4) {
+    if (softpay && moyen === "orange_money" && otp.trim().length < 4) {
       setError(t("payment.otpRequired"));
       return;
     }
@@ -224,7 +227,7 @@ export function PayForm({
         </div>
       )}
 
-      {moyen === "orange_money" && (
+      {softpay && moyen === "orange_money" && (
         <div className="space-y-2">
           <Label htmlFor="om-otp">{t("payment.otpLabel")}</Label>
           <Input

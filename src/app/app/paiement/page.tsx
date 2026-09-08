@@ -7,7 +7,7 @@ import { getPricing } from "@/features/settings/queries";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PayForm } from "@/features/payments/pay-form";
-import { getAvailablePaymentMethods } from "@/features/payments/provider";
+import { getAvailablePaymentMethods, paydunyaSoftpayActive } from "@/features/payments/provider";
 import { formatFcfa } from "@/lib/utils";
 import type { PaymentMethod, PaymentType } from "@/lib/supabase/database.types";
 
@@ -21,6 +21,7 @@ export default async function PaiementPage() {
   const supabase = await createClient();
   const pricing = await getPricing();
   const methods = getAvailablePaymentMethods();
+  const softpay = paydunyaSoftpayActive();
   const t = await getTranslations();
 
   if (profile.role === "candidate") {
@@ -43,6 +44,7 @@ export default async function PaiementPage() {
         ]}
         phone={profile.phone ?? ""}
         methods={methods}
+        softpay={softpay}
       />
     );
   }
@@ -67,6 +69,7 @@ export default async function PaiementPage() {
         ]}
         phone={profile.phone ?? ""}
         methods={methods}
+        softpay={softpay}
       />
     );
   }
@@ -82,6 +85,7 @@ function Checkout({
   features,
   phone,
   methods,
+  softpay,
 }: {
   type: PaymentType;
   title: string;
@@ -90,6 +94,7 @@ function Checkout({
   features: string[];
   phone: string;
   methods: PaymentMethod[];
+  softpay: boolean;
 }) {
   return (
     <div className="space-y-5">
@@ -111,7 +116,7 @@ function Checkout({
         </CardContent>
       </Card>
 
-      <PayForm type={type} montant={montant} defaultPhone={phone} methods={methods} />
+      <PayForm type={type} montant={montant} defaultPhone={phone} methods={methods} softpay={softpay} />
     </div>
   );
 }

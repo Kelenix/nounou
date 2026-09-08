@@ -106,6 +106,12 @@
 
 ## Journal de session (le plus récent en haut)
 
+- 2026-09-09 — **PayDunya : SOFTPAY conscient du mode (sandbox = redirection, prod = in-app).**
+  Découverte : SOFTPAY n'a pas d'environnement sandbox (doc n'expose que `api/v1/softpay/...`), d'où
+  l'échec `success:false` en test. `initiate` bascule désormais : `PAYDUNYA_MODE=test` → checkout
+  hébergé (redirection, testable en sandbox) ; `=live` → SOFTPAY in-app. Helper `paydunyaSoftpayActive()`
+  pilote le champ/obligation OTP Orange Money (formulaire + route), masqué en test. Log de diagnostic
+  ajouté sur l'échec SOFTPAY. **SOFTPAY ne pourra être validé qu'en prod (live).** Build+types+lint verts.
 - 2026-09-08 — **PayDunya SOFTPAY (paiement in-app, sans redirection).** Le client paie sans quitter
   le site : opérateur + numéro → validation sur son téléphone (plus de page PayDunya, pas de compte).
   `PayDunyaProvider.initiate` fait facture → appel SOFTPAY par opérateur (params exacts CI :
