@@ -786,7 +786,16 @@
     "momoNumber": "Mobile Money number",
     "pay": "Pay {amount}",
     "secure": "Secure payment",
-    "unavailable": "Online payment will be available soon. Please try again later."
+    "unavailable": "Online payment will be available soon. Please try again later.",
+    "otpLabel": "Orange Money payment code",
+    "otpPlaceholder": "e.g. 8562",
+    "otpHint": "Dial #144*82# (option 2) on your phone to get the code.",
+    "otpRequired": "Enter your Orange Money payment code.",
+    "pendingTitle": "Payment pending",
+    "pendingDefault": "Confirm the payment on your phone.",
+    "pendingWait": "Waiting for your confirmation…",
+    "pendingTimeout": "Not confirmed yet. If you validated on your phone, please wait a moment.",
+    "recheck": "I validated, check now"
   },
   "settings": {
     "metaTitle": "Settings",

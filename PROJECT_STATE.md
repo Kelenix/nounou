@@ -106,6 +106,13 @@
 
 ## Journal de session (le plus récent en haut)
 
+- 2026-09-08 — **PayDunya SOFTPAY (paiement in-app, sans redirection).** Le client paie sans quitter
+  le site : opérateur + numéro → validation sur son téléphone (plus de page PayDunya, pas de compte).
+  `PayDunyaProvider.initiate` fait facture → appel SOFTPAY par opérateur (params exacts CI :
+  `orange-money-ci` + OTP `#144*82#`, `mtn-ci` push, `moov-ci` popup, `wave-ci` → URL Wave). Champ
+  **OTP** au formulaire pour Orange Money ; état « en attente » + **suivi auto** via
+  `GET /api/paiement/statut` (mis à jour par l'IPN signé) ; refus opérateur renvoyé avec le motif.
+  i18n FR/EN. Build + typecheck + lint verts. **À tester en sandbox** (clients fictifs PayDunya).
 - 2026-09-08 — **Réconciliation PayDunya (comble la limite).** Nouvelle colonne
   `payments.provider_token` (migration `20260908000001`) : le token d'invoice PayDunya est stocké à
   l'initiation. `checkStatus` implémenté pour PayDunya (GET `/checkout-invoice/confirm/{token}` →

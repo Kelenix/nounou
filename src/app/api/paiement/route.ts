@@ -14,6 +14,8 @@ const bodySchema = z.object({
   moyen: z.enum(["orange_money", "mtn_momo", "moov_money", "wave", "carte"]),
   // Le téléphone n'est requis que pour le Mobile Money (pas pour la carte).
   phone: z.string().trim().min(8).max(20).optional(),
+  // Code OTP (Orange Money CI via SOFTPAY : le client le génère avec #144*82#).
+  otp: z.string().trim().max(12).optional(),
 });
 
 const SETTING_KEY: Record<PaymentType, string> = {
@@ -55,12 +57,25 @@ export async function POST(request: Request) {
   }
 
   // Vérifie que le rôle correspond au type de paiement.
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, prenom, nom")
+    .eq("id", user.id)
+    .maybeSingle();
   const roleOk =
     (type === "activation_candidate" && profile?.role === "candidate") ||
     (type === "premium_employeur" && profile?.role === "employer");
   if (!roleOk) {
     return NextResponse.json({ error: "Type de paiement non autorisé pour ce rôle" }, { status: 403 });
+  }
+
+  // SOFTPAY Orange Money CI exige un code OTP (généré par le client via #144*82#).
+  const provider = getPaymentProvider(moyen);
+  if (provider.name === "paydunya" && moyen === "orange_money" && (parsed.data.otp ?? "").length < 4) {
+    return NextResponse.json(
+      { error: "Code Orange Money requis. Composez #144*82# (option 2) pour l'obtenir." },
+      { status: 400 },
+    );
   }
 
   const admin = createAdminClient();
@@ -88,15 +103,26 @@ export async function POST(request: Request) {
   const montant = setting ? Number(setting.value) : DEFAULT_PRICE[type];
 
   // Initiation via le fournisseur (mock par défaut ; réel = CinetPay/PayDunya/Stripe).
+  const customerName = `${profile?.prenom ?? ""} ${profile?.nom ?? ""}`.trim() || undefined;
   let result: InitiatePaymentResult;
   try {
-    result = await getPaymentProvider(moyen).initiate({ userId: user.id, montant, moyen, type, phone });
+    result = await provider.initiate({
+      userId: user.id,
+      montant,
+      moyen,
+      type,
+      phone,
+      customerName,
+      customerEmail: user.email ?? undefined,
+      otp: parsed.data.otp,
+    });
   } catch (e) {
     console.error("[paiement] initiation échouée", e);
     return NextResponse.json({ error: "Paiement indisponible pour le moment." }, { status: 502 });
   }
 
-  // Enregistre la transaction (statut = en_attente pour un vrai fournisseur, reussi pour le mock).
+  // Enregistre la transaction (en_attente = à confirmer par IPN ; echoue = refus opérateur ;
+  // reussi = mock immédiat).
   await admin.from("payments").insert({
     user_id: user.id,
     montant,
@@ -107,10 +133,18 @@ export async function POST(request: Request) {
     statut: result.status,
   });
 
-  // Vrai fournisseur : rediriger vers la page de paiement hébergée. L'activation se fera
-  // au retour du webhook signé (jamais sur la seule réponse d'initiation).
+  // Refus opérateur (OTP invalide, délai dépassé…) : renvoyer le motif à afficher.
+  if (result.status === "echoue") {
+    return NextResponse.json({ error: result.message ?? "Paiement refusé." }, { status: 400 });
+  }
+
+  // Wave / page hébergée : rediriger. L'activation se fera au retour du webhook signé.
   if (result.redirectUrl) {
-    return NextResponse.json({ status: result.status, redirectUrl: result.redirectUrl });
+    return NextResponse.json({
+      status: result.status,
+      reference: result.reference,
+      redirectUrl: result.redirectUrl,
+    });
   }
 
   // Mock : paiement immédiatement réussi → appliquer les effets tout de suite.
@@ -118,5 +152,12 @@ export async function POST(request: Request) {
     await applyPaymentSuccess(admin, user.id, type, montant);
   }
 
-  return NextResponse.json({ status: result.status, montant });
+  // SOFTPAY (Orange/MTN/Moov) : en attente de validation sur le téléphone → l'app interroge
+  // /api/paiement/statut jusqu'à confirmation par l'IPN.
+  return NextResponse.json({
+    status: result.status,
+    reference: result.reference,
+    montant,
+    message: result.message ?? null,
+  });
 }

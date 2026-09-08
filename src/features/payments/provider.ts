@@ -9,6 +9,12 @@ export type InitiatePaymentInput = {
   moyen: PaymentMethod;
   type: PaymentType;
   phone: string;
+  /** Nom du payeur (requis par SOFTPAY PayDunya). */
+  customerName?: string;
+  /** Email du payeur (requis par SOFTPAY PayDunya). */
+  customerEmail?: string;
+  /** Code OTP saisi par le client (Orange Money CI uniquement, via #144*82#). */
+  otp?: string;
 };
 
 export type InitiatePaymentResult = {
@@ -18,6 +24,8 @@ export type InitiatePaymentResult = {
   redirectUrl?: string;
   /** Jeton d'invoice du fournisseur, à conserver pour la réconciliation (ex. token PayDunya). */
   providerToken?: string | null;
+  /** Message opérateur à afficher (ex. « validez sur votre téléphone » ou motif d'échec). */
+  message?: string;
 };
 
 /** Identifiants d'une transaction pour interroger le fournisseur (réconciliation). */
@@ -190,9 +198,64 @@ class PayDunyaProvider implements PaymentProvider {
     };
   }
 
+  // Correspondance moyen (app) → endpoint SOFTPAY PayDunya (Côte d'Ivoire).
+  private static readonly SOFTPAY_CI: Record<Exclude<PaymentMethod, "carte">, string> = {
+    orange_money: "orange-money-ci",
+    mtn_momo: "mtn-ci",
+    moov_money: "moov-ci",
+    wave: "wave-ci",
+  };
+
+  /** Numéro local (sans indicatif) attendu par SOFTPAY. */
+  private localPhone(phone: string): string {
+    return phone.replace(/^\+?225/, "");
+  }
+
+  /** Corps SOFTPAY spécifique à chaque opérateur (noms de champs imposés par PayDunya). */
+  private softpayBody(input: InitiatePaymentInput, token: string, name: string, email: string) {
+    const phone = this.localPhone(input.phone);
+    switch (input.moyen) {
+      case "orange_money":
+        return {
+          orange_money_ci_customer_fullname: name,
+          orange_money_ci_email: email,
+          orange_money_ci_phone_number: phone,
+          orange_money_ci_otp: input.otp ?? "",
+          payment_token: token,
+        };
+      case "mtn_momo":
+        return {
+          mtn_ci_customer_fullname: name,
+          mtn_ci_email: email,
+          mtn_ci_phone_number: phone,
+          mtn_ci_wallet_provider: "MTNCI",
+          payment_token: token,
+        };
+      case "moov_money":
+        return {
+          moov_ci_customer_fullname: name,
+          moov_ci_email: email,
+          moov_ci_phone_number: phone,
+          payment_token: token,
+        };
+      case "wave":
+        return {
+          wave_ci_fullName: name,
+          wave_ci_email: email,
+          wave_ci_phone: phone,
+          wave_ci_payment_token: token, // Wave utilise un nom de token différent
+        };
+      default:
+        throw new Error("PayDunya : moyen non pris en charge.");
+    }
+  }
+
   async initiate(input: InitiatePaymentInput): Promise<InitiatePaymentResult> {
+    if (input.moyen === "carte") throw new Error("PayDunya ne gère pas la carte.");
     const reference = makeReference(input);
-    const res = await fetch(`${this.base()}/checkout-invoice/create`, {
+
+    // 1. Création de la facture → token de paiement.
+    const invRes = await fetch(`${this.base()}/checkout-invoice/create`, {
       method: "POST",
       headers: this.headers(),
       body: JSON.stringify({
@@ -202,14 +265,45 @@ class PayDunyaProvider implements PaymentProvider {
         actions: { callback_url: webhookUrl("paydunya"), return_url: returnUrl() },
       }),
     });
-    const data = await res.json().catch(() => null);
-    const url = data?.response_text as string | undefined;
-    if (data?.response_code !== "00" || !url) {
-      throw new Error(`PayDunya : initiation échouée (${data?.response_text ?? res.status})`);
+    const inv = await invRes.json().catch(() => null);
+    const token = inv?.token as string | undefined;
+    if (inv?.response_code !== "00" || !token) {
+      throw new Error(`PayDunya : création de facture échouée (${inv?.response_text ?? invRes.status})`);
     }
-    // Le token d'invoice permet de re-vérifier le statut plus tard (réconciliation).
-    const providerToken = (data?.token as string | undefined) ?? null;
-    return { reference, status: "en_attente", redirectUrl: url, providerToken };
+
+    // 2. SOFTPAY : débit direct via l'opérateur (sans redirection, sauf Wave qui renvoie une URL).
+    const name = input.customerName?.trim() || "Client";
+    const email = input.customerEmail?.trim() || `${input.userId}@jaimanounou.com`;
+    const endpoint = PayDunyaProvider.SOFTPAY_CI[input.moyen];
+    const spRes = await fetch(`${this.base()}/softpay/${endpoint}`, {
+      method: "POST",
+      headers: this.headers(),
+      body: JSON.stringify(this.softpayBody(input, token, name, email)),
+    });
+    const sp = await spRes.json().catch(() => null);
+
+    // Échec attendu (OTP invalide, délai dépassé, solde insuffisant…) : on renvoie le motif,
+    // sans exception (l'utilisateur pourra réessayer). Transaction marquée échouée.
+    if (sp?.success !== true) {
+      return {
+        reference,
+        status: "echoue",
+        providerToken: token,
+        message: (sp?.message as string | undefined) ?? "Paiement refusé par l'opérateur.",
+      };
+    }
+
+    // Wave CI (et OM QR) : une URL est renvoyée → rediriger le client vers Wave.
+    const url = sp?.url as string | undefined;
+    if (url) return { reference, status: "en_attente", redirectUrl: url, providerToken: token };
+
+    // MTN/Moov/OM : requête acceptée, validation sur le téléphone → confirmation via IPN.
+    return {
+      reference,
+      status: "en_attente",
+      providerToken: token,
+      message: (sp?.message as string | undefined) ?? undefined,
+    };
   }
 
   async checkStatus(ref: PaymentRef): Promise<PaymentWebhookEvent | null> {

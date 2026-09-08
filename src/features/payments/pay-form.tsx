@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { CheckCircle2, ShieldCheck, Clock } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Clock, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,9 @@ import { useToast } from "@/components/ui/toast";
 import { PAYMENT_METHOD_LABELS } from "@/lib/constants";
 import { formatFcfa, toE164Ci } from "@/lib/utils";
 import type { PaymentMethod, PaymentType } from "@/lib/supabase/database.types";
+
+const POLL_INTERVAL_MS = 4000;
+const POLL_MAX_ATTEMPTS = 30; // ~2 min
 
 export function PayForm({
   type,
@@ -30,12 +33,57 @@ export function PayForm({
   const t = useTranslations();
   const [moyen, setMoyen] = useState<PaymentMethod>(methods[0] ?? "orange_money");
   const [phone, setPhone] = useState(defaultPhone.replace(/^\+225/, ""));
+  const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Suivi SOFTPAY (validation sur le téléphone).
+  const [pending, setPending] = useState<{ reference: string; message: string } | null>(null);
+  const [timedOut, setTimedOut] = useState(false);
+  const mounted = useRef(true);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  function succeed() {
+    if (!mounted.current) return;
+    setPending(null);
+    setLoading(false);
+    setDone(true);
+    toast(t("payment.confirmed"), "success");
+    router.refresh();
+  }
+
+  // Interroge le statut jusqu'à confirmation par l'IPN (ou expiration).
+  async function poll(reference: string, attempt: number) {
+    if (!mounted.current) return;
+    if (attempt >= POLL_MAX_ATTEMPTS) {
+      setTimedOut(true);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/paiement/statut?reference=${encodeURIComponent(reference)}`);
+      const data = await res.json().catch(() => null);
+      if (data?.statut === "reussi") return succeed();
+      if (data?.statut === "echoue" || data?.statut === "annule") {
+        if (!mounted.current) return;
+        setPending(null);
+        setError(t("payment.failed"));
+        return;
+      }
+    } catch {
+      /* réseau : on retentera au prochain tour */
+    }
+    setTimeout(() => poll(reference, attempt + 1), POLL_INTERVAL_MS);
+  }
 
   async function pay() {
     setError(null);
+    setTimedOut(false);
     // Le Mobile Money exige un numéro ; la carte (Stripe) non.
     let e164: string | undefined;
     if (moyen !== "carte") {
@@ -46,28 +94,42 @@ export function PayForm({
       }
       e164 = parsed;
     }
+    if (moyen === "orange_money" && otp.trim().length < 4) {
+      setError(t("payment.otpRequired"));
+      return;
+    }
     setLoading(true);
     const res = await fetch("/api/paiement", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, moyen, phone: e164 }),
+      body: JSON.stringify({ type, moyen, phone: e164, otp: otp.trim() || undefined }),
     });
     const data = await res.json().catch(() => null);
 
-    // Vrai fournisseur : redirection vers la page de paiement hébergée.
+    // Wave / page hébergée : redirection.
     if (res.ok && data?.redirectUrl) {
       window.location.href = data.redirectUrl;
       return;
     }
 
-    setLoading(false);
-    if (!res.ok || data?.status !== "reussi") {
+    if (!res.ok) {
+      setLoading(false);
       setError(data?.error ?? t("payment.failed"));
       return;
     }
-    setDone(true);
-    toast(t("payment.confirmed"), "success");
-    router.refresh();
+
+    // Mock : réussi immédiatement.
+    if (data?.status === "reussi") return succeed();
+
+    // SOFTPAY (Orange/MTN/Moov) : validation sur le téléphone → suivi du statut.
+    if (data?.status === "en_attente" && data?.reference) {
+      setPending({ reference: data.reference, message: data.message || t("payment.pendingDefault") });
+      poll(data.reference, 0);
+      return;
+    }
+
+    setLoading(false);
+    setError(t("payment.failed"));
   }
 
   if (done) {
@@ -79,6 +141,35 @@ export function PayForm({
           {type === "activation_candidate" ? t("payment.candidateDone") : t("payment.employerDone")}
         </p>
         <Button onClick={() => router.push("/app")} className="mt-2">{t("payment.backHome")}</Button>
+      </div>
+    );
+  }
+
+  // Paiement SOFTPAY en attente de validation sur le téléphone.
+  if (pending) {
+    return (
+      <div className="flex flex-col items-center gap-3 rounded-2xl border border-primary/30 bg-primary-soft/40 p-6 text-center">
+        <Smartphone className="size-12 text-primary" />
+        <h2 className="text-lg font-bold">{t("payment.pendingTitle")}</h2>
+        <p className="text-sm text-muted-foreground">{pending.message}</p>
+        {timedOut ? (
+          <>
+            <p className="text-sm text-muted-foreground">{t("payment.pendingTimeout")}</p>
+            <Button
+              onClick={() => {
+                setTimedOut(false);
+                poll(pending.reference, 0);
+              }}
+              className="mt-1"
+            >
+              {t("payment.recheck")}
+            </Button>
+          </>
+        ) : (
+          <p className="flex items-center gap-2 text-sm text-primary">
+            <Spinner /> {t("payment.pendingWait")}
+          </p>
+        )}
       </div>
     );
   }
@@ -130,6 +221,20 @@ export function PayForm({
               placeholder="07 00 00 00 00"
             />
           </div>
+        </div>
+      )}
+
+      {moyen === "orange_money" && (
+        <div className="space-y-2">
+          <Label htmlFor="om-otp">{t("payment.otpLabel")}</Label>
+          <Input
+            id="om-otp"
+            inputMode="numeric"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+            placeholder={t("payment.otpPlaceholder")}
+          />
+          <p className="text-xs text-muted-foreground">{t("payment.otpHint")}</p>
         </div>
       )}
 
