@@ -106,6 +106,14 @@
 
 ## Journal de session (le plus récent en haut)
 
+- 2026-09-08 — **Paiement : passage à PayDunya + sécurité webhook.** CinetPay abandonné (mise en prod
+  trop lourde). PayDunya (déjà codé) retenu pour le Mobile Money CI. **Vérification de signature IPN
+  implémentée** : `data[hash]` = SHA-512(PAYDUNYA_MASTER_KEY), comparaison à temps constant, rejet de
+  toute notification falsifiée ([provider.ts](src/features/payments/provider.ts), TODO résolu). Clés
+  test posées dans `.env.production` (`PAYDUNYA_MODE=test`). IPN CinetPay/PayDunya à activer côté
+  PayDunya : `https://jaimanounou.com/api/paiement/webhook/paydunya`. Build + typecheck + lint verts.
+  **Limite connue** : la réconciliation cron ne couvre pas encore PayDunya (`checkStatus` non
+  implémenté — nécessiterait de stocker le token d'invoice PayDunya). Le webhook IPN reste la source.
 - 2026-09-07 — **PWA : badges Android/iOS interactifs + « Disponible sur » dans le footer.** Contexte
   partagé `PwaInstallProvider` (capture `beforeinstallprompt` une seule fois → bandeau ET badges le
   réutilisent sans se le disputer). Badges cliquables (`FooterInstallBadges`) : Android lance

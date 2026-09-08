@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import type { PaymentMethod, PaymentStatus, PaymentType } from "@/lib/supabase/database.types";
 
 export type InitiatePaymentInput = {
@@ -203,7 +203,17 @@ class PayDunyaProvider implements PaymentProvider {
     const params = new URLSearchParams(await request.text());
     const reference = params.get("data[custom_data][reference]");
     if (!reference) return null;
-    // TODO : vérifier `data[hash]` = SHA-512(master_key) selon la doc PayDunya avant de confirmer.
+
+    // Authenticité : PayDunya envoie `data[hash]` = SHA-512(master_key). On refuse
+    // toute notification dont la signature ne correspond pas (anti-falsification).
+    const masterKey = requireEnv("PAYDUNYA_MASTER_KEY");
+    const received = params.get("data[hash]");
+    if (!received) return null;
+    const expected = createHash("sha512").update(masterKey).digest("hex");
+    const a = Buffer.from(received);
+    const b = Buffer.from(expected);
+    if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
+
     return { reference, success: params.get("data[status]") === "completed" };
   }
 }
