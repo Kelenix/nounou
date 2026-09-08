@@ -45,6 +45,13 @@
 - [ ] **Agrégateur Mobile Money** (ex. CinetPay, PayDunya, Djamo) : compte marchand + clés +
   URL de callback. Orange Money / MTN MoMo / Moov Money / Wave.
 
+## Migration base à appliquer (réconciliation PayDunya)
+- [ ] **Colonne `payments.provider_token`** (migration `20260908000001_payment_provider_token.sql`) :
+  à appliquer sur **Supabase Cloud AVANT de déployer** le nouveau code (sinon l'insertion d'un
+  paiement échoue). Depuis le repo lié au projet cloud : `supabase db push` — ou coller le contenu
+  de la migration dans **Supabase → SQL Editor**. C'est un simple `ADD COLUMN IF NOT EXISTS`
+  (idempotent, sans risque).
+
 ## Réconciliation automatique des paiements (cron VPS)
 - [ ] **Générer le secret** : `openssl rand -hex 32` → coller dans `.env.production` :
   `CRON_SECRET=<valeur>` (puis relancer `bash deploy/deploy.sh` pour que le conteneur le charge).

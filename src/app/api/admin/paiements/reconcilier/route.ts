@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     // Vérification d'une transaction précise.
     const { data: payment } = await admin
       .from("payments")
-      .select("moyen, statut, reference_transaction")
+      .select("moyen, statut, reference_transaction, provider_token")
       .eq("reference_transaction", reference)
       .maybeSingle();
     counts = { confirmed: 0, failed: 0, consistent: 0, mismatch: 0, unverifiable: 0 };

@@ -59,7 +59,7 @@ export type ReconcileOutcome =
   | "failed" // était en attente → marquée échouée
   | "consistent" // déjà cohérente avec le fournisseur
   | "mismatch" // marquée réussie chez nous mais NON acceptée côté fournisseur (à examiner)
-  | "unverifiable"; // pas de référence ou fournisseur sans API de contrôle
+  | "unverifiable"; // pas de référence/jeton, ou fournisseur sans API de contrôle
 
 export type ReconcileResult = { reference: string | null; outcome: ReconcileOutcome; changed: boolean };
 
@@ -72,14 +72,14 @@ export type ReconcileResult = { reference: string | null; outcome: ReconcileOutc
 export async function reconcilePayment(
   admin: Admin,
   provider: PaymentProvider,
-  payment: Pick<PaymentRow, "reference_transaction" | "statut">,
+  payment: Pick<PaymentRow, "reference_transaction" | "provider_token" | "statut">,
 ): Promise<ReconcileResult> {
   const reference = payment.reference_transaction;
   if (!reference || !provider.checkStatus) {
     return { reference, outcome: "unverifiable", changed: false };
   }
 
-  const real = await provider.checkStatus(reference);
+  const real = await provider.checkStatus({ reference, providerToken: payment.provider_token });
   if (!real) return { reference, outcome: "unverifiable", changed: false };
 
   if (real.success) {
@@ -113,7 +113,7 @@ export async function reconcileStuckPayments(
   const cutoff = new Date(Date.now() - olderThanMs).toISOString();
   const { data: payments } = await admin
     .from("payments")
-    .select("id, moyen, statut, reference_transaction")
+    .select("id, moyen, statut, reference_transaction, provider_token")
     .eq("statut", "en_attente")
     .not("reference_transaction", "is", null)
     .lte("created_at", cutoff)

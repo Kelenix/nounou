@@ -22,6 +22,9 @@ next-env.d.ts
 /supabase/.temp
 /supabase/.env
 
+# Claude Code (skills, réglages locaux) — ne pas publier sur GitHub
+.claude/
+
 # divers
 .DS_Store
 *.pem

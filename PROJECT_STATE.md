@@ -106,6 +106,13 @@
 
 ## Journal de session (le plus récent en haut)
 
+- 2026-09-08 — **Réconciliation PayDunya (comble la limite).** Nouvelle colonne
+  `payments.provider_token` (migration `20260908000001`) : le token d'invoice PayDunya est stocké à
+  l'initiation. `checkStatus` implémenté pour PayDunya (GET `/checkout-invoice/confirm/{token}` →
+  `status === "completed"`). Signature `checkStatus(ref: PaymentRef)` généralisée (reference +
+  providerToken) ; CinetPay/mock/cron/API admin adaptés. Le cron et la réconciliation manuelle
+  couvrent désormais CinetPay ET PayDunya. **À faire avant déploiement** : appliquer la migration sur
+  Supabase Cloud (`supabase db push`, cf. `docs/manual-tasks.md`). Build + typecheck + lint + 11 tests verts.
 - 2026-09-08 — **Paiement : passage à PayDunya + sécurité webhook.** CinetPay abandonné (mise en prod
   trop lourde). PayDunya (déjà codé) retenu pour le Mobile Money CI. **Vérification de signature IPN
   implémentée** : `data[hash]` = SHA-512(PAYDUNYA_MASTER_KEY), comparaison à temps constant, rejet de

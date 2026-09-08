@@ -103,6 +103,7 @@ export async function POST(request: Request) {
     moyen,
     type,
     reference_transaction: result.reference,
+    provider_token: result.providerToken ?? null,
     statut: result.status,
   });
 

@@ -16,6 +16,16 @@ export type InitiatePaymentResult = {
   status: PaymentStatus;
   /** URL de paiement hébergée (agrégateur/Stripe) vers laquelle rediriger l'utilisateur. */
   redirectUrl?: string;
+  /** Jeton d'invoice du fournisseur, à conserver pour la réconciliation (ex. token PayDunya). */
+  providerToken?: string | null;
+};
+
+/** Identifiants d'une transaction pour interroger le fournisseur (réconciliation). */
+export type PaymentRef = {
+  /** Notre référence interne (transaction_id envoyé au fournisseur). */
+  reference: string;
+  /** Jeton d'invoice du fournisseur, si conservé à l'initiation. */
+  providerToken: string | null;
 };
 
 /** Événement de confirmation reçu et vérifié depuis un webhook fournisseur. */
@@ -36,9 +46,10 @@ export interface PaymentProvider {
   parseWebhook(request: Request): Promise<PaymentWebhookEvent | null>;
   /**
    * Interroge le fournisseur sur le statut réel d'une transaction (réconciliation).
-   * `null` = statut non déterminable automatiquement (fournisseur sans API de contrôle).
+   * `null` = statut non déterminable automatiquement (fournisseur sans API de contrôle,
+   * ou jeton manquant).
    */
-  checkStatus?(reference: string): Promise<PaymentWebhookEvent | null>;
+  checkStatus?(ref: PaymentRef): Promise<PaymentWebhookEvent | null>;
 }
 
 // ---------------------------------------------------------------------------
@@ -88,8 +99,8 @@ class MockPaymentProvider implements PaymentProvider {
     return null;
   }
 
-  async checkStatus(reference: string): Promise<PaymentWebhookEvent | null> {
-    return { reference, success: true };
+  async checkStatus(ref: PaymentRef): Promise<PaymentWebhookEvent | null> {
+    return { reference: ref.reference, success: true };
   }
 }
 
@@ -138,10 +149,11 @@ class CinetPayProvider implements PaymentProvider {
     if (!reference) return null;
     // Source de vérité : on re-vérifie le statut réel via l'API /payment/check
     // (recommandé par CinetPay plutôt que de se fier au seul webhook).
-    return this.checkStatus(reference);
+    return this.checkStatus({ reference, providerToken: null });
   }
 
-  async checkStatus(reference: string): Promise<PaymentWebhookEvent | null> {
+  async checkStatus(ref: PaymentRef): Promise<PaymentWebhookEvent | null> {
+    const reference = ref.reference;
     const { apikey, site_id } = this.creds();
     const res = await fetch(`${CinetPayProvider.BASE}/payment/check`, {
       method: "POST",
@@ -195,7 +207,21 @@ class PayDunyaProvider implements PaymentProvider {
     if (data?.response_code !== "00" || !url) {
       throw new Error(`PayDunya : initiation échouée (${data?.response_text ?? res.status})`);
     }
-    return { reference, status: "en_attente", redirectUrl: url };
+    // Le token d'invoice permet de re-vérifier le statut plus tard (réconciliation).
+    const providerToken = (data?.token as string | undefined) ?? null;
+    return { reference, status: "en_attente", redirectUrl: url, providerToken };
+  }
+
+  async checkStatus(ref: PaymentRef): Promise<PaymentWebhookEvent | null> {
+    // La réconciliation PayDunya passe par le token d'invoice (pas notre référence).
+    if (!ref.providerToken) return null;
+    const res = await fetch(`${this.base()}/checkout-invoice/confirm/${ref.providerToken}`, {
+      method: "GET",
+      headers: this.headers(),
+    });
+    const data = await res.json().catch(() => null);
+    if (data?.response_code !== "00") return null; // requête invalide → non déterminable
+    return { reference: ref.reference, success: data?.status === "completed" };
   }
 
   async parseWebhook(request: Request): Promise<PaymentWebhookEvent | null> {

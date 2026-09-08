@@ -185,6 +185,7 @@ export type PaymentRow = Timestamps & {
   montant: number;
   moyen: PaymentMethod;
   reference_transaction: string | null;
+  provider_token: string | null;
   statut: PaymentStatus;
   type: PaymentType;
 };
