@@ -285,11 +285,17 @@ class PayDunyaProvider implements PaymentProvider {
     // Échec attendu (OTP invalide, délai dépassé, solde insuffisant…) : on renvoie le motif,
     // sans exception (l'utilisateur pourra réessayer). Transaction marquée échouée.
     if (sp?.success !== true) {
+      // Trace la réponse brute pour diagnostic (visible dans `docker logs jaimanounou`).
+      console.error(`[paydunya softpay] ${endpoint} status=${spRes.status} body=${JSON.stringify(sp)}`);
+      const msg =
+        (sp?.message as string | undefined) ??
+        (sp?.response_text as string | undefined) ??
+        (sp?.errors?.message as string | undefined);
       return {
         reference,
         status: "echoue",
         providerToken: token,
-        message: (sp?.message as string | undefined) ?? "Paiement refusé par l'opérateur.",
+        message: msg ?? "Paiement refusé par l'opérateur.",
       };
     }
 
