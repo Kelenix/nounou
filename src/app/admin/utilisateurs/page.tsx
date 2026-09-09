@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import { Users } from "lucide-react";
-import { getTranslations } from "next-intl/server";
-import { createClient } from "@/lib/supabase/server";
+import { Users, Mail, CalendarDays } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { UserFilters } from "@/features/admin/user-filters";
 import { UserActions, type SubscriptionInfo } from "@/features/admin/user-actions";
 import { requireAdminSection } from "@/lib/admin";
 import { getPricing } from "@/features/settings/queries";
-import { formatPhoneCi } from "@/lib/utils";
+import { formatPhoneCi, dateLocale } from "@/lib/utils";
 import type { UserRole, PaymentMethod } from "@/lib/supabase/database.types";
 
 export async function generateMetadata() {
@@ -40,6 +40,8 @@ export default async function AdminUsersPage({
   const status = get("status");
   const ville = get("ville");
   const q = get("q");
+  const period = get("period"); // "" | today | 7d | 30d (date d'inscription)
+  const sort = get("sort"); // "" (récent) | old
   const page = Math.max(1, Number(get("page")) || 1);
 
   const supabase = await createClient();
@@ -53,14 +55,36 @@ export default async function AdminUsersPage({
   if (ville) query = query.eq("ville", ville);
   if (q) query = query.or(`prenom.ilike.%${q}%,nom.ilike.%${q}%,phone.ilike.%${q}%`);
 
+  // Filtre « date d'inscription » (utile pour traiter les vérifications récentes).
+  const now = Date.now();
+  let since: string | null = null;
+  if (period === "today") {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    since = d.toISOString();
+  } else if (period === "7d") since = new Date(now - 7 * 86_400_000).toISOString();
+  else if (period === "30d") since = new Date(now - 30 * 86_400_000).toISOString();
+  if (since) query = query.gte("created_at", since);
+
   const from = (page - 1) * PAGE_SIZE;
   const { data: users, count } = await query
-    .order("created_at", { ascending: false })
+    .order("created_at", { ascending: sort === "old" })
     .range(from, from + PAGE_SIZE - 1);
 
   const list = users ?? [];
   const total = count ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  // E-mails : stockés côté auth (pas dans `profiles`) → récupérés via le client admin.
+  const admin = createAdminClient();
+  const emailById = new Map<string, string>();
+  await Promise.all(
+    list.map(async (u) => {
+      const { data } = await admin.auth.admin.getUserById(u.id);
+      const email = data?.user?.email;
+      if (email) emailById.set(u.id, email);
+    }),
+  );
 
   // Abonnements pour les utilisateurs de la page.
   const ids = list.map((u) => u.id);
@@ -104,8 +128,12 @@ export default async function AdminUsersPage({
     return { label: t("admin.subPremium"), montant: pay?.montant ?? pricing.premiumEmployeur, moyen: pay?.moyen ?? null, date: pay?.created_at ?? null };
   }
 
+  const dl = dateLocale(await getLocale());
+  const fmtDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(dl, { day: "numeric", month: "short", year: "numeric" });
+
   const linkParams: Record<string, string> = {};
-  for (const k of ["role", "status", "ville", "q"]) if (get(k)) linkParams[k] = get(k);
+  for (const k of ["role", "status", "ville", "q", "period", "sort"]) if (get(k)) linkParams[k] = get(k);
 
   return (
     <div className="space-y-5">
@@ -143,6 +171,14 @@ export default async function AdminUsersPage({
                       <p className="truncate text-xs text-muted-foreground">
                         {formatPhoneCi(u.phone)}
                         {u.ville ? ` · ${[u.commune, u.ville].filter(Boolean).join(", ")}` : ""}
+                      </p>
+                      {emailById.get(u.id) && (
+                        <p className="flex items-center gap-1 truncate text-xs text-muted-foreground">
+                          <Mail className="size-3 shrink-0" /> {emailById.get(u.id)}
+                        </p>
+                      )}
+                      <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <CalendarDays className="size-3 shrink-0" /> {t("admin.registeredOn", { date: fmtDate(u.created_at) })}
                       </p>
                       <div className="mt-1 flex flex-wrap gap-1.5">
                         {u.is_super_admin ? (

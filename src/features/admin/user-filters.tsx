@@ -41,7 +41,9 @@ export function UserFilters() {
   const role = params.get("role") ?? "";
   const status = params.get("status") ?? "";
   const ville = params.get("ville") ?? "";
-  const activeCount = [q, role, status, ville].filter(Boolean).length;
+  const period = params.get("period") ?? "";
+  const sort = params.get("sort") ?? "";
+  const activeCount = [q, role, status, ville, period, sort].filter(Boolean).length;
 
   return (
     <div className="grid gap-3 rounded-2xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -63,6 +65,16 @@ export function UserFilters() {
       <Select value={ville} onChange={(e) => setParam("ville", e.target.value)}>
         <option value="">{tr("admin.allCities")}</option>
         {VILLES_CI.map((v) => <option key={v} value={v}>{v}</option>)}
+      </Select>
+      <Select value={period} onChange={(e) => setParam("period", e.target.value)}>
+        <option value="">{tr("admin.allPeriods")}</option>
+        <option value="today">{tr("admin.periodToday")}</option>
+        <option value="7d">{tr("admin.period7d")}</option>
+        <option value="30d">{tr("admin.period30d")}</option>
+      </Select>
+      <Select value={sort} onChange={(e) => setParam("sort", e.target.value)}>
+        <option value="">{tr("admin.sortRecent")}</option>
+        <option value="old">{tr("admin.sortOld")}</option>
       </Select>
       {activeCount > 0 && (
         <Button variant="ghost" size="sm" onClick={() => { setQ(""); router.replace(pathname); }} className="text-muted-foreground lg:col-span-4">
