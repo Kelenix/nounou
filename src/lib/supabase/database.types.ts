@@ -65,6 +65,7 @@ export type ProfileRow = {
   verification_level: VerificationLevel;
   is_active: boolean;
   is_suspended: boolean;
+  email_opt_out: boolean;
   is_super_admin: boolean;
   staff_permissions: string[];
   created_at: string;
@@ -225,6 +226,14 @@ export type SettingRow = {
   updated_at: string;
 };
 
+export type EmailReminderRow = {
+  id: string;
+  user_id: string;
+  kind: string;
+  step: number;
+  sent_at: string;
+};
+
 type TableDef<Row, Insert = Partial<Row>, Update = Partial<Row>> = {
   Row: Row;
   Insert: Insert;
@@ -249,6 +258,7 @@ export interface Database {
       messages: TableDef<MessageRow>;
       settings: TableDef<SettingRow>;
       admin_audit_log: TableDef<AdminAuditLogRow>;
+      email_reminders: TableDef<EmailReminderRow>;
     };
     Views: {
       public_profiles: { Row: PublicProfileRow; Relationships: [] };

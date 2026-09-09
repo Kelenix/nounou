@@ -306,7 +306,24 @@
     "action_reactivate": "Réactivation d'un compte",
     "action_delete_user": "Suppression d'un compte",
     "action_cancel_subscription": "Annulation d'abonnement",
-    "action_reconcile_payments": "Réconciliation des paiements"
+    "action_reconcile_payments": "Réconciliation des paiements",
+    "action_email_relances": "Relances e-mail"
+  },
+  "adminRelances": {
+    "metaTitle": "Admin — Relances e-mail",
+    "title": "Relances e-mail",
+    "subtitle": "Rappels d'onboarding envoyés automatiquement (séquence J+0 / J+1 / J+3 / J+7).",
+    "notConfigured": "Envoi d'e-mails non configuré : renseignez RESEND_API_KEY et EMAIL_FROM sur le serveur.",
+    "statTotal": "Total envoyé",
+    "stat7d": "7 derniers jours",
+    "statOptOut": "Désinscrits",
+    "lastRun": "Dernière exécution : {when}",
+    "neverRun": "Le cron de relances n'a pas encore tourné.",
+    "byKindTitle": "Par type de relance",
+    "kind_complete_profile": "Profil à compléter",
+    "kind_activate_candidate": "Activation candidat",
+    "kind_activate_premium": "Premium employeur",
+    "emailsCount": "{count} e-mail(s)"
   },
   "adminNav": {
     "dashboard": "Tableau de bord",
@@ -319,6 +336,7 @@
     "admins": "Administrateurs",
     "auditLog": "Journal d'audit",
     "system": "Système",
+    "relances": "Relances e-mail",
     "siteHome": "Accueil du site",
     "superAdmin": "Super Admin",
     "staff": "Staff",

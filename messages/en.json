@@ -306,7 +306,24 @@
     "action_reactivate": "Account reactivated",
     "action_delete_user": "Account deleted",
     "action_cancel_subscription": "Subscription cancelled",
-    "action_reconcile_payments": "Payments reconciliation"
+    "action_reconcile_payments": "Payments reconciliation",
+    "action_email_relances": "Email reminders"
+  },
+  "adminRelances": {
+    "metaTitle": "Admin — Email reminders",
+    "title": "Email reminders",
+    "subtitle": "Onboarding nudges sent automatically (D+0 / D+1 / D+3 / D+7 sequence).",
+    "notConfigured": "Email sending not configured: set RESEND_API_KEY and EMAIL_FROM on the server.",
+    "statTotal": "Total sent",
+    "stat7d": "Last 7 days",
+    "statOptOut": "Unsubscribed",
+    "lastRun": "Last run: {when}",
+    "neverRun": "The reminders cron has not run yet.",
+    "byKindTitle": "By reminder type",
+    "kind_complete_profile": "Complete profile",
+    "kind_activate_candidate": "Candidate activation",
+    "kind_activate_premium": "Employer premium",
+    "emailsCount": "{count} email(s)"
   },
   "adminNav": {
     "dashboard": "Dashboard",
@@ -319,6 +336,7 @@
     "admins": "Administrators",
     "auditLog": "Audit log",
     "system": "System",
+    "relances": "Email reminders",
     "siteHome": "Site home",
     "superAdmin": "Super Admin",
     "staff": "Staff",

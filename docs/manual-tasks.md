@@ -63,6 +63,20 @@
 - Note : la vérification interroge réellement le fournisseur uniquement si `PAYMENT_MOBILE_PROVIDER=cinetpay`
   et les clés CinetPay sont renseignées ; sinon le cron tourne sans effet (aucune transaction réelle).
 
+## Relances e-mail d'onboarding (cron VPS)
+> Rappels automatiques : profils incomplets + candidats n'ayant pas payé l'activation.
+> Séquence espacée **J+0 / J+1 / J+3 / J+7** (4 e-mails max), avec lien de désinscription.
+- [ ] **Migration** `20260909000001_email_relances.sql` à appliquer sur Supabase Cloud
+  **avant de déployer** le nouveau code (`supabase db push` ou SQL Editor). Idempotente.
+- [ ] **Resend opérationnel** : compte Resend + **domaine `jaimanounou.com` vérifié** (SPF/DKIM),
+  puis dans `.env.production` : `RESEND_API_KEY=...`, `EMAIL_FROM="J'ai ma nounou <no-reply@jaimanounou.com>"`.
+  ⚠️ Sans domaine vérifié, les e-mails partent en spam.
+- [ ] **Secret désinscription** : `openssl rand -hex 32` → `EMAIL_UNSUB_SECRET=<valeur>` dans `.env.production`.
+- [ ] **Installer le cron** (1×/jour suffit — c'est idempotent) : `crontab -e` puis
+  `30 10 * * * /chemin/vers/projet/deploy/cron-relances.sh >> /var/log/jaimanounou-cron.log 2>&1`
+- [ ] **Tester** une fois : `bash deploy/cron-relances.sh` doit répondre `{"ok":true,"sent":...}`.
+  Les exécutions apparaissent dans le **journal d'audit** (action `email_relances`).
+
 ## Légal (Côte d'Ivoire)
 - [ ] Valider les textes **CGU** et **Politique de confidentialité** (données perso + paiement).
   Claude fournira des gabarits ; une relecture juridique reste recommandée.
