@@ -314,7 +314,23 @@
     "action_delete_user": "Suppression d'un compte",
     "action_cancel_subscription": "Annulation d'abonnement",
     "action_reconcile_payments": "Réconciliation des paiements",
-    "action_email_relances": "Relances e-mail"
+    "action_email_relances": "Relances e-mail",
+    "action_broadcast": "Annonce système",
+    "action_verify_identity": "Vérification d'identité"
+  },
+  "annonces": {
+    "metaTitle": "Admin — Annonces",
+    "title": "Annonce système",
+    "subtitle": "Envoyez un message à tous les utilisateurs (cloche + e-mail).",
+    "titreLabel": "Titre",
+    "titrePlaceholder": "Ex. Maintenance prévue dimanche",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Votre message à tous les utilisateurs…",
+    "warning": "Cette annonce sera envoyée à TOUS les utilisateurs actifs, par notification et par e-mail. Action non réversible.",
+    "confirmCheckbox": "Je confirme l'envoi à tous les utilisateurs.",
+    "send": "Envoyer l'annonce",
+    "failed": "Envoi impossible. Réessayez.",
+    "sent": "Annonce envoyée à {count} utilisateur(s)."
   },
   "adminRelances": {
     "metaTitle": "Admin — Relances e-mail",
@@ -344,6 +360,7 @@
     "auditLog": "Journal d'audit",
     "system": "Système",
     "relances": "Relances e-mail",
+    "announcements": "Annonces",
     "siteHome": "Accueil du site",
     "superAdmin": "Super Admin",
     "staff": "Staff",

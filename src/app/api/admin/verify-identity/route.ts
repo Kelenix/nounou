@@ -29,6 +29,12 @@ export async function POST(request: Request) {
     // le service_role (contexte de confiance) qui valide.
     const { error } = await admin.from("profiles").update({ verification_level: "identity" }).eq("id", userId);
     if (error) return NextResponse.json({ error: "Validation impossible" }, { status: 500 });
+    await admin.from("notifications").insert({
+      user_id: userId,
+      type: "profil_verifie",
+      titre: "Profil vérifié",
+      message: "Votre pièce d'identité a été validée : votre profil est désormais vérifié.",
+    });
     await logAudit(me, "verify_identity", { targetId: userId, details: { approved: true } });
     return NextResponse.json({ ok: true, approved: true });
   }
@@ -36,6 +42,12 @@ export async function POST(request: Request) {
   // Rejet : on retire le document (l'utilisateur pourra en re-téléverser un).
   const { error } = await admin.from("profiles").update({ identity_doc_path: null }).eq("id", userId);
   if (error) return NextResponse.json({ error: "Rejet impossible" }, { status: 500 });
+  await admin.from("notifications").insert({
+    user_id: userId,
+    type: "systeme",
+    titre: "Pièce d'identité non validée",
+    message: "Votre pièce d'identité n'a pas pu être validée. Merci d'en soumettre une nouvelle, lisible et en cours de validité.",
+  });
   await logAudit(me, "verify_identity", { targetId: userId, details: { rejected: true } });
   return NextResponse.json({ ok: true, rejected: true });
 }

@@ -314,7 +314,23 @@
     "action_delete_user": "Account deleted",
     "action_cancel_subscription": "Subscription cancelled",
     "action_reconcile_payments": "Payments reconciliation",
-    "action_email_relances": "Email reminders"
+    "action_email_relances": "Email reminders",
+    "action_broadcast": "System announcement",
+    "action_verify_identity": "Identity verification"
+  },
+  "annonces": {
+    "metaTitle": "Admin — Announcements",
+    "title": "System announcement",
+    "subtitle": "Send a message to all users (bell + email).",
+    "titreLabel": "Title",
+    "titrePlaceholder": "e.g. Maintenance scheduled Sunday",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Your message to all users…",
+    "warning": "This announcement will be sent to ALL active users, via notification and email. This cannot be undone.",
+    "confirmCheckbox": "I confirm sending to all users.",
+    "send": "Send announcement",
+    "failed": "Sending failed. Please retry.",
+    "sent": "Announcement sent to {count} user(s)."
   },
   "adminRelances": {
     "metaTitle": "Admin — Email reminders",
@@ -344,6 +360,7 @@
     "auditLog": "Audit log",
     "system": "System",
     "relances": "Email reminders",
+    "announcements": "Announcements",
     "siteHome": "Site home",
     "superAdmin": "Super Admin",
     "staff": "Staff",

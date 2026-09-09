@@ -63,12 +63,26 @@ export async function POST(request: Request) {
     await admin.from("profiles").update({ role, staff_permissions: [] }).eq("id", userId);
     if (role === "candidate") await admin.from("candidate_profiles").upsert({ user_id: userId });
     else if (role === "employer") await admin.from("employer_profiles").upsert({ user_id: userId });
+    await admin.from("notifications").insert({
+      user_id: userId,
+      type: "systeme",
+      titre: "Votre rôle a été mis à jour",
+      message: "Un administrateur a modifié le rôle associé à votre compte.",
+    });
     await logAudit(me, "set_role", { targetId: userId, targetName, details: { role } });
     return NextResponse.json({ ok: true });
   }
 
   if (action === "suspend") {
     await admin.from("profiles").update({ is_suspended: !!suspended }).eq("id", userId);
+    await admin.from("notifications").insert({
+      user_id: userId,
+      type: "systeme",
+      titre: suspended ? "Compte suspendu" : "Compte réactivé",
+      message: suspended
+        ? "Votre compte a été suspendu. Contactez le support pour plus d'informations."
+        : "Votre compte a été réactivé : vous pouvez de nouveau utiliser le service.",
+    });
     await logAudit(me, suspended ? "suspend" : "reactivate", { targetId: userId, targetName });
     return NextResponse.json({ ok: true });
   }
