@@ -2,14 +2,15 @@ import "server-only";
 
 /**
  * Envoi d'email transactionnel via Resend (https://resend.com).
- * Inactif si `RESEND_API_KEY` / `EMAIL_FROM` ne sont pas configurés.
+ * Lève une erreur si `RESEND_API_KEY` / `EMAIL_FROM` ne sont pas configurés : un envoi
+ * manqué doit être traité comme un échec par les appelants (relances, webhook) — sinon
+ * l'e-mail serait compté « envoyé » et le palier consommé à tort.
  */
 export async function sendEmail(to: string, subject: string, html: string): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
   if (!apiKey || !from) {
-    console.warn("[email] non configuré (RESEND_API_KEY / EMAIL_FROM) — email ignoré.");
-    return;
+    throw new Error("Email non configuré (RESEND_API_KEY / EMAIL_FROM manquants).");
   }
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
