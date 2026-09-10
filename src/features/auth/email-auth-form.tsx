@@ -61,8 +61,10 @@ export function EmailAuthForm({ mode }: { mode: "login" | "register" }) {
       return;
     }
 
-    // Champs de profil requis à l'inscription (le téléphone alimente le profil).
-    let phoneMeta: string | undefined;
+    // Champs de profil requis à l'inscription. Toute l'identité part dans les
+    // métadonnées : le trigger `handle_new_user` la persiste dès la création du
+    // compte (atomique), sans dépendre de l'UPDATE client qui suit.
+    let signupMeta: Record<string, string> | undefined;
     if (mode === "register") {
       if (!isValidName(prenom) || !isValidName(nom)) {
         setError(t("auth.errNameRequired"));
@@ -82,7 +84,16 @@ export function EmailAuthForm({ mode }: { mode: "login" | "register" }) {
         setError(t("auth.errAge"));
         return;
       }
-      phoneMeta = e164.replace(/^\+/, "");
+      const fullName = `${prenom.trim()} ${nom.trim()}`.trim();
+      signupMeta = {
+        phone: e164.replace(/^\+/, ""),
+        given_name: prenom.trim(),
+        family_name: nom.trim(),
+        full_name: fullName,
+        display_name: fullName,
+        role,
+        date_naissance: dob,
+      };
     }
 
     setLoading(true);
@@ -90,7 +101,7 @@ export function EmailAuthForm({ mode }: { mode: "login" | "register" }) {
       email: normalizedEmail(),
       options:
         mode === "register"
-          ? { shouldCreateUser: true, data: { phone: phoneMeta } }
+          ? { shouldCreateUser: true, data: signupMeta }
           : { shouldCreateUser: false },
     });
     setLoading(false);

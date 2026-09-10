@@ -125,6 +125,19 @@
   bloqués à leur prochaine modification de profil (ils devront saisir un vrai nom). Tu peux les
   supprimer depuis `/admin/utilisateurs` si besoin.
 
+## Identité écrite dès la création du compte (correctif)
+> Avant, nom/prénom/rôle/date de naissance étaient écrits par un `UPDATE` client
+> APRÈS la création du compte : si l'onglet se fermait ou le réseau coupait juste
+> après la saisie du code, on obtenait un compte confirmé mais **sans nom ni rôle**.
+> Désormais l'identité part dans les métadonnées de `signInWithOtp` et le trigger
+> `handle_new_user` la persiste **atomiquement à l'INSERT**. Le Display name de la
+> console Supabase Auth s'affiche aussi (métadonnée `full_name`).
+- [ ] **Migration** `20260910000003_signup_identity_metadata.sql` à appliquer sur
+  Supabase Cloud **avant de déployer** le nouveau code (`supabase db push` ou SQL
+  Editor). Idempotente (`create or replace` du trigger).
+- Note : les comptes déjà créés sans nom ne sont pas rétro-corrigés. L'utilisateur
+  complétera son profil à l'onboarding, ou tu peux corriger depuis `/admin/utilisateurs`.
+
 ## Légal (Côte d'Ivoire)
 - [ ] Valider les textes **CGU** et **Politique de confidentialité** (données perso + paiement).
   Claude fournira des gabarits ; une relecture juridique reste recommandée.
