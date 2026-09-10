@@ -97,16 +97,20 @@
   notifications ; les **messages** et les **fichiers d'identité en Storage** ne sont pas
   encore purgés (à traiter dans une itération dédiée si nécessaire).
 
-## Mot de passe oublié (réinitialisation)
-> Flux ajouté : lien « Mot de passe oublié ? » → e-mail de récupération (Supabase Auth) →
-> page `/reinitialiser-mot-de-passe`. L'e-mail passe par le système d'e-mails de **Supabase
-> Auth** (le même que la confirmation d'inscription, déjà opérationnel) — pas par Resend.
-- [ ] **Supabase → Auth → URL Configuration → Redirect URLs** : autoriser le retour du lien de
-  récupération, qui passe par `/auth/callback` avec un paramètre. Ajouter un motif avec joker :
-  `https://jaimanounou.com/auth/callback*` (ou `https://jaimanounou.com/**`). Sans ça, le clic sur
-  le lien renverra une erreur `redirect_to not allowed`.
-- [ ] (Recommandé) **SMTP personnalisé** dans Supabase (Auth → Emails) pour un meilleur taux de
-  délivrabilité des e-mails de récupération/confirmation (sinon quota d'envoi Supabase limité).
+## Connexion / inscription par code e-mail (OTP, sans mot de passe)
+> L'écran d'auth envoie un **code à 6 chiffres par e-mail** (`signInWithOtp` / `verifyOtp`).
+> L'e-mail passe par le système d'e-mails de **Supabase Auth** (même canal que la confirmation
+> d'inscription, déjà en place).
+- [ ] **Provider Email activé** : Supabase → Authentication → Providers → **Email** activé
+  (déjà le cas). L'OTP e-mail fonctionne avec ce provider.
+- [ ] **Template « Magic Link »** : Supabase → Authentication → Email Templates → **Magic Link** →
+  coller `docs/email-templates/magic-link.html` (sujet : `Votre code de connexion · J'ai ma nounou`).
+  ⚠️ Il DOIT contenir la variable **`{{ .Token }}`** (le code), sinon l'utilisateur reçoit un lien
+  au lieu d'un code et la saisie du code échoue.
+- [ ] (Recommandé) **SMTP personnalisé** dans Supabase (Auth → Emails) pour la délivrabilité des
+  e-mails d'OTP/confirmation (sinon quota d'envoi Supabase limité). Voir plus bas.
+- [ ] (Optionnel) **Expiration du code** : Auth → Providers → Email → *Email OTP Expiration*
+  (par défaut ~1 h ; réduire à 10 min si souhaité pour la sécurité).
 
 ## Légal (Côte d'Ivoire)
 - [ ] Valider les textes **CGU** et **Politique de confidentialité** (données perso + paiement).

@@ -11,8 +11,15 @@ Supabase → **Authentication → Email Templates** → sélectionner le templat
 
 | Template Supabase | Fichier | Sujet à mettre |
 |---|---|---|
-| **Confirm signup** | [`confirm-signup.html`](confirm-signup.html) | `Confirmez votre adresse e-mail · J'ai ma nounou` |
-| **Reset Password** | [`reset-password.html`](reset-password.html) | `Réinitialisez votre mot de passe · J'ai ma nounou` |
+| **Magic Link** ⭐ | [`magic-link.html`](magic-link.html) | `Votre code de connexion · J'ai ma nounou` |
+| Confirm signup | [`confirm-signup.html`](confirm-signup.html) | `Confirmez votre adresse e-mail · J'ai ma nounou` |
+| Reset Password | [`reset-password.html`](reset-password.html) | `Réinitialisez votre mot de passe · J'ai ma nounou` |
+
+⭐ **Le template « Magic Link » est le seul indispensable** : c'est celui qu'utilise la connexion
+par **code OTP e-mail** (`signInWithOtp`). Il DOIT contenir la variable **`{{ .Token }}`** (le code
+à 6 chiffres) — sans elle, l'utilisateur ne reçoit pas de code. Les templates *Confirm signup* et
+*Reset Password* ne sont pas utilisés par le parcours actuel (connexion sans mot de passe) ; on les
+garde stylisés au cas où.
 
 ## Règles importantes
 

@@ -5,6 +5,25 @@
 
 ---
 
+## ADR-013 — Connexion/inscription par code e-mail (OTP, sans mot de passe)
+- **Décideur** : Claude (à la demande du propriétaire)
+- **Contexte** : friction du parcours e-mail+mot de passe (mot de passe à retenir + étape de
+  confirmation e-mail séparée) ; l'envoi OTP par **SMS** (SMSPRO) posait problème et a un coût.
+  Le SMTP e-mail étant désormais fiable, on simplifie via un code à usage unique par e-mail.
+- **Décision** : l'écran d'auth passe en **OTP e-mail sans mot de passe**, en 2 étapes
+  (`signInWithOtp` → `verifyOtp`, type `email`). Google conservé. Le trigger `handle_new_user`
+  crée le profil (téléphone via `options.data.phone`) ; après vérification du code, on complète
+  nom/rôle/date. L'OTP confirme l'e-mail → plus d'étape de confirmation séparée.
+- **Conséquences** :
+  - **Supprime** la fonctionnalité « mot de passe oublié » (ADR-012), devenue sans objet :
+    pages `/mot-de-passe-oublie` et `/reinitialiser-mot-de-passe`, formulaires associés, et la
+    branche `isRecovery` du callback **retirés**.
+  - Dépendance config : template Supabase **« Magic Link »** doit contenir `{{ .Token }}`
+    (`docs/email-templates/magic-link.html`), sinon pas de code. SMTP custom recommandé.
+  - Le mot de passe (`signInWithPassword`/`signUp`) n'est plus utilisé dans l'UI ; les comptes
+    existants se connectent par OTP e-mail sans migration.
+  - SMS OTP reste une piste future (infra hook déjà présente) si un fournisseur fiable est branché.
+
 ## ADR-012 — Réinitialisation du mot de passe + suppression d'offres par l'admin
 - **Décideur** : Claude (à la demande du propriétaire)
 - **Contexte** : (1) l'auth email+mot de passe n'offrait **aucun** moyen de récupérer un mot de

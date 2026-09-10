@@ -1,0 +1,30 @@
+<!-- Supabase → Authentication → Email Templates → « Magic Link »
+     (c'est le template utilisé par l'OTP e-mail : signInWithOtp / verifyOtp).
+     Sujet : Votre code de connexion · J'ai ma nounou
+     La variable {{ .Token }} = le code à 6 chiffres. NE PAS la retirer. -->
+<!doctype html>
+<html lang="fr">
+  <body style="margin:0;background:#f4f6f5;font-family:Arial,Helvetica,sans-serif">
+    <div style="max-width:520px;margin:0 auto;padding:24px">
+      <div style="text-align:center;padding:8px 0 16px">
+        <img src="https://jaimanounou.com/logo.png" alt="J'ai ma nounou" height="56" style="height:56px;width:auto;border:0" />
+      </div>
+      <div style="background:#ffffff;border-radius:16px;padding:28px;text-align:center">
+        <h1 style="margin:0 0 8px;font-size:18px;color:#0f172a">Votre code de connexion</h1>
+        <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.5">
+          Saisissez ce code pour vous connecter à J'ai ma nounou&nbsp;:
+        </p>
+        <div style="display:inline-block;background:#f4f6f5;border-radius:12px;padding:14px 24px;font-size:32px;font-weight:800;letter-spacing:8px;color:#0f172a">
+          {{ .Token }}
+        </div>
+        <p style="margin:20px 0 0;color:#94a3b8;font-size:13px;line-height:1.5">
+          Ce code expire dans quelques minutes. Ne le communiquez à personne.
+        </p>
+      </div>
+      <p style="text-align:center;color:#94a3b8;font-size:12px;margin-top:16px;line-height:1.6">
+        J'ai ma nounou · <a href="https://jaimanounou.com" style="color:#94a3b8">jaimanounou.com</a><br />
+        Vous n'êtes pas à l'origine de cette demande&nbsp;? Ignorez cet e-mail.
+      </p>
+    </div>
+  </body>
+</html>
