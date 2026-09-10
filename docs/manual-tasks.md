@@ -112,6 +112,16 @@
 - [ ] (Optionnel) **Expiration du code** : Auth → Providers → Email → *Email OTP Expiration*
   (par défaut ~1 h ; réduire à 10 min si souhaité pour la sécurité).
 
+## Garde-fou identité (nom réel + téléphone obligatoire)
+> Un compte actif (rôle choisi) doit avoir un **téléphone valide** et un **vrai nom**
+> (les noms factices « test », « sans nom »… sont refusés). Validé côté client ET par un
+> **trigger en base** (inviolable).
+- [ ] **Migration** `20260910000002_profile_identity_guard.sql` à appliquer sur Supabase Cloud
+  **avant de déployer** (`supabase db push` ou SQL Editor). Idempotente.
+- Note : les comptes fictifs déjà en base ne sont pas supprimés automatiquement ; ils seront
+  bloqués à leur prochaine modification de profil (ils devront saisir un vrai nom). Tu peux les
+  supprimer depuis `/admin/utilisateurs` si besoin.
+
 ## Légal (Côte d'Ivoire)
 - [ ] Valider les textes **CGU** et **Politique de confidentialité** (données perso + paiement).
   Claude fournira des gabarits ; une relecture juridique reste recommandée.

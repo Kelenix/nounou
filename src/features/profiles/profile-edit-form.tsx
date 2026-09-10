@@ -17,6 +17,7 @@ import { useToast } from "@/components/ui/toast";
 import { AvatarUpload } from "@/features/profiles/avatar-upload";
 import { IdentityDocUpload } from "@/features/profiles/identity-doc-upload";
 import { VILLES_CI, COMMUNES_ABIDJAN } from "@/lib/constants";
+import { isValidName } from "@/lib/profile-validation";
 import { ageFromDob } from "@/lib/utils";
 import type {
   ProfileRow,
@@ -80,7 +81,7 @@ export function ProfileEditForm({
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (prenom.trim().length < 2 || nom.trim().length < 2) {
+    if (!isValidName(prenom) || !isValidName(nom)) {
       setError(t("profileEdit.nameRequired"));
       return;
     }

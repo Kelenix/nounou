@@ -14,7 +14,7 @@ import { useToast } from "@/components/ui/toast";
 import { Logo } from "@/components/brand/logo";
 import { AvatarUpload } from "@/features/profiles/avatar-upload";
 import { VILLES_CI, COMMUNES_ABIDJAN } from "@/lib/constants";
-import { phoneSchema } from "@/features/auth/schemas";
+import { isValidName, isValidCiPhone } from "@/lib/profile-validation";
 import { toE164Ci, formatPhoneCi, ageFromDob } from "@/lib/utils";
 import type { ProfileRow, UserRole } from "@/lib/supabase/database.types";
 
@@ -42,7 +42,7 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
   function goToRole(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (prenom.trim().length < 2 || nom.trim().length < 2) {
+    if (!isValidName(prenom) || !isValidName(nom)) {
       setError(t("onboarding.nameRequired"));
       return;
     }
@@ -51,7 +51,7 @@ export function OnboardingForm({ profile }: { profile: ProfileRow }) {
       return;
     }
     // Le téléphone est requis (contact) : demandé ici si le compte n'en a pas (Google).
-    if (!hasPhone && !toE164Ci(phoneSchema.safeParse({ phone: phoneInput }).success ? phoneInput : "")) {
+    if (!hasPhone && !isValidCiPhone(phoneInput)) {
       setError(t("onboarding.phoneRequired"));
       return;
     }

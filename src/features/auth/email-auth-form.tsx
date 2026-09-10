@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
 import { emailSchema, phoneSchema } from "@/features/auth/schemas";
+import { isValidName } from "@/lib/profile-validation";
 import { GoogleButton } from "@/features/auth/google-button";
 import { toE164Ci, cn, ageFromDob } from "@/lib/utils";
 import type { UserRole } from "@/lib/supabase/database.types";
@@ -63,7 +64,7 @@ export function EmailAuthForm({ mode }: { mode: "login" | "register" }) {
     // Champs de profil requis à l'inscription (le téléphone alimente le profil).
     let phoneMeta: string | undefined;
     if (mode === "register") {
-      if (prenom.trim().length < 2 || nom.trim().length < 2) {
+      if (!isValidName(prenom) || !isValidName(nom)) {
         setError(t("auth.errNameRequired"));
         return;
       }
