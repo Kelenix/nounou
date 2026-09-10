@@ -168,21 +168,33 @@ export default async function AdminUsersPage({
                   <div className="flex min-w-0 flex-1 items-center gap-3">
                     <Avatar src={u.photo_url} nom={u.nom} prenom={u.prenom} className="size-11" />
                     <div className="min-w-0">
-                      <p className="truncate font-semibold">
-                        {`${u.prenom ?? ""} ${u.nom ?? ""}`.trim() || t("admin.noName")}
-                      </p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {formatPhoneCi(u.phone)}
-                        {u.ville ? ` · ${[u.commune, u.ville].filter(Boolean).join(", ")}` : ""}
-                      </p>
-                      {emailById.get(u.id) && (
-                        <p className="flex items-center gap-1 truncate text-xs text-muted-foreground">
-                          <Mail className="size-3 shrink-0" /> {emailById.get(u.id)}
-                        </p>
-                      )}
-                      <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <CalendarDays className="size-3 shrink-0" /> {t("admin.registeredOn", { date: fmtDate(u.created_at) })}
-                      </p>
+                      {/* Ligne 1 : nom | téléphone · adresse */}
+                      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                        <span className="font-semibold">
+                          {`${u.prenom ?? ""} ${u.nom ?? ""}`.trim() || t("admin.noName")}
+                        </span>
+                        {(u.phone || u.ville) && (
+                          <span className="text-xs text-muted-foreground">
+                            <span className="mr-2 text-muted-foreground/50">|</span>
+                            {formatPhoneCi(u.phone)}
+                            {u.ville ? ` · ${[u.commune, u.ville].filter(Boolean).join(", ")}` : ""}
+                          </span>
+                        )}
+                      </div>
+                      {/* Ligne 2 : email | date d'inscription */}
+                      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+                        {emailById.get(u.id) && (
+                          <>
+                            <span className="inline-flex items-center gap-1">
+                              <Mail className="size-3 shrink-0" /> {emailById.get(u.id)}
+                            </span>
+                            <span className="text-muted-foreground/50">|</span>
+                          </>
+                        )}
+                        <span className="inline-flex items-center gap-1">
+                          <CalendarDays className="size-3 shrink-0" /> {t("admin.registeredOn", { date: fmtDate(u.created_at) })}
+                        </span>
+                      </div>
                       <div className="mt-1 flex flex-wrap gap-1.5">
                         {u.is_super_admin ? (
                           <Badge className="bg-amber-100 text-amber-800">{t("admin.superAdmin")}</Badge>
