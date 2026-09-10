@@ -565,7 +565,8 @@
     "errSendCode": "Could not send the code. Please try again.",
     "errNoAccount": "No account for this email, or sending failed. Check the address or create an account.",
     "errCode": "Enter the code you received by email.",
-    "errCodeInvalid": "Incorrect or expired code. Please try again."
+    "errCodeInvalid": "Incorrect or expired code. Please try again.",
+    "errSuspended": "This account is suspended. Please contact support."
   },
   "legal": {
     "updated": "Last updated",

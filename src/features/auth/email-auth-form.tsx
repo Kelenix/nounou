@@ -156,7 +156,18 @@ export function EmailAuthForm({ mode }: { mode: "login" | "register" }) {
     }
 
     // -------- Connexion --------
-    const { data: profile } = await supabase.from("profiles").select("role").eq("id", data.user.id).maybeSingle();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role, is_suspended, deleted_at")
+      .eq("id", data.user.id)
+      .maybeSingle();
+    // Compte suspendu ou supprimé : refuser la connexion.
+    if (profile?.is_suspended || profile?.deleted_at) {
+      await supabase.auth.signOut();
+      setLoading(false);
+      setError(t("auth.errSuspended"));
+      return;
+    }
     setLoading(false);
     router.replace(destForRole(profile?.role));
     router.refresh();

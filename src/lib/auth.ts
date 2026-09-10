@@ -18,8 +18,9 @@ export async function getCurrentProfile(): Promise<ProfileRow | null> {
     .eq("id", user.id)
     .maybeSingle();
 
-  // Compte supprimé (soft-delete) : traité comme non connecté partout dans l'app.
-  if (data?.deleted_at) return null;
+  // Compte supprimé ou suspendu : traité comme non connecté partout dans l'app
+  // (blocage immédiat, même pour une session déjà ouverte avant l'action admin).
+  if (data?.deleted_at || data?.is_suspended) return null;
 
   return data ?? null;
 }

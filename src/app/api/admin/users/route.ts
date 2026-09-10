@@ -78,6 +78,9 @@ export async function POST(request: Request) {
 
   if (action === "suspend") {
     await admin.from("profiles").update({ is_suspended: !!suspended }).eq("id", userId);
+    // Bloque (ou rétablit) réellement la connexion : un compte suspendu ne peut plus
+    // ni se connecter ni valider un code OTP (bannissement auth).
+    await admin.auth.admin.updateUserById(userId, { ban_duration: suspended ? BAN_FOREVER : "none" });
     await admin.from("notifications").insert({
       user_id: userId,
       type: "systeme",

@@ -109,8 +109,11 @@
   au lieu d'un code et la saisie du code échoue.
 - [ ] (Recommandé) **SMTP personnalisé** dans Supabase (Auth → Emails) pour la délivrabilité des
   e-mails d'OTP/confirmation (sinon quota d'envoi Supabase limité). Voir plus bas.
-- [ ] (Optionnel) **Expiration du code** : Auth → Providers → Email → *Email OTP Expiration*
-  (par défaut ~1 h ; réduire à 10 min si souhaité pour la sécurité).
+- [ ] **Expiration du code** : Auth → Providers → Email → *Email OTP Expiration*. Si les
+  utilisateurs voient « code expiré » alors qu'ils viennent de le recevoir, la valeur est trop
+  courte : la mettre à **600 s (10 min)** minimum, le temps d'ouvrir l'e-mail et saisir le code.
+- Note : un **compte suspendu** ne peut plus se connecter ni valider de code (bannissement auth
+  appliqué automatiquement à la suspension).
 
 ## Garde-fou identité (nom réel + téléphone obligatoire)
 > Un compte actif (rôle choisi) doit avoir un **téléphone valide** et un **vrai nom**
