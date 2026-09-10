@@ -557,14 +557,14 @@
     "codeSent": "Code sent by email",
     "codeResent": "New code sent",
     "codeTitle": "Enter your code",
-    "codeSubtitle": "We sent a 6-digit code to {email}.",
-    "codeLabel": "6-digit code",
+    "codeSubtitle": "We sent a sign-in code to {email}.",
+    "codeLabel": "Code from your email",
     "codeSubmit": "Sign in",
     "codeChangeEmail": "Change email",
     "codeResend": "Resend code",
     "errSendCode": "Could not send the code. Please try again.",
     "errNoAccount": "No account for this email, or sending failed. Check the address or create an account.",
-    "errCode": "Enter the 6-digit code.",
+    "errCode": "Enter the code you received by email.",
     "errCodeInvalid": "Incorrect or expired code. Please try again."
   },
   "legal": {

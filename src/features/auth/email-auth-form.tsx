@@ -109,7 +109,8 @@ export function EmailAuthForm({ mode }: { mode: "login" | "register" }) {
     setError(null);
 
     const token = code.replace(/\D/g, "");
-    if (!/^\d{6}$/u.test(token)) {
+    // La longueur du code dépend du réglage Supabase (« Email OTP Length », 6 à 10).
+    if (!/^\d{6,10}$/u.test(token)) {
       setError(t("auth.errCode"));
       return;
     }
@@ -190,18 +191,18 @@ export function EmailAuthForm({ mode }: { mode: "login" | "register" }) {
             id="code"
             inputMode="numeric"
             autoComplete="one-time-code"
-            maxLength={6}
-            placeholder="123456"
-            className="h-14 text-center text-2xl font-bold tracking-[0.4em]"
+            maxLength={10}
+            placeholder="••••••"
+            className="h-14 text-center text-2xl font-bold tracking-[0.3em]"
             value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 10))}
             autoFocus
           />
         </div>
 
         {error && <p className="text-sm text-destructive">{error}</p>}
 
-        <Button type="submit" size="lg" className="w-full text-base" disabled={loading || code.length < 6}>
+        <Button type="submit" size="lg" className="w-full text-base" disabled={loading || code.replace(/\D/g, "").length < 6}>
           {loading ? <Spinner className="text-primary-foreground" /> : t("auth.codeSubmit")}
         </Button>
 

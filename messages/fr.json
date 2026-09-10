@@ -557,14 +557,14 @@
     "codeSent": "Code envoyé par e-mail",
     "codeResent": "Nouveau code envoyé",
     "codeTitle": "Entrez votre code",
-    "codeSubtitle": "Nous avons envoyé un code à 6 chiffres à {email}.",
-    "codeLabel": "Code à 6 chiffres",
+    "codeSubtitle": "Nous avons envoyé un code de connexion à {email}.",
+    "codeLabel": "Code reçu par e-mail",
     "codeSubmit": "Se connecter",
     "codeChangeEmail": "Changer d'e-mail",
     "codeResend": "Renvoyer le code",
     "errSendCode": "Impossible d'envoyer le code. Réessayez.",
     "errNoAccount": "Aucun compte pour cet e-mail, ou envoi impossible. Vérifiez l'adresse ou créez un compte.",
-    "errCode": "Entrez le code à 6 chiffres.",
+    "errCode": "Entrez le code reçu par e-mail.",
     "errCodeInvalid": "Code incorrect ou expiré. Réessayez."
   },
   "legal": {
