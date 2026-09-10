@@ -77,6 +77,26 @@
 - [ ] **Tester** une fois : `bash deploy/cron-relances.sh` doit répondre `{"ok":true,"sent":...}`.
   Les exécutions apparaissent dans le **journal d'audit** (action `email_relances`).
 
+## Suppression douce des comptes + purge (cron VPS)
+> Un compte supprimé (par l'admin ou par l'utilisateur lui-même) n'est plus effacé
+> physiquement : il est **banni + masqué**, mais son historique (paiements, avis,
+> signalements) est **conservé pour la traçabilité**, puis **anonymisé** après une
+> durée de conservation (**12 mois**, cf. `ACCOUNT_RETENTION_MONTHS` dans
+> `src/lib/constants.ts` — ajuster si besoin).
+- [ ] **Migration** `20260910000001_soft_delete_accounts.sql` à appliquer sur Supabase
+  Cloud **avant de déployer** (`supabase db push` ou SQL Editor). Idempotente : ajoute
+  `deleted_at/deleted_by/deletion_reason/anonymized_at` sur `profiles` et masque les
+  comptes supprimés dans la vue `public_profiles`.
+- [ ] **Installer le cron de purge** (1×/jour, idempotent) : `crontab -e` puis
+  `45 3 * * * /chemin/vers/projet/deploy/cron-purge-comptes.sh >> /var/log/jaimanounou-cron.log 2>&1`
+- [ ] **Tester** une fois : `bash deploy/cron-purge-comptes.sh` doit répondre
+  `{"ok":true,"anonymized":...}`. Exécutions visibles dans le **journal d'audit** (action `purge_comptes`).
+- [ ] **Juridique** : valider la durée de conservation (12 mois) et la base légale
+  (obligations comptables / prévention fraude) dans la Politique de confidentialité.
+- Note (suivi ultérieur) : l'anonymisation efface le profil et supprime les
+  notifications ; les **messages** et les **fichiers d'identité en Storage** ne sont pas
+  encore purgés (à traiter dans une itération dédiée si nécessaire).
+
 ## Légal (Côte d'Ivoire)
 - [ ] Valider les textes **CGU** et **Politique de confidentialité** (données perso + paiement).
   Claude fournira des gabarits ; une relecture juridique reste recommandée.

@@ -50,8 +50,11 @@ export default async function AdminUsersPage({
   // Le Super Admin n'est visible que par lui-même : masqué au staff (liste + comptage).
   if (!me.is_super_admin) query = query.eq("is_super_admin", false);
   if (role) query = query.eq("role", role);
-  if (status === "active") query = query.eq("is_suspended", false);
-  if (status === "suspended") query = query.eq("is_suspended", true);
+  // « Supprimé » = compte en suppression douce (banni, masqué du marketplace).
+  // Les onglets actif/suspendu excluent ces comptes (catégorie distincte).
+  if (status === "active") query = query.eq("is_suspended", false).is("deleted_at", null);
+  if (status === "suspended") query = query.eq("is_suspended", true).is("deleted_at", null);
+  if (status === "deleted") query = query.not("deleted_at", "is", null);
   if (ville) query = query.eq("ville", ville);
   if (q) query = query.or(`prenom.ilike.%${q}%,nom.ilike.%${q}%,phone.ilike.%${q}%`);
 
@@ -187,7 +190,13 @@ export default async function AdminUsersPage({
                           <Badge className="bg-primary-soft text-primary">{u.role ? roleLabel[u.role] : "—"}</Badge>
                         )}
                         {hasSub && <Badge className="bg-emerald-100 text-emerald-700">{t("admin.subscriber")}</Badge>}
-                        {u.is_suspended && <Badge className="bg-red-100 text-red-700">{t("admin.suspended")}</Badge>}
+                        {u.deleted_at ? (
+                          <Badge className="bg-red-100 text-red-700">
+                            {u.anonymized_at ? t("admin.anonymizedBadge") : t("admin.deletedBadge")}
+                          </Badge>
+                        ) : u.is_suspended ? (
+                          <Badge className="bg-red-100 text-red-700">{t("admin.suspended")}</Badge>
+                        ) : null}
                       </div>
                     </div>
                   </div>
@@ -197,6 +206,8 @@ export default async function AdminUsersPage({
                       name={`${u.prenom ?? ""} ${u.nom ?? ""}`.trim() || t("admin.thisUser")}
                       role={u.role}
                       suspended={u.is_suspended}
+                      deleted={!!u.deleted_at}
+                      anonymized={!!u.anonymized_at}
                       hasSubscription={hasSub}
                       subscription={hasSub ? subscriptionOf(u.id, u.role) : null}
                       isSuperAdmin={me.is_super_admin}

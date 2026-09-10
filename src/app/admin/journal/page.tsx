@@ -26,6 +26,8 @@ const ACTION_ICON: Record<string, typeof UserCog> = {
   email_relances: Mail,
   broadcast: Megaphone,
   verify_identity: BadgeCheck,
+  restore_user: RotateCcw,
+  purge_comptes: Trash2,
 };
 
 export default async function AdminJournalPage({

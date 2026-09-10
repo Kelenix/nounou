@@ -34,7 +34,8 @@ export async function POST(request: Request) {
   const { data: recipients, error } = await admin
     .from("profiles")
     .select("id")
-    .eq("is_suspended", false);
+    .eq("is_suspended", false)
+    .is("deleted_at", null);
   if (error) {
     return NextResponse.json({ error: "Chargement des destinataires impossible" }, { status: 500 });
   }

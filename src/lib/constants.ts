@@ -63,3 +63,12 @@ export const COMMUNES_ABIDJAN = [
 ];
 
 export const APP_NAME = "J'ai ma nounou";
+
+/**
+ * Suppression douce des comptes : durée de conservation de l'identité d'un compte
+ * supprimé/banni avant anonymisation automatique (cron de purge). Choix ingénierie :
+ * 12 mois — assez long pour couvrir un litige ou un signalement (paiement, sécurité)
+ * qui surgit tardivement, tout en restant borné pour le respect de la vie privée.
+ * Les enregistrements financiers/modération, eux, sont conservés (anonymisés).
+ */
+export const ACCOUNT_RETENTION_MONTHS = 12;

@@ -5,11 +5,14 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { logAudit } from "@/lib/admin";
 
 const bodySchema = z.object({
-  action: z.enum(["delete", "cancel_subscription", "activate_subscription", "set_role", "suspend"]),
+  action: z.enum(["delete", "restore", "cancel_subscription", "activate_subscription", "set_role", "suspend"]),
   userId: z.string().uuid(),
   role: z.enum(["candidate", "employer", "admin"]).optional(),
   suspended: z.boolean().optional(),
 });
+
+// Bannissement auth « permanent » (100 ans) : bloque toute connexion d'un compte supprimé.
+const BAN_FOREVER = "876000h";
 
 export async function POST(request: Request) {
   const me = await getCurrentProfile();
@@ -30,7 +33,7 @@ export async function POST(request: Request) {
   const admin = createAdminClient();
   const { data: target } = await admin
     .from("profiles")
-    .select("role, is_super_admin, prenom, nom")
+    .select("role, is_super_admin, prenom, nom, anonymized_at")
     .eq("id", userId)
     .maybeSingle();
   if (!target) {
@@ -88,11 +91,33 @@ export async function POST(request: Request) {
   }
 
   if (action === "delete") {
-    const { error } = await admin.auth.admin.deleteUser(userId);
+    // Suppression DOUCE : on conserve le compte et son historique (paiements, avis,
+    // signalements) pour la traçabilité, mais on bannit la connexion et on le masque
+    // partout. L'anonymisation (effacement des données perso) intervient plus tard,
+    // via le cron de purge, après la durée de conservation.
+    await admin
+      .from("profiles")
+      .update({ deleted_at: new Date().toISOString(), deleted_by: me.id, is_suspended: true })
+      .eq("id", userId);
+    const { error } = await admin.auth.admin.updateUserById(userId, { ban_duration: BAN_FOREVER });
     if (error) {
       return NextResponse.json({ error: "Suppression impossible" }, { status: 500 });
     }
     await logAudit(me, "delete_user", { targetId: userId, targetName });
+    return NextResponse.json({ ok: true });
+  }
+
+  if (action === "restore") {
+    // Restauration d'un compte supprimé (impossible une fois anonymisé).
+    if (target.anonymized_at) {
+      return NextResponse.json({ error: "Compte anonymisé : restauration impossible" }, { status: 400 });
+    }
+    await admin
+      .from("profiles")
+      .update({ deleted_at: null, deleted_by: null, deletion_reason: null, is_suspended: false })
+      .eq("id", userId);
+    await admin.auth.admin.updateUserById(userId, { ban_duration: "none" });
+    await logAudit(me, "restore_user", { targetId: userId, targetName });
     return NextResponse.json({ ok: true });
   }
 

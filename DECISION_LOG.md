@@ -5,6 +5,40 @@
 
 ---
 
+## ADR-011 — Suppression douce des comptes (traçabilité + conservation des stats)
+- **Décideur** : Claude (à la demande du propriétaire, choix d'architecture délégué)
+- **Contexte** : la suppression d'un compte effaçait ses **paiements** (et avis/signalements) via
+  des FK `on delete cascade` (`auth.users` → `profiles` → `payments/ratings/reports`). Les
+  statistiques financières disparaissaient du tableau de bord. Besoin métier : **conserver les
+  stats et une traçabilité** du compte (litiges, fraude, sécurité) même après suppression/bannissement.
+- **Décision** : **suppression douce** au lieu d'une suppression physique.
+  - Migration `20260910000001` : colonnes `deleted_at/deleted_by/deletion_reason/anonymized_at`
+    sur `profiles` ; la vue `public_profiles` masque les comptes supprimés (`where deleted_at is null`)
+    → tous les listings marketplace en héritent (défense au niveau source).
+  - Les endpoints de suppression (admin `POST /api/admin/users` + auto-suppression RGPD
+    `DELETE /api/account`) **ne suppriment plus** : ils marquent `deleted_at`, mettent `is_suspended`,
+    et **bannissent l'utilisateur auth** (`ban_duration`, 100 ans) → plus aucune connexion.
+    `getCurrentProfile` traite un compte `deleted_at` comme non connecté.
+  - Comme le profil **reste en base**, aucune cascade ne se déclenche : paiements/avis/signalements
+    sont conservés et restent liés (traçabilité). `admin_audit_log` survivait déjà (`actor_id` SET NULL
+    + noms dénormalisés).
+  - **Rétention 12 mois** (`ACCOUNT_RETENTION_MONTHS`, choix ingénierie : couvre un litige tardif tout
+    en restant borné). Cron `GET /api/cron/purge-comptes` (protégé `CRON_SECRET`) **anonymise** ensuite
+    le profil (efface nom/photo/téléphone…), supprime ses notifications, tente d'effacer l'identité auth,
+    mais **garde les enregistrements financiers/modération** (désormais rattachés à un profil anonyme).
+    Idempotent via `anonymized_at`. Restauration admin possible **tant que non anonymisé**.
+- **Alternatives écartées** :
+  - `ON DELETE SET NULL` sur les FK : conserve les montants mais **perd la traçabilité** (on ne sait plus
+    qui a payé) et impose une chirurgie de FK sur 3 tables.
+  - `ON DELETE RESTRICT` : empêcherait toute suppression d'un compte ayant payé (bloque le RGPD/l'admin).
+- **Conséquences** :
+  - Le texte de suppression (UI) n'est plus « irréversible » ; un badge « Supprimé »/« Anonymisé » et un
+    filtre de statut « Supprimés » sont ajoutés à `/admin/utilisateurs`, avec une action **Restaurer**.
+  - **Suivi ultérieur** (non fait) : purge des **messages** et des **fichiers d'identité (Storage)** ;
+    base légale/durée à valider juridiquement (Politique de confidentialité).
+  - Les paiements **déjà** supprimés avant cette ADR sont perdus (seule une restauration PITR Supabase
+    pourrait les récupérer).
+
 ## ADR-010 — Tableau de bord Revenus + réconciliation fournisseur (Super Admin)
 - **Décideur** : Claude (à la demande du propriétaire)
 - **Contexte** : le compte marchand CinetPay est au nom du propriétaire (Europe) ; un partenaire

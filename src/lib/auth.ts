@@ -18,6 +18,9 @@ export async function getCurrentProfile(): Promise<ProfileRow | null> {
     .eq("id", user.id)
     .maybeSingle();
 
+  // Compte supprimé (soft-delete) : traité comme non connecté partout dans l'app.
+  if (data?.deleted_at) return null;
+
   return data ?? null;
 }
 

@@ -20,13 +20,15 @@ export type SubscriptionInfo = {
   date: string | null;
 };
 
-type Dialog = "suspend" | "cancel" | "activate" | "delete" | "role" | null;
+type Dialog = "suspend" | "cancel" | "activate" | "delete" | "restore" | "role" | null;
 
 export function UserActions({
   userId,
   name,
   role,
   suspended,
+  deleted = false,
+  anonymized = false,
   hasSubscription,
   subscription,
   isSuperAdmin = false,
@@ -35,6 +37,8 @@ export function UserActions({
   name: string;
   role: UserRole | null;
   suspended: boolean;
+  deleted?: boolean;
+  anonymized?: boolean;
   hasSubscription: boolean;
   subscription: SubscriptionInfo | null;
   isSuperAdmin?: boolean;
@@ -61,7 +65,7 @@ export function UserActions({
     }
   }
 
-  async function callApi(action: "cancel_subscription" | "activate_subscription" | "delete" | "set_role" | "suspend", extra?: Record<string, unknown>) {
+  async function callApi(action: "cancel_subscription" | "activate_subscription" | "delete" | "restore" | "set_role" | "suspend", extra?: Record<string, unknown>) {
     setLoading(true);
     const res = await fetch("/api/admin/users", {
       method: "POST",
@@ -109,6 +113,41 @@ export function UserActions({
       toast(t("admin.toastAccountDeleted"), "success");
       router.refresh();
     }
+  }
+
+  async function confirmRestore() {
+    if (await callApi("restore")) {
+      setDialog(null);
+      toast(t("admin.toastAccountRestored"), "success");
+      router.refresh();
+    }
+  }
+
+  // Compte supprimé (soft-delete) : seule la restauration est proposée, et
+  // uniquement tant que le compte n'a pas été anonymisé par le cron de purge.
+  if (deleted) {
+    return (
+      <>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {anonymized ? (
+            <span className="text-xs text-muted-foreground">{t("admin.anonymizedNote")}</span>
+          ) : (
+            <Button variant="secondary" size="sm" onClick={() => setDialog("restore")}>
+              <RotateCcw className="size-4" /> {t("admin.btnRestore")}
+            </Button>
+          )}
+        </div>
+        <ConfirmDialog
+          open={dialog === "restore"}
+          onOpenChange={close}
+          title={t("admin.restoreTitle")}
+          description={t("admin.restoreDesc", { name })}
+          confirmLabel={t("admin.btnRestore")}
+          loading={loading}
+          onConfirm={confirmRestore}
+        />
+      </>
+    );
   }
 
   return (

@@ -61,6 +61,7 @@ export function UserFilters() {
         <option value="">{tr("admin.allStatuses")}</option>
         <option value="active">{tr("admin.activePlural")}</option>
         <option value="suspended">{tr("admin.suspendedPlural")}</option>
+        <option value="deleted">{tr("admin.deletedPlural")}</option>
       </Select>
       <Select value={ville} onChange={(e) => setParam("ville", e.target.value)}>
         <option value="">{tr("admin.allCities")}</option>

@@ -18,9 +18,23 @@ export async function DELETE() {
   }
 
   const admin = createAdminClient();
-  const { error } = await admin.auth.admin.deleteUser(user.id);
+  // Suppression DOUCE (RGPD) : le compte est banni et masqué immédiatement, mais
+  // conservé (données financières/modération) le temps de la durée de conservation,
+  // puis anonymisé automatiquement par le cron de purge. Base légale : obligations
+  // comptables et prévention de la fraude/litiges.
+  await admin
+    .from("profiles")
+    .update({
+      deleted_at: new Date().toISOString(),
+      deletion_reason: "Auto-suppression (RGPD)",
+      is_suspended: true,
+    })
+    .eq("id", user.id);
+  const { error } = await admin.auth.admin.updateUserById(user.id, { ban_duration: "876000h" });
   if (error) {
     return NextResponse.json({ error: "Suppression impossible" }, { status: 500 });
   }
+  // Ferme la session courante de l'utilisateur.
+  await supabase.auth.signOut();
   return NextResponse.json({ ok: true });
 }

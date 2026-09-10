@@ -152,6 +152,7 @@ async function selectIncompleteProfiles(admin: Admin): Promise<Target[]> {
     .select("id, created_at, role, prenom, nom, ville")
     .eq("email_opt_out", false)
     .eq("is_suspended", false)
+    .is("deleted_at", null)
     .or("role.is.null,prenom.is.null,nom.is.null,ville.is.null")
     .limit(MAX_PER_RUN);
 
@@ -177,7 +178,8 @@ async function selectUnpaidCandidates(admin: Admin, exclude: Set<string>): Promi
     .in("id", ids)
     .eq("role", "candidate")
     .eq("email_opt_out", false)
-    .eq("is_suspended", false);
+    .eq("is_suspended", false)
+    .is("deleted_at", null);
 
   return (profiles ?? [])
     // Profil de base complet : sinon c'est la relance « complète ton profil » qui prime (segment A).
@@ -202,7 +204,8 @@ async function selectNonPremiumEmployers(admin: Admin, exclude: Set<string>): Pr
     .in("id", ids)
     .eq("role", "employer")
     .eq("email_opt_out", false)
-    .eq("is_suspended", false);
+    .eq("is_suspended", false)
+    .is("deleted_at", null);
 
   return (profiles ?? [])
     .filter((p) => !!p.prenom && !!p.nom && !!p.ville)

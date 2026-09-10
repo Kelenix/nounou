@@ -68,6 +68,11 @@ export type ProfileRow = {
   email_opt_out: boolean;
   is_super_admin: boolean;
   staff_permissions: string[];
+  // Suppression douce : compte supprimé/banni mais conservé pour la traçabilité.
+  deleted_at: string | null;
+  deleted_by: string | null;
+  deletion_reason: string | null;
+  anonymized_at: string | null;
   created_at: string;
   updated_at: string;
 };
