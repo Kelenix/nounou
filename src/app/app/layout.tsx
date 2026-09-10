@@ -35,7 +35,7 @@ export default async function AppLayout({
           <AppHeader profile={profile} unread={unread} />
         </div>
 
-        <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-4 lg:px-8 lg:pb-12 lg:pt-8">
+        <main className="w-full flex-1 px-4 pb-24 pt-4 lg:px-10 lg:pb-12 lg:pt-8">
           {children}
         </main>
 
