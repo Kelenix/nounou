@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Mail, Lock, Phone, Search, Briefcase } from "lucide-react";
@@ -201,6 +202,14 @@ export function EmailAuthForm({ mode }: { mode: "login" | "register" }) {
         <Button type="submit" size="lg" className="w-full text-base" disabled={loading}>
           {loading ? <Spinner className="text-primary-foreground" /> : mode === "register" ? t("auth.signUp") : t("auth.signIn")}
         </Button>
+
+        {mode === "login" && (
+          <p className="text-center text-sm">
+            <Link href="/mot-de-passe-oublie" className="font-medium text-primary hover:underline">
+              {t("auth.forgotPassword")}
+            </Link>
+          </p>
+        )}
       </form>
 
       <div className="flex items-center gap-3">

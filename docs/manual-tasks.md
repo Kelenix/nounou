@@ -97,6 +97,17 @@
   notifications ; les **messages** et les **fichiers d'identité en Storage** ne sont pas
   encore purgés (à traiter dans une itération dédiée si nécessaire).
 
+## Mot de passe oublié (réinitialisation)
+> Flux ajouté : lien « Mot de passe oublié ? » → e-mail de récupération (Supabase Auth) →
+> page `/reinitialiser-mot-de-passe`. L'e-mail passe par le système d'e-mails de **Supabase
+> Auth** (le même que la confirmation d'inscription, déjà opérationnel) — pas par Resend.
+- [ ] **Supabase → Auth → URL Configuration → Redirect URLs** : autoriser le retour du lien de
+  récupération, qui passe par `/auth/callback` avec un paramètre. Ajouter un motif avec joker :
+  `https://jaimanounou.com/auth/callback*` (ou `https://jaimanounou.com/**`). Sans ça, le clic sur
+  le lien renverra une erreur `redirect_to not allowed`.
+- [ ] (Recommandé) **SMTP personnalisé** dans Supabase (Auth → Emails) pour un meilleur taux de
+  délivrabilité des e-mails de récupération/confirmation (sinon quota d'envoi Supabase limité).
+
 ## Légal (Côte d'Ivoire)
 - [ ] Valider les textes **CGU** et **Politique de confidentialité** (données perso + paiement).
   Claude fournira des gabarits ; une relecture juridique reste recommandée.

@@ -4,6 +4,7 @@ import { requireAdminSection } from "@/lib/admin";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pagination } from "@/components/ui/pagination";
+import { OfferDeleteButton } from "@/features/admin/offer-delete-button";
 import { formatFcfa } from "@/lib/utils";
 
 export async function generateMetadata() {
@@ -53,6 +54,9 @@ export default async function AdminOffersPage({
                 {t(`services.${o.type_service}`)} · {[o.commune, o.ville].filter(Boolean).join(", ")}
                 {o.salaire != null ? ` · ${formatFcfa(o.salaire)}` : ""}
               </p>
+              <div className="mt-3 flex justify-end">
+                <OfferDeleteButton offerId={o.id} titre={o.titre} />
+              </div>
             </CardContent>
           </Card>
         ))}

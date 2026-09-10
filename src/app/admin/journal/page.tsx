@@ -28,6 +28,7 @@ const ACTION_ICON: Record<string, typeof UserCog> = {
   verify_identity: BadgeCheck,
   restore_user: RotateCcw,
   purge_comptes: Trash2,
+  delete_offer: Trash2,
 };
 
 export default async function AdminJournalPage({

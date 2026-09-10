@@ -45,9 +45,15 @@ export async function GET(request: Request) {
     .eq("id", user.id)
     .maybeSingle();
 
+  // Réinitialisation de mot de passe : on honore toujours la page de reset (la
+  // session de récupération vient d'être établie), sans redirection par rôle.
+  const isRecovery = safeRedirect === "/reinitialiser-mot-de-passe";
+
   let dest = safeRedirect;
-  if (!profile?.role) dest = "/onboarding";
-  else if (profile.role === "admin") dest = "/admin";
+  if (!isRecovery) {
+    if (!profile?.role) dest = "/onboarding";
+    else if (profile.role === "admin") dest = "/admin";
+  }
 
   return NextResponse.redirect(new URL(dest, origin));
 }

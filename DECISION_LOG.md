@@ -5,6 +5,26 @@
 
 ---
 
+## ADR-012 — Réinitialisation du mot de passe + suppression d'offres par l'admin
+- **Décideur** : Claude (à la demande du propriétaire)
+- **Contexte** : (1) l'auth email+mot de passe n'offrait **aucun** moyen de récupérer un mot de
+  passe oublié → utilisateur bloqué. (2) La page admin des offres **listait** sans permettre de
+  **supprimer** (la RLS `offers_delete_owner_or_admin` l'autorisait pourtant déjà).
+- **Décisions** :
+  - **Mot de passe oublié** : lien sur la connexion → `/mot-de-passe-oublie` (`resetPasswordForEmail`)
+    → e-mail de récupération **Supabase Auth** (même canal que la confirmation d'inscription, déjà
+    en place) → retour via `/auth/callback` (réutilisé, déjà autorisé) qui **honore la page de reset**
+    sans redirection par rôle → `/reinitialiser-mot-de-passe` (`updateUser({ password })`).
+    Anti-énumération : la demande affiche toujours « e-mail envoyé si le compte existe ».
+  - **Suppression d'offres (admin)** : `POST /api/admin/offres` (admin + permission `offers`,
+    Super Admin inclus), action journalisée `delete_offer` ; bouton + confirmation sur `/admin/offres`.
+- **Alternatives écartées** : lien de reset via redirectTo direct (poserait un souci de PKCE
+  cross-device et d'allow-list) → on réutilise le callback PKCE déjà éprouvé (même navigateur).
+- **Conséquences** :
+  - Tâche manuelle : ajouter un motif joker aux **Redirect URLs** Supabase (`/auth/callback*`) ;
+    SMTP personnalisé recommandé pour la délivrabilité.
+  - Supprimer une offre supprime ses **candidatures** (cascade) — cohérent pour une modération.
+
 ## ADR-011 — Suppression douce des comptes (traçabilité + conservation des stats)
 - **Décideur** : Claude (à la demande du propriétaire, choix d'architecture délégué)
 - **Contexte** : la suppression d'un compte effaçait ses **paiements** (et avis/signalements) via
