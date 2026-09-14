@@ -867,7 +867,12 @@
     "pendingDefault": "Confirm the payment on your phone.",
     "pendingWait": "Waiting for your confirmation…",
     "pendingTimeout": "Not confirmed yet. If you validated on your phone, please wait a moment.",
-    "recheck": "I validated, check now"
+    "recheck": "I validated, check now",
+    "selarTitle": "Pay with Selar",
+    "selarInstruction": "Important: pay with your account email ({email}), otherwise activation can't be automatic.",
+    "selarOpen": "Open Selar payment",
+    "selarNote": "After payment, activation may take a moment. Come back here and click “I paid”.",
+    "selarCheck": "I paid, check activation"
   },
   "settings": {
     "metaTitle": "Settings",

@@ -867,7 +867,12 @@
     "pendingDefault": "Confirmez le paiement sur votre téléphone.",
     "pendingWait": "En attente de votre confirmation…",
     "pendingTimeout": "Toujours pas confirmé. Si vous avez validé sur votre téléphone, patientez quelques instants.",
-    "recheck": "J'ai validé, vérifier"
+    "recheck": "J'ai validé, vérifier",
+    "selarTitle": "Payer via Selar",
+    "selarInstruction": "Important : payez avec l'e-mail de votre compte ({email}), sinon l'activation ne pourra pas être automatique.",
+    "selarOpen": "Ouvrir le paiement Selar",
+    "selarNote": "Après le paiement, l'activation peut prendre quelques instants. Revenez ici et cliquez sur « J'ai payé ».",
+    "selarCheck": "J'ai payé, vérifier l'activation"
   },
   "settings": {
     "metaTitle": "Paramètres",

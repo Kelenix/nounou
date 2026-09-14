@@ -24,6 +24,13 @@ next-env.d.ts
 
 # Claude Code (skills, réglages locaux) — ne pas publier sur GitHub
 .claude/
+#INTAKE.md
+#CLAUDE.md
+#PROJECT_STATE.md
+#RAPPORT.md
+#PLAN.md
+
+
 
 # divers
 .DS_Store

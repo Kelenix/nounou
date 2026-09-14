@@ -138,6 +138,37 @@
 - Note : les comptes déjà créés sans nom ne sont pas rétro-corrigés. L'utilisateur
   complétera son profil à l'onboarding, ou tu peux corriger depuis `/admin/utilisateurs`.
 
+## Paiement via Selar (particulier, sans entreprise)
+> Alternative aux agrégateurs qui exigent une société. Selar accepte les
+> **particuliers** : le client paie sur une page Selar, et l'app est prévenue par
+> **webhook** (`/api/paiement/selar`) qui identifie l'acheteur **par e-mail** et
+> active le compte automatiquement. Idempotent + protégé par un secret partagé.
+- [ ] **Migration** `20260914000001_payment_method_selar.sql` à appliquer sur
+  Supabase Cloud **avant de déployer** (`supabase db push` ou SQL Editor). Ajoute
+  la valeur `selar` à l'enum `payment_method` (idempotent).
+- [ ] **Produits Selar** : crée 2 produits à prix fixe dans ton dashboard Selar —
+  un pour l'**activation candidate**, un pour le **premium employeur**. Récupère
+  leurs **liens publics**.
+- [ ] **Variables d'env** (`.env.production`) :
+  - `SELAR_WEBHOOK_SECRET` = `openssl rand -hex 32` (secret partagé).
+  - `SELAR_PRODUCT_ACTIVATION` / `SELAR_PRODUCT_PREMIUM` = un **fragment** du nom
+    (ou slug) de chaque produit Selar, pour router la vente vers le bon type
+    (défauts : `activation` / `premium`).
+  - `NEXT_PUBLIC_SELAR_ACTIVATION_URL` / `NEXT_PUBLIC_SELAR_PREMIUM_URL` = liens
+    publics des produits (bouton « Payer via Selar » dans l'app).
+- [ ] **Brancher le webhook** vers `https://jaimanounou.com/api/paiement/selar` :
+  - **Option A — webhook natif Selar** (Réglages → Intégrations/API, si dispo) :
+    ajoute l'en-tête `x-selar-secret: <SELAR_WEBHOOK_SECRET>` **ou** l'URL
+    `.../api/paiement/selar?secret=<SELAR_WEBHOOK_SECRET>`.
+  - **Option B — Zapier** : déclencheur Selar « **New Sale** » → action
+    « Webhooks by Zapier (POST) » vers l'URL ci-dessus (avec `?secret=...`),
+    corps JSON mappé : `email` = e-mail acheteur, `product` = nom du produit,
+    `reference` = id de commande (pour l'idempotence).
+- ⚠️ **L'acheteur doit payer avec l'e-mail de son compte** (l'écran le lui
+  rappelle) — sinon l'app ne peut pas relier le paiement au compte.
+- ⚠️ Zapier gratuit **scanne toutes les ~15 min** → activation différée d'autant ;
+  webhook natif Selar = instantané. Selar prélève une **commission**.
+
 ## Légal (Côte d'Ivoire)
 - [ ] Valider les textes **CGU** et **Politique de confidentialité** (données perso + paiement).
   Claude fournira des gabarits ; une relecture juridique reste recommandée.

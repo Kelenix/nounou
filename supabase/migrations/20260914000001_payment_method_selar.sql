@@ -1,0 +1,11 @@
+-- ============================================================================
+-- Ajoute le moyen de paiement « selar » à l'enum public.payment_method.
+-- Selar (plateforme créateur, accessible aux particuliers sans entreprise) sert
+-- de canal d'encaissement : la vente est confirmée à l'app par webhook
+-- (`/api/paiement/selar`), qui identifie l'acheteur par e-mail via la fonction
+-- existante `admin_user_id_by_email`.
+-- NB : `ALTER TYPE ... ADD VALUE` ne doit pas être utilisé dans le même bloc
+-- transactionnel qui consomme ensuite la valeur ; cette migration ne fait que
+-- l'ajout, donc c'est sans risque (idempotent).
+-- ============================================================================
+alter type public.payment_method add value if not exists 'selar';
