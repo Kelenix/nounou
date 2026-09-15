@@ -148,10 +148,15 @@
 - [ ] **Compte mobile money ivoirien** opérationnel (Orange Money et/ou Wave) dont
   tu reçois les notifications de paiement.
 - [ ] **Variables d'env** (`.env.production`) — valeurs **publiques**, affichées au client :
-  - `NEXT_PUBLIC_MANUAL_PAY_OM` = numéro Orange Money (ex. `07 xx xx xx xx`).
-  - `NEXT_PUBLIC_MANUAL_PAY_WAVE` = numéro/lien Wave.
+  - `NEXT_PUBLIC_WAVE_MERCHANT_LINK` = ton lien marchand Wave **sans le montant**
+    (ex. `https://pay.wave.com/m/M_ci_xxxxx/c/ci/`). L'app y injecte automatiquement
+    le bon montant selon le tarif → bouton « Payer avec Wave » (montant prérempli).
+  - `NEXT_PUBLIC_MANUAL_PAY_OM` = numéro Orange Money (ex. `07 xx xx xx xx`), si tu en proposes un.
+  - `NEXT_PUBLIC_MANUAL_PAY_WAVE` = numéro Wave à afficher (facultatif si tu utilises le lien).
   - `NEXT_PUBLIC_MANUAL_PAY_NAME` = nom du titulaire (le client vérifie le destinataire).
-  - Renseigne **au moins un** des deux numéros pour activer le paiement.
+  - Renseigne **au moins un** canal (lien Wave, numéro OM ou numéro Wave).
+  - 💡 Le lien Wave gère le montant tout seul : **ne mets pas** `?amount=` dedans, et si tu
+    changes le prix dans Admin → Paramètres, le lien reste automatiquement juste.
 - [ ] **Processus de validation** : quand un client déclare un paiement, il apparaît
   dans **Admin → Revenus → « Paiements à valider »**. Vérifie l'identifiant dans ton
   compte OM/Wave, puis **Confirmer** (active le profil) ou **Rejeter**.

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { PayForm } from "@/features/payments/pay-form";
 import { ManualPay } from "@/features/payments/manual-pay";
 import { getAvailablePaymentMethods, paydunyaSoftpayActive } from "@/features/payments/provider";
-import { manualChannels, manualPayeeName, type ManualChannel } from "@/features/payments/manual";
+import { manualChannels, manualPayeeName, waveLinkForAmount, type ManualChannel } from "@/features/payments/manual";
 import { formatFcfa } from "@/lib/utils";
 import type { PaymentMethod, PaymentType } from "@/lib/supabase/database.types";
 
@@ -144,7 +144,13 @@ async function Checkout({
               <span className="h-px flex-1 bg-border" />
             </div>
           )}
-          <ManualPay type={type} montant={montant} channels={channels} payeeName={payeeName} />
+          <ManualPay
+            type={type}
+            montant={montant}
+            channels={channels}
+            payeeName={payeeName}
+            waveLink={waveLinkForAmount(montant)}
+          />
         </>
       )}
 

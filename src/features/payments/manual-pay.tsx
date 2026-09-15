@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Clock, Copy, Check, ShieldCheck } from "lucide-react";
+import { Clock, Copy, Check, ShieldCheck, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,11 +24,14 @@ export function ManualPay({
   montant,
   channels,
   payeeName,
+  waveLink,
 }: {
   type: PaymentType;
   montant: number;
   channels: ManualChannel[];
   payeeName: string;
+  /** Lien de paiement Wave prérempli avec le montant (bouton « Payer avec Wave »). */
+  waveLink?: string;
 }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -121,14 +124,24 @@ export function ManualPay({
           </div>
         )}
 
-        {selected && (
+        {/* Wave : bouton de paiement direct (montant prérempli). */}
+        {moyen === "wave" && waveLink && (
+          <Button asChild className="w-full">
+            <a href={waveLink} target="_blank" rel="noopener noreferrer">
+              {t("payment.manualPayNow")} <ExternalLink className="ml-1 size-4" />
+            </a>
+          </Button>
+        )}
+
+        {/* Numéro à créditer (Orange Money, ou Wave si un numéro est fourni). */}
+        {selected?.number && (
           <div className="space-y-1 rounded-2xl bg-secondary/60 p-3">
             <div className="flex items-center justify-between gap-2">
               <div>
                 <p className="text-xs text-muted-foreground">{PAYMENT_METHOD_LABELS[selected.moyen]}</p>
                 <p className="text-lg font-bold tracking-wide">{selected.number}</p>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => copy(selected.number)}>
+              <Button variant="ghost" size="sm" onClick={() => copy(selected.number!)}>
                 {copied === selected.number ? <Check className="size-4 text-primary" /> : <Copy className="size-4" />}
               </Button>
             </div>
