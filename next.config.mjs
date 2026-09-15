@@ -44,11 +44,9 @@ const securityHeaders = [
 
 const nextConfig = {
   reactStrictMode: true,
-  // Sortie autonome : produit `.next/standalone` (serveur Node minimal) pour un
-  // conteneur Docker léger en production (déploiement VPS).
   output: "standalone",
+  lintDirs: ["app", "src"],  // ← ADD THIS LINE
   images: {
-    // Supabase Storage sert les photos ; autoriser l'hôte du projet.
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co" },
       { protocol: "http", hostname: "127.0.0.1" },
@@ -59,6 +57,8 @@ const nextConfig = {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
 };
+
+
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
