@@ -138,6 +138,30 @@
 - Note : les comptes déjà créés sans nom ne sont pas rétro-corrigés. L'utilisateur
   complétera son profil à l'onboarding, ou tu peux corriger depuis `/admin/utilisateurs`.
 
+## Paiement mobile money « relais local » (particulier en Europe, sans entreprise)
+> Aucune plateforme ne permet à un particulier basé en Europe d'encaisser du
+> mobile money ivoirien avec versement en Europe (il faut un compte de règlement
+> **local**). Solution retenue : le client paie sur un compte **Orange Money / Wave
+> ivoirien que tu contrôles** (le tien ou celui d'un proche de confiance), déclare
+> l'**identifiant de transaction** dans l'app, et un **admin valide** (page Revenus).
+> Aucune vérification automatique n'est possible sur un compte personnel.
+- [ ] **Compte mobile money ivoirien** opérationnel (Orange Money et/ou Wave) dont
+  tu reçois les notifications de paiement.
+- [ ] **Variables d'env** (`.env.production`) — valeurs **publiques**, affichées au client :
+  - `NEXT_PUBLIC_MANUAL_PAY_OM` = numéro Orange Money (ex. `07 xx xx xx xx`).
+  - `NEXT_PUBLIC_MANUAL_PAY_WAVE` = numéro/lien Wave.
+  - `NEXT_PUBLIC_MANUAL_PAY_NAME` = nom du titulaire (le client vérifie le destinataire).
+  - Renseigne **au moins un** des deux numéros pour activer le paiement.
+- [ ] **Processus de validation** : quand un client déclare un paiement, il apparaît
+  dans **Admin → Revenus → « Paiements à valider »**. Vérifie l'identifiant dans ton
+  compte OM/Wave, puis **Confirmer** (active le profil) ou **Rejeter**.
+- Sécurités intégrées : un même identifiant de transaction ne peut être déclaré
+  qu'une fois ; un utilisateur ne peut avoir qu'une déclaration en attente par type ;
+  le tarif vient des réglages (jamais du client) ; validation réservée au Super Admin.
+- ⚠️ **Confiance** : si tu utilises le compte d'un proche, tu dois lui faire confiance
+  pour te reverser les fonds. ⚠️ La validation est **manuelle** — prévois d'y passer
+  régulièrement tant que le volume est faible.
+
 ## Légal (Côte d'Ivoire)
 - [ ] Valider les textes **CGU** et **Politique de confidentialité** (données perso + paiement).
   Claude fournira des gabarits ; une relecture juridique reste recommandée.
