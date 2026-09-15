@@ -34,7 +34,6 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   moov_money: "Moov Money",
   wave: "Wave",
   carte: "Carte bancaire",
-  selar: "Selar",
 };
 
 /** Quelques villes/communes courantes de Côte d'Ivoire (liste non exhaustive). */

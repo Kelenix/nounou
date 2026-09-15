@@ -29,7 +29,7 @@ export type ReportMotif =
   | "conditions_differentes"
   | "autre";
 export type ReportStatus = "ouvert" | "en_cours" | "traite" | "rejete";
-export type PaymentMethod = "orange_money" | "mtn_momo" | "moov_money" | "wave" | "carte" | "selar";
+export type PaymentMethod = "orange_money" | "mtn_momo" | "moov_money" | "wave" | "carte";
 export type PaymentStatus = "en_attente" | "reussi" | "echoue" | "annule";
 export type PaymentType = "activation_candidate" | "premium_employeur";
 export type RatingContext =

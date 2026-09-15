@@ -199,7 +199,7 @@ class PayDunyaProvider implements PaymentProvider {
   }
 
   // Correspondance moyen (app) → endpoint SOFTPAY PayDunya (Côte d'Ivoire).
-  private static readonly SOFTPAY_CI: Record<Exclude<PaymentMethod, "carte" | "selar">, string> = {
+  private static readonly SOFTPAY_CI: Record<Exclude<PaymentMethod, "carte">, string> = {
     orange_money: "orange-money-ci",
     mtn_momo: "mtn-ci",
     moov_money: "moov-ci",
@@ -283,8 +283,7 @@ class PayDunyaProvider implements PaymentProvider {
     // 2. SOFTPAY (production) : débit direct via l'opérateur (sans redirection, sauf Wave qui renvoie une URL).
     const name = input.customerName?.trim() || "Client";
     const email = input.customerEmail?.trim() || `${input.userId}@jaimanounou.com`;
-    // Ce chemin n'est atteint que par le Mobile Money (carte → Stripe, selar → webhook Selar).
-    const endpoint = PayDunyaProvider.SOFTPAY_CI[input.moyen as keyof typeof PayDunyaProvider.SOFTPAY_CI];
+    const endpoint = PayDunyaProvider.SOFTPAY_CI[input.moyen];
     const spRes = await fetch(`${this.base()}/softpay/${endpoint}`, {
       method: "POST",
       headers: this.headers(),

@@ -7,19 +7,9 @@ import { getPricing } from "@/features/settings/queries";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PayForm } from "@/features/payments/pay-form";
-import { SelarPay } from "@/features/payments/selar-pay";
 import { getAvailablePaymentMethods, paydunyaSoftpayActive } from "@/features/payments/provider";
 import { formatFcfa } from "@/lib/utils";
 import type { PaymentMethod, PaymentType } from "@/lib/supabase/database.types";
-
-/** URL du produit Selar selon le type de paiement (particulier, sans entreprise). */
-function selarUrlFor(type: PaymentType): string | undefined {
-  const url =
-    type === "activation_candidate"
-      ? process.env.NEXT_PUBLIC_SELAR_ACTIVATION_URL
-      : process.env.NEXT_PUBLIC_SELAR_PREMIUM_URL;
-  return url && url.trim() ? url.trim() : undefined;
-}
 
 export async function generateMetadata() {
   const t = await getTranslations();
@@ -29,10 +19,6 @@ export async function generateMetadata() {
 export default async function PaiementPage() {
   const profile = await requireProfile();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const email = user?.email ?? "";
   const pricing = await getPricing();
   const methods = getAvailablePaymentMethods();
   const softpay = paydunyaSoftpayActive();
@@ -59,8 +45,6 @@ export default async function PaiementPage() {
         phone={profile.phone ?? ""}
         methods={methods}
         softpay={softpay}
-        email={email}
-        selarUrl={selarUrlFor("activation_candidate")}
       />
     );
   }
@@ -86,8 +70,6 @@ export default async function PaiementPage() {
         phone={profile.phone ?? ""}
         methods={methods}
         softpay={softpay}
-        email={email}
-        selarUrl={selarUrlFor("premium_employeur")}
       />
     );
   }
@@ -95,7 +77,7 @@ export default async function PaiementPage() {
   return <AlreadyDone label={t("payment.noPaymentNeeded")} backLabel={t("payment.backHome")} />;
 }
 
-async function Checkout({
+function Checkout({
   type,
   title,
   montant,
@@ -104,8 +86,6 @@ async function Checkout({
   phone,
   methods,
   softpay,
-  email,
-  selarUrl,
 }: {
   type: PaymentType;
   title: string;
@@ -115,10 +95,7 @@ async function Checkout({
   phone: string;
   methods: PaymentMethod[];
   softpay: boolean;
-  email: string;
-  selarUrl?: string;
 }) {
-  const t = await getTranslations();
   return (
     <div className="space-y-5">
       <Card className="border-primary/30 bg-primary-soft/40">
@@ -139,29 +116,7 @@ async function Checkout({
         </CardContent>
       </Card>
 
-      {/* Mobile Money / carte (si un fournisseur est configuré). */}
-      {methods.length > 0 && (
-        <PayForm type={type} montant={montant} defaultPhone={phone} methods={methods} softpay={softpay} />
-      )}
-
-      {/* Selar (particulier, sans entreprise) : affiché si le lien produit est configuré. */}
-      {selarUrl && email && (
-        <>
-          {methods.length > 0 && (
-            <div className="flex items-center gap-3">
-              <span className="h-px flex-1 bg-border" />
-              <span className="text-xs text-muted-foreground">{t("auth.or")}</span>
-              <span className="h-px flex-1 bg-border" />
-            </div>
-          )}
-          <SelarPay selarUrl={selarUrl} email={email} />
-        </>
-      )}
-
-      {/* Aucun moyen configuré du tout : message d'indisponibilité. */}
-      {methods.length === 0 && !selarUrl && (
-        <PayForm type={type} montant={montant} defaultPhone={phone} methods={methods} softpay={softpay} />
-      )}
+      <PayForm type={type} montant={montant} defaultPhone={phone} methods={methods} softpay={softpay} />
     </div>
   );
 }
