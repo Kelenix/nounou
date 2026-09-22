@@ -413,15 +413,101 @@ function verifyStripeSignature(payload: string, header: string, secret: string):
 }
 
 // ---------------------------------------------------------------------------
+// Cartflox (agrégateur Mobile Money africain) — Checkout hébergé + webhook signé
+// Doc : https://cartflox.com/docs. La clé secrète sert à l'API ET à signer les
+// webhooks. Clés de test (af_test_sec_…) : aucune vérification d'identité requise.
+// ---------------------------------------------------------------------------
+
+class CartfloxProvider implements PaymentProvider {
+  readonly name = "cartflox";
+
+  private base(): string {
+    return process.env.CARTFLOX_API_BASE?.trim() || "https://cartflox.com/api/v1";
+  }
+  private secret(): string {
+    return requireEnv("CARTFLOX_SECRET_KEY");
+  }
+
+  async initiate(input: InitiatePaymentInput): Promise<InitiatePaymentResult> {
+    const reference = makeReference(input);
+    const res = await fetch(`${this.base()}/checkout/sessions`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${this.secret()}`,
+        "Content-Type": "application/json",
+        "Idempotency-Key": reference,
+      },
+      body: JSON.stringify({
+        amount: input.montant, // XOF : entier, sans décimales
+        currency: "XOF",
+        customer_email: input.customerEmail,
+        customer_name: input.customerName,
+        customer_phone: input.phone || undefined,
+        description: labelForType(input.type),
+        success_url: `${returnUrl()}?status=success`,
+        cancel_url: `${returnUrl()}?status=cancel`,
+        metadata: { reference },
+      }),
+    });
+    const data = await res.json().catch(() => null);
+    const url = data?.url as string | undefined;
+    if (!url) {
+      throw new Error(`Cartflox : initiation échouée (${data?.error?.message ?? data?.message ?? res.status})`);
+    }
+    // On conserve l'id de session (checkout.session.id) comme jeton fournisseur.
+    return { reference, status: "en_attente", redirectUrl: url, providerToken: (data?.id as string) ?? null };
+  }
+
+  async parseWebhook(request: Request): Promise<PaymentWebhookEvent | null> {
+    const raw = await request.text();
+    const sigHeader = request.headers.get("x-afriflow-signature");
+    if (!sigHeader || !verifyCartfloxSignature(raw, sigHeader, this.secret())) return null;
+
+    const evt = JSON.parse(raw);
+    const reference = evt?.data?.metadata?.reference ?? evt?.data?.metadata?.order_id;
+    if (!reference) return null;
+
+    // On n'agit que sur l'issue d'un paiement ; transfer.* / payment.updated ignorés.
+    if (evt?.event === "payment.completed") return { reference, success: true };
+    if (evt?.event === "payment.failed" || evt?.event === "payment.cancelled") {
+      return { reference, success: false };
+    }
+    return null;
+  }
+}
+
+/**
+ * Vérifie l'en-tête `X-Afriflow-Signature` (`t=<ts>,v1=<hex>`, HMAC-SHA256 de
+ * `<ts>.<corps brut>` avec la clé secrète). Rejette au-delà de 5 min (anti-rejeu).
+ */
+function verifyCartfloxSignature(payload: string, header: string, secret: string): boolean {
+  const parts = Object.fromEntries(header.split(",").map((p) => p.split("=")) as [string, string][]);
+  const t = parts["t"];
+  const v1 = parts["v1"];
+  if (!t || !v1) return false;
+  // Anti-rejeu : horodatage de moins de 5 minutes (tolère secondes ou millisecondes).
+  const raw = Number(t);
+  const ts = Number.isFinite(raw) ? (raw > 1e12 ? raw / 1000 : raw) : NaN;
+  if (!Number.isFinite(ts) || Math.abs(Date.now() / 1000 - ts) > 300) return false;
+  const expected = createHmac("sha256", secret).update(`${t}.${payload}`).digest("hex");
+  try {
+    return timingSafeEqual(Buffer.from(expected), Buffer.from(v1));
+  } catch {
+    return false;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Sélection du fournisseur
-//   - Carte  → PAYMENT_CARD_PROVIDER   (mock | stripe)              défaut mock
-//   - Mobile → PAYMENT_MOBILE_PROVIDER (mock | cinetpay | paydunya) défaut mock
+//   - Carte  → PAYMENT_CARD_PROVIDER   (mock | stripe)                        défaut mock
+//   - Mobile → PAYMENT_MOBILE_PROVIDER (mock | cinetpay | paydunya | cartflox) défaut mock
 // ---------------------------------------------------------------------------
 
 const PROVIDERS: Record<string, () => PaymentProvider> = {
   mock: () => new MockPaymentProvider(),
   cinetpay: () => new CinetPayProvider(),
   paydunya: () => new PayDunyaProvider(),
+  cartflox: () => new CartfloxProvider(),
   stripe: () => new StripeProvider(),
 };
 
@@ -452,6 +538,7 @@ export function getPaymentProviderByName(name: string): PaymentProvider | null {
 function mobileMoneyReady(): boolean {
   const p = process.env.PAYMENT_MOBILE_PROVIDER ?? "mock";
   if (p === "cinetpay") return !!process.env.CINETPAY_API_KEY && !!process.env.CINETPAY_SITE_ID;
+  if (p === "cartflox") return !!process.env.CARTFLOX_SECRET_KEY;
   if (p === "paydunya") {
     return (
       !!process.env.PAYDUNYA_MASTER_KEY &&

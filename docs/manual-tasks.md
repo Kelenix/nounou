@@ -138,6 +138,33 @@
 - Note : les comptes déjà créés sans nom ne sont pas rétro-corrigés. L'utilisateur
   complétera son profil à l'onboarding, ou tu peux corriger depuis `/admin/utilisateurs`.
 
+## Cartflox (agrégateur Mobile Money — paiement AUTOMATIQUE)
+> Cartflox fournit une **API + des webhooks signés** : le client paie sur la page
+> hébergée Cartflox, et un webhook **active le compte automatiquement** (aucune
+> validation manuelle). Intégré comme fournisseur (`PaymentProvider`), il réutilise
+> la route webhook et la réconciliation existantes.
+- [ ] **Clés de test** (dashboard Cartflox → API & Logs → *Clés de test*,
+  utilisables **sans vérification d'identité**). Dans `.env.local` :
+  - `PAYMENT_MOBILE_PROVIDER=cartflox`
+  - `CARTFLOX_SECRET_KEY=af_test_sec_…` (la clé **secrète** de test)
+- [ ] **Webhook** : dans Cartflox → API & Logs → *Webhook*, enregistrer l'adresse
+  `{NEXT_PUBLIC_APP_URL}/api/paiement/webhook/cartflox` et cocher au moins
+  `payment.completed`, `payment.failed`, `payment.cancelled`.
+  ⚠️ Cartflox doit pouvoir **joindre** cette URL : en local, expose ton serveur
+  (ex. `cloudflared tunnel` ou `ngrok http 3000`) et mets l'URL publique du tunnel ;
+  sinon teste directement sur l'environnement déployé (Vercel/VPS).
+- [ ] **Passage en production** : remplacer par `CARTFLOX_SECRET_KEY=af_live_sec_…`
+  (nécessite la vérification d'identité côté Cartflox) et pointer le webhook vers
+  le domaine de prod. La clé secrète sert à l'API **et** à vérifier la signature.
+- Test rapide de création de session (remplace la clé) :
+  ```bash
+  curl -X POST https://cartflox.com/api/v1/checkout/sessions \
+    -H "Authorization: Bearer af_test_sec_XXXX" \
+    -H "Content-Type: application/json" \
+    -d '{"amount":1000,"currency":"XOF","customer_email":"test@example.com","success_url":"https://exemple.com/merci","metadata":{"reference":"TEST-1"}}'
+  ```
+  → réponse `201` avec un champ `url` (page de paiement) et `id` (session).
+
 ## Paiement mobile money « relais local » (particulier en Europe, sans entreprise)
 > Aucune plateforme ne permet à un particulier basé en Europe d'encaisser du
 > mobile money ivoirien avec versement en Europe (il faut un compte de règlement
