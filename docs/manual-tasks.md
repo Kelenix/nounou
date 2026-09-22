@@ -167,35 +167,6 @@
   ```
   → réponse `201` avec un champ `url` (page de paiement) et `id` (session).
 
-## Paiement mobile money « relais local » (particulier en Europe, sans entreprise)
-> Aucune plateforme ne permet à un particulier basé en Europe d'encaisser du
-> mobile money ivoirien avec versement en Europe (il faut un compte de règlement
-> **local**). Solution retenue : le client paie sur un compte **Orange Money / Wave
-> ivoirien que tu contrôles** (le tien ou celui d'un proche de confiance), déclare
-> l'**identifiant de transaction** dans l'app, et un **admin valide** (page Revenus).
-> Aucune vérification automatique n'est possible sur un compte personnel.
-- [ ] **Compte mobile money ivoirien** opérationnel (Orange Money et/ou Wave) dont
-  tu reçois les notifications de paiement.
-- [ ] **Variables d'env** (`.env.production`) — valeurs **publiques**, affichées au client :
-  - `NEXT_PUBLIC_WAVE_MERCHANT_LINK` = ton lien marchand Wave **sans le montant**
-    (ex. `https://pay.wave.com/m/M_ci_xxxxx/c/ci/`). L'app y injecte automatiquement
-    le bon montant selon le tarif → bouton « Payer avec Wave » (montant prérempli).
-  - `NEXT_PUBLIC_MANUAL_PAY_OM` = numéro Orange Money (ex. `07 xx xx xx xx`), si tu en proposes un.
-  - `NEXT_PUBLIC_MANUAL_PAY_WAVE` = numéro Wave à afficher (facultatif si tu utilises le lien).
-  - `NEXT_PUBLIC_MANUAL_PAY_NAME` = nom du titulaire (le client vérifie le destinataire).
-  - Renseigne **au moins un** canal (lien Wave, numéro OM ou numéro Wave).
-  - 💡 Le lien Wave gère le montant tout seul : **ne mets pas** `?amount=` dedans, et si tu
-    changes le prix dans Admin → Paramètres, le lien reste automatiquement juste.
-- [ ] **Processus de validation** : quand un client déclare un paiement, il apparaît
-  dans **Admin → Revenus → « Paiements à valider »**. Vérifie l'identifiant dans ton
-  compte OM/Wave, puis **Confirmer** (active le profil) ou **Rejeter**.
-- Sécurités intégrées : un même identifiant de transaction ne peut être déclaré
-  qu'une fois ; un utilisateur ne peut avoir qu'une déclaration en attente par type ;
-  le tarif vient des réglages (jamais du client) ; validation réservée au Super Admin.
-- ⚠️ **Confiance** : si tu utilises le compte d'un proche, tu dois lui faire confiance
-  pour te reverser les fonds. ⚠️ La validation est **manuelle** — prévois d'y passer
-  régulièrement tant que le volume est faible.
-
 ## Légal (Côte d'Ivoire)
 - [ ] Valider les textes **CGU** et **Politique de confidentialité** (données perso + paiement).
   Claude fournira des gabarits ; une relecture juridique reste recommandée.

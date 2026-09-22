@@ -356,3 +356,15 @@ juridique des CGU / confidentialité.
 <sub>Fait pour les familles ivoiriennes — <strong>J'ai ma nounou</strong>.</sub>
 
 </div>
+
+----
+Les 3 comptes de test locaux sont prêts :
+
+Rôle	E-mail	Nom	État
+👩 Nounou (candidate)	nounou@example.com	Awa Kone	non activée → peut payer l'activation
+👨‍👩‍👧 Famille (employer)	famille@example.com	Jean Bamba	non premium → peut payer le premium
+🛡️ Admin (super)	admin@example.com	Nounou Admin	accès complet (dont Revenus)
+Comment se connecter (sans mot de passe — code e-mail)
+Ouvre http://localhost:3000 → Se connecter → saisis l'e-mail.
+Le code OTP arrive dans le catcher d'e-mails local Mailpit → http://127.0.0.1:54334 : ouvre le dernier message, récupère le code.
+Saisis le code → connecté. La nounou/famille atterrit sur l'app, l'admin sur /admin.

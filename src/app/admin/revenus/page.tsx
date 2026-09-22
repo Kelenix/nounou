@@ -13,7 +13,6 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ReconcileButton } from "@/features/admin/reconcile-button";
-import { ValidatePaymentButtons } from "@/features/admin/validate-payment-buttons";
 import { RevenueDateFilter } from "@/features/admin/revenue-date-filter";
 import { PAYMENT_METHOD_LABELS } from "@/lib/constants";
 import { formatFcfa, dateLocale } from "@/lib/utils";
@@ -58,19 +57,10 @@ export default async function RevenusPage({ searchParams }: { searchParams: Prom
 
   const { data: rowsRaw } = await admin
     .from("payments")
-    .select("id, user_id, montant, moyen, type, statut, reference_transaction, provider_token, created_at")
+    .select("id, user_id, montant, moyen, type, statut, reference_transaction, created_at")
     .order("created_at", { ascending: false })
     .limit(10000);
   const rows = rowsRaw ?? [];
-
-  // Paiements mobile money « relais local » à valider à la main (statut en attente).
-  const toValidate = rows.filter((r) => r.statut === "en_attente");
-  const validateUids = Array.from(new Set(toValidate.map((r) => r.user_id)));
-  const nameById = new Map<string, string>();
-  if (validateUids.length) {
-    const { data: profs } = await admin.from("profiles").select("id, prenom, nom").in("id", validateUids);
-    for (const p of profs ?? []) nameById.set(p.id, `${p.prenom ?? ""} ${p.nom ?? ""}`.trim());
-  }
 
   // Transactions de la période sélectionnée (par défaut : tout l'historique).
   const periodRows = fromDate || toDate ? rows.filter((r) => inPeriod(r.created_at)) : rows;
@@ -149,52 +139,6 @@ export default async function RevenusPage({ searchParams }: { searchParams: Prom
       </div>
 
       <RevenueDateFilter from={from} to={to} />
-
-      {/* Paiements mobile money « relais local » à valider à la main */}
-      {toValidate.length > 0 && (
-        <Card className="border-amber-300">
-          <CardContent className="space-y-3 p-5">
-            <div>
-              <h2 className="flex items-center gap-2 font-bold">
-                <Clock className="size-4 text-amber-600" /> {t("revenus.validateTitle")}
-              </h2>
-              <p className="text-sm text-muted-foreground">{t("revenus.validateHelp")}</p>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-xs text-muted-foreground">
-                    <th className="py-2 pr-3 font-medium">{t("revenus.colUser")}</th>
-                    <th className="py-2 pr-3 font-medium">{t("revenus.colType")}</th>
-                    <th className="py-2 pr-3 font-medium">{t("revenus.colMethod")}</th>
-                    <th className="py-2 pr-3 font-medium">{t("revenus.colTxId")}</th>
-                    <th className="py-2 pr-3 font-medium">{t("revenus.colSender")}</th>
-                    <th className="py-2 pr-3 font-medium">{t("revenus.colAmount")}</th>
-                    <th className="py-2 pr-3 font-medium">{t("revenus.colDate")}</th>
-                    <th className="py-2 font-medium" />
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/60">
-                  {toValidate.map((r) => (
-                    <tr key={r.id}>
-                      <td className="py-2 pr-3 font-medium">{nameById.get(r.user_id) || "—"}</td>
-                      <td className="py-2 pr-3">{typeLabel(r.type)}</td>
-                      <td className="py-2 pr-3">{PAYMENT_METHOD_LABELS[r.moyen]}</td>
-                      <td className="max-w-[160px] truncate py-2 pr-3 font-mono text-xs">{r.reference_transaction}</td>
-                      <td className="py-2 pr-3 font-mono text-xs text-muted-foreground">{r.provider_token || "—"}</td>
-                      <td className="py-2 pr-3 font-semibold">{formatFcfa(Number(r.montant))}</td>
-                      <td className="whitespace-nowrap py-2 pr-3 text-muted-foreground">{fmtDate(r.created_at)}</td>
-                      <td className="py-2">
-                        <ValidatePaymentButtons paymentId={r.id} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* KPIs — chiffres de la période sélectionnée */}
       <div>
