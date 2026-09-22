@@ -45,7 +45,6 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   output: "standalone",
-  lintDirs: ["app", "src"],  // ← ADD THIS LINE
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co" },
