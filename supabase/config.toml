@@ -36,6 +36,15 @@ additional_redirect_urls = ["http://localhost:3000", "http://localhost:3001", "h
 jwt_expiry = 3600
 enable_signup = true
 
+# --- E-mail : template OTP. La présence de {{ .Token }} fait envoyer un CODE à
+#     6 chiffres (et non un lien magique). Reflète le template prod à coller dans
+#     Supabase → Auth → Email Templates → Magic Link. ---
+[auth.email]
+enable_confirmations = false
+[auth.email.template.magic_link]
+subject = "Votre code de connexion · J'ai ma nounou"
+content_path = "./supabase/templates/magic_link.html"
+
 # --- Limitation de débit (S5) : plafonds anti-abus. En production, vérifier aussi
 #     les limites côté tableau de bord Supabase (Auth > Rate Limits). ---
 [auth.rate_limit]

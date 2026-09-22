@@ -1,0 +1,20 @@
+<!-- Template OTP e-mail (local + réf. prod). {{ .Token }} = code à 6 chiffres. -->
+<!doctype html>
+<html lang="fr">
+  <body style="margin:0;background:#f4f6f5;font-family:Arial,Helvetica,sans-serif">
+    <div style="max-width:520px;margin:0 auto;padding:24px">
+      <div style="background:#ffffff;border-radius:16px;padding:28px;text-align:center">
+        <h1 style="margin:0 0 8px;font-size:18px;color:#0f172a">Votre code de connexion</h1>
+        <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.5">
+          Saisissez ce code pour vous connecter à J'ai ma nounou&nbsp;:
+        </p>
+        <div style="display:inline-block;background:#f4f6f5;border-radius:12px;padding:14px 24px;font-size:32px;font-weight:800;letter-spacing:8px;color:#0f172a">
+          {{ .Token }}
+        </div>
+        <p style="margin:20px 0 0;color:#94a3b8;font-size:13px;line-height:1.5">
+          Ce code expire dans quelques minutes. Ne le communiquez à personne.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
