@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getCurrentProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/server";
 import { logAudit } from "@/lib/admin";
+import { anonymizeAccount } from "@/features/account/purge";
 
 const bodySchema = z.object({
   action: z.enum(["delete", "restore", "cancel_subscription", "activate_subscription", "set_role", "suspend"]),
@@ -94,10 +95,10 @@ export async function POST(request: Request) {
   }
 
   if (action === "delete") {
-    // Suppression DOUCE : on conserve le compte et son historique (paiements, avis,
-    // signalements) pour la traçabilité, mais on bannit la connexion et on le masque
-    // partout. L'anonymisation (effacement des données perso) intervient plus tard,
-    // via le cron de purge, après la durée de conservation.
+    // Suppression : on CONSERVE la ligne et les paiements liés (statistiques),
+    // mais on bannit la connexion, on masque partout, et on ANONYMISE l'identité
+    // immédiatement — nom/téléphone/e-mail effacés — pour que l'e-mail et le numéro
+    // puissent resservir à une nouvelle inscription. Opération définitive.
     await admin
       .from("profiles")
       .update({ deleted_at: new Date().toISOString(), deleted_by: me.id, is_suspended: true })
@@ -106,12 +107,15 @@ export async function POST(request: Request) {
     if (error) {
       return NextResponse.json({ error: "Suppression impossible" }, { status: 500 });
     }
+    // Libère l'e-mail + le téléphone (anonymisation), après avoir posé deleted_at.
+    await anonymizeAccount(admin, userId);
     await logAudit(me, "delete_user", { targetId: userId, targetName });
     return NextResponse.json({ ok: true });
   }
 
   if (action === "restore") {
-    // Restauration d'un compte supprimé (impossible une fois anonymisé).
+    // Restauration d'un compte supprimé (impossible une fois anonymisé — c.-à-d.
+    // dès la suppression, puisque l'identité est libérée immédiatement).
     if (target.anonymized_at) {
       return NextResponse.json({ error: "Compte anonymisé : restauration impossible" }, { status: 400 });
     }

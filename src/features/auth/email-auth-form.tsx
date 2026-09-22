@@ -97,6 +97,27 @@ export function EmailAuthForm({ mode }: { mode: "login" | "register" }) {
     }
 
     setLoading(true);
+
+    // Inscription : refuser d'emblée un e-mail déjà associé à un compte, avec un
+    // message clair (sinon un code serait envoyé et connecterait au compte existant).
+    if (mode === "register") {
+      try {
+        const res = await fetch("/api/auth/check-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: normalizedEmail() }),
+        });
+        const data = await res.json().catch(() => null);
+        if (data?.exists) {
+          setLoading(false);
+          setError(t("auth.errEmailExists"));
+          return;
+        }
+      } catch {
+        /* réseau : on laisse l'inscription suivre son cours normal */
+      }
+    }
+
     const { error: err } = await supabase.auth.signInWithOtp({
       email: normalizedEmail(),
       options:

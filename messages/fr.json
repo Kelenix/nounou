@@ -574,6 +574,7 @@
     "codeResend": "Renvoyer le code",
     "errSendCode": "Impossible d'envoyer le code. Réessayez.",
     "errNoAccount": "Aucun compte pour cet e-mail, ou envoi impossible. Vérifiez l'adresse ou créez un compte.",
+    "errEmailExists": "Un compte existe déjà avec cet e-mail. Connectez-vous plutôt que de créer un compte.",
     "errCode": "Entrez le code reçu par e-mail.",
     "errCodeInvalid": "Code incorrect ou expiré. Réessayez.",
     "errSuspended": "Ce compte est suspendu. Contactez le support."

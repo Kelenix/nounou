@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { anonymizeAccount } from "@/features/account/purge";
 
 /** Suppression, par l'utilisateur lui-même, de son propre compte (RGPD). */
 export async function DELETE() {
@@ -18,10 +19,10 @@ export async function DELETE() {
   }
 
   const admin = createAdminClient();
-  // Suppression DOUCE (RGPD) : le compte est banni et masqué immédiatement, mais
-  // conservé (données financières/modération) le temps de la durée de conservation,
-  // puis anonymisé automatiquement par le cron de purge. Base légale : obligations
-  // comptables et prévention de la fraude/litiges.
+  // Suppression (RGPD) : le compte est banni, masqué, et son identité est
+  // ANONYMISÉE immédiatement — nom/téléphone/e-mail effacés — afin que l'e-mail
+  // et le numéro puissent resservir à une nouvelle inscription. La ligne et les
+  // paiements liés sont CONSERVÉS (statistiques). Opération définitive.
   await admin
     .from("profiles")
     .update({
@@ -34,6 +35,8 @@ export async function DELETE() {
   if (error) {
     return NextResponse.json({ error: "Suppression impossible" }, { status: 500 });
   }
+  // Libère l'e-mail + le téléphone (anonymisation), après avoir posé deleted_at.
+  await anonymizeAccount(admin, user.id);
   // Ferme la session courante de l'utilisateur.
   await supabase.auth.signOut();
   return NextResponse.json({ ok: true });

@@ -77,12 +77,14 @@
 - [ ] **Tester** une fois : `bash deploy/cron-relances.sh` doit répondre `{"ok":true,"sent":...}`.
   Les exécutions apparaissent dans le **journal d'audit** (action `email_relances`).
 
-## Suppression douce des comptes + purge (cron VPS)
-> Un compte supprimé (par l'admin ou par l'utilisateur lui-même) n'est plus effacé
-> physiquement : il est **banni + masqué**, mais son historique (paiements, avis,
-> signalements) est **conservé pour la traçabilité**, puis **anonymisé** après une
-> durée de conservation (**12 mois**, cf. `ACCOUNT_RETENTION_MONTHS` dans
-> `src/lib/constants.ts` — ajuster si besoin).
+## Suppression des comptes + purge (cron VPS)
+> Un compte supprimé (par l'admin ou par l'utilisateur lui-même) n'est pas effacé
+> physiquement : la ligne et son historique (paiements, avis, signalements) sont
+> **conservés pour les statistiques**. En revanche l'identité est **anonymisée
+> immédiatement** — nom/téléphone/e-mail effacés — pour que **l'e-mail et le numéro
+> puissent resservir à une nouvelle inscription**. La suppression est donc
+> **définitive** (plus de restauration). Le cron de purge ne sert plus que de
+> filet de sécurité (comptes anonymisés au-delà de `ACCOUNT_RETENTION_MONTHS`).
 - [ ] **Migration** `20260910000001_soft_delete_accounts.sql` à appliquer sur Supabase
   Cloud **avant de déployer** (`supabase db push` ou SQL Editor). Idempotente : ajoute
   `deleted_at/deleted_by/deletion_reason/anonymized_at` sur `profiles` et masque les
