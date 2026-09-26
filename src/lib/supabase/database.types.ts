@@ -274,6 +274,7 @@ export interface Database {
       app_current_role: { Args: Record<string, never>; Returns: UserRole };
       candidate_phone: { Args: { candidate: string }; Returns: string | null };
       admin_user_id_by_email: { Args: { p_email: string }; Returns: string | null };
+      unlink_auth_identities: { Args: { p_user_id: string }; Returns: undefined };
     };
     Enums: {
       user_role: UserRole;

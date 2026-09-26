@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.redirect(new URL("/connexion?error=oauth", url.origin));
+    return NextResponse.redirect(new URL("/connexion?error=oauth", origin));
   }
 
   const { data: profile } = await supabase
