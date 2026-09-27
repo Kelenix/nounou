@@ -31,6 +31,19 @@ export type ReportMotif =
 export type ReportStatus = "ouvert" | "en_cours" | "traite" | "rejete";
 export type PaymentMethod = "orange_money" | "mtn_momo" | "moov_money" | "wave" | "carte";
 export type PaymentStatus = "en_attente" | "reussi" | "echoue" | "annule";
+
+export type SystemHealthStats = {
+  db_size_bytes: number;
+  connections: number;
+  max_connections: number;
+  deadlocks: number;
+  active_sessions: number;
+  active_users_24h: number;
+  sign_ins_24h: number;
+  /** Absents si pg_stat_statements n'est pas disponible. */
+  avg_query_ms?: number | null;
+  slow_queries?: number;
+};
 export type PaymentType = "activation_candidate" | "premium_employeur";
 export type RatingContext =
   | "employer_rates_candidate"
@@ -275,6 +288,7 @@ export interface Database {
       candidate_phone: { Args: { candidate: string }; Returns: string | null };
       admin_user_id_by_email: { Args: { p_email: string }; Returns: string | null };
       unlink_auth_identities: { Args: { p_user_id: string }; Returns: undefined };
+      system_health_stats: { Args: Record<string, never>; Returns: SystemHealthStats };
     };
     Enums: {
       user_role: UserRole;
