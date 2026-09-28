@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, MessageCircle, MapPin } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
@@ -14,8 +14,30 @@ export default async function ContactPage() {
       <p className="mt-3 text-muted-foreground">{t("contact.subtitle")}</p>
 
       <div className="mt-8 space-y-4">
-        <Row icon={<Phone className="size-5" />} label={t("contact.phone")} value="+225 07 00 00 00 00" />
-        <Row icon={<Mail className="size-5" />} label={t("contact.email")} value="lionelkelenix@gmail.com" />
+        <Row
+          icon={<MessageCircle className="size-5" />}
+          label={t("contact.whatsapp")}
+          value="+39 350 859 1046"
+          href="https://wa.me/393508591046"
+        />
+        <Row
+          icon={<MessageCircle className="size-5" />}
+          label={t("contact.whatsapp")}
+          value="+225 07 05 34 97 51"
+          href="https://wa.me/2250705349751"
+        />
+        <Row
+          icon={<Mail className="size-5" />}
+          label={t("contact.email")}
+          value="sagesseamouret@gmail.com"
+          href="mailto:sagesseamouret@gmail.com"
+        />
+        <Row
+          icon={<Mail className="size-5" />}
+          label={t("contact.email")}
+          value="lionelkelenix@gmail.com"
+          href="mailto:lionelkelenix@gmail.com"
+        />
         <Row icon={<MapPin className="size-5" />} label={t("contact.address")} value={t("contact.addressValue")} />
       </div>
 
@@ -24,9 +46,9 @@ export default async function ContactPage() {
   );
 }
 
-function Row({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4">
+function Row({ icon, label, value, href }: { icon: React.ReactNode; label: string; value: string; href?: string }) {
+  const inner = (
+    <>
       <span className="flex size-11 items-center justify-center rounded-2xl bg-primary-soft text-primary">
         {icon}
       </span>
@@ -34,6 +56,20 @@ function Row({ icon, label, value }: { icon: React.ReactNode; label: string; val
         <div className="text-xs text-muted-foreground">{label}</div>
         <div className="font-semibold">{value}</div>
       </div>
-    </div>
+    </>
   );
+  const className = "flex items-center gap-4 rounded-2xl border border-border bg-card p-4";
+  if (href) {
+    const external = href.startsWith("http");
+    return (
+      <a
+        href={href}
+        className={`${className} transition-colors hover:border-primary/40 hover:bg-secondary`}
+        {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
+        {inner}
+      </a>
+    );
+  }
+  return <div className={className}>{inner}</div>;
 }
