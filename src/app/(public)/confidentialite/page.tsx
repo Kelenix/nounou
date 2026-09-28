@@ -240,11 +240,6 @@ function PrivacyEn() {
           changes will be brought to your attention.
         </p>
       </section>
-
-      <p className="text-xs">
-        This document is a template to be completed (items in brackets) and
-        <strong> must undergo legal review</strong> before going into production.
-      </p>
     </>
   );
 }
