@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { LayoutDashboard, Users, FileText, Flag, Settings, UserCog, ScrollText, BadgeCheck, Activity, Wallet, Mail, Megaphone } from "lucide-react";
+import { LayoutDashboard, Users, UserX, FileText, Flag, Settings, UserCog, ScrollText, BadgeCheck, Activity, Wallet, Mail, Megaphone } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { canAccess } from "@/lib/admin-permissions";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,7 @@ export function AdminSidebar({ profile }: { profile: ProfileRow }) {
   const ITEMS = [
     { href: "/admin", label: t("adminNav.dashboard"), icon: LayoutDashboard, exact: true, show: true },
     { href: "/admin/utilisateurs", label: t("adminNav.users"), icon: Users, show: canAccess(profile, "users") },
+    { href: "/admin/comptes-supprimes", label: t("adminNav.deletedAccounts"), icon: UserX, show: canAccess(profile, "users") },
     { href: "/admin/verifications", label: t("adminNav.verifications"), icon: BadgeCheck, show: canAccess(profile, "users") },
     { href: "/admin/offres", label: t("adminNav.offers"), icon: FileText, show: canAccess(profile, "offers") },
     { href: "/admin/signalements", label: t("adminNav.reports"), icon: Flag, show: canAccess(profile, "reports") },

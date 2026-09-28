@@ -1,5 +1,6 @@
 import { Suspense } from "react";
-import { Users, Mail, CalendarDays } from "lucide-react";
+import Link from "next/link";
+import { Users, Mail, CalendarDays, UserX } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { Avatar } from "@/components/ui/avatar";
@@ -46,15 +47,13 @@ export default async function AdminUsersPage({
 
   const supabase = await createClient();
 
-  let query = supabase.from("profiles").select("*", { count: "exact" });
+  // Les comptes supprimés ont leur propre page (/admin/comptes-supprimes).
+  let query = supabase.from("profiles").select("*", { count: "exact" }).is("deleted_at", null);
   // Le Super Admin n'est visible que par lui-même : masqué au staff (liste + comptage).
   if (!me.is_super_admin) query = query.eq("is_super_admin", false);
   if (role) query = query.eq("role", role);
-  // « Supprimé » = compte en suppression douce (banni, masqué du marketplace).
-  // Les onglets actif/suspendu excluent ces comptes (catégorie distincte).
-  if (status === "active") query = query.eq("is_suspended", false).is("deleted_at", null);
-  if (status === "suspended") query = query.eq("is_suspended", true).is("deleted_at", null);
-  if (status === "deleted") query = query.not("deleted_at", "is", null);
+  if (status === "active") query = query.eq("is_suspended", false);
+  if (status === "suspended") query = query.eq("is_suspended", true);
   if (ville) query = query.eq("ville", ville);
   if (q) query = query.or(`prenom.ilike.%${q}%,nom.ilike.%${q}%,phone.ilike.%${q}%`);
 
@@ -73,6 +72,11 @@ export default async function AdminUsersPage({
   const { data: users, count } = await query
     .order("created_at", { ascending: sort === "old" })
     .range(from, from + PAGE_SIZE - 1);
+
+  const { count: deletedCount } = await supabase
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .not("deleted_at", "is", null);
 
   const list = users ?? [];
   const total = count ?? 0;
@@ -140,9 +144,16 @@ export default async function AdminUsersPage({
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-extrabold tracking-tight">{t("admin.usersTitle")}</h1>
-        <p className="text-sm text-muted-foreground">{t("admin.totalAccounts", { count: total })}</p>
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-extrabold tracking-tight">{t("admin.usersTitle")}</h1>
+          <p className="text-sm text-muted-foreground">{t("admin.totalAccounts", { count: total })}</p>
+        </div>
+        {!!deletedCount && (
+          <Link href="/admin/comptes-supprimes" className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary">
+            <UserX className="size-4" /> {t("admin.seeDeleted", { count: deletedCount })}
+          </Link>
+        )}
       </div>
 
       <Suspense fallback={null}>
@@ -202,13 +213,7 @@ export default async function AdminUsersPage({
                           <Badge className="bg-primary-soft text-primary">{u.role ? roleLabel[u.role] : "—"}</Badge>
                         )}
                         {hasSub && <Badge className="bg-emerald-100 text-emerald-700">{t("admin.subscriber")}</Badge>}
-                        {u.deleted_at ? (
-                          <Badge className="bg-red-100 text-red-700">
-                            {u.anonymized_at ? t("admin.anonymizedBadge") : t("admin.deletedBadge")}
-                          </Badge>
-                        ) : u.is_suspended ? (
-                          <Badge className="bg-red-100 text-red-700">{t("admin.suspended")}</Badge>
-                        ) : null}
+                        {u.is_suspended && <Badge className="bg-red-100 text-red-700">{t("admin.suspended")}</Badge>}
                       </div>
                     </div>
                   </div>
@@ -218,8 +223,6 @@ export default async function AdminUsersPage({
                       name={`${u.prenom ?? ""} ${u.nom ?? ""}`.trim() || t("admin.thisUser")}
                       role={u.role}
                       suspended={u.is_suspended}
-                      deleted={!!u.deleted_at}
-                      anonymized={!!u.anonymized_at}
                       hasSubscription={hasSub}
                       subscription={hasSub ? subscriptionOf(u.id, u.role) : null}
                       isSuperAdmin={me.is_super_admin}

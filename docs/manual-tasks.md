@@ -140,6 +140,13 @@
 - Note : les comptes déjà créés sans nom ne sont pas rétro-corrigés. L'utilisateur
   complétera son profil à l'onboarding, ou tu peux corriger depuis `/admin/utilisateurs`.
 
+## Réinscription Google après suppression de compte (correctif)
+> Un compte supprimé gardait son identité Google liée : le même compte Google
+> retombait sur le compte banni → « Continuer avec Google » échouait.
+- [ ] **Migration** `20260926000001_unlink_deleted_identities.sql` à appliquer (local :
+  `supabase migration up` ; Cloud : `supabase db push` ou SQL Editor) **avant de déployer**.
+  Idempotente ; délie aussi les identités des comptes déjà supprimés.
+
 ## Cartflox (agrégateur Mobile Money — paiement AUTOMATIQUE)
 > Cartflox fournit une **API + des webhooks signés** : le client paie sur la page
 > hébergée Cartflox, et un webhook **active le compte automatiquement** (aucune

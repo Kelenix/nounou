@@ -60,9 +60,7 @@ export function UserFilters() {
       <Select value={status} onChange={(e) => setParam("status", e.target.value)}>
         <option value="">{tr("admin.allStatuses")}</option>
         <option value="active">{tr("admin.activePlural")}</option>
-        <option value="suspended">{tr("admin.suspendedPlural")}</option>
-        <option value="deleted">{tr("admin.deletedPlural")}</option>
-      </Select>
+        <option value="suspended">{tr("admin.suspendedPlural")}</option>      </Select>
       <Select value={ville} onChange={(e) => setParam("ville", e.target.value)}>
         <option value="">{tr("admin.allCities")}</option>
         {VILLES_CI.map((v) => <option key={v} value={v}>{v}</option>)}

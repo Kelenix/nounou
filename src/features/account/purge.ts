@@ -54,6 +54,10 @@ export async function anonymizeAccount(admin: Admin, id: string): Promise<void> 
   } catch {
     // Best-effort : ne bloque pas la suppression/purge.
   }
+
+  // 4) Délier les identités (Google…) : sinon le même compte Google retombe sur
+  //    ce compte banni et ne peut plus servir à une nouvelle inscription.
+  await admin.rpc("unlink_auth_identities", { p_user_id: id });
 }
 
 /**
