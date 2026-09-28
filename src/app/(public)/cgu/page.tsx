@@ -34,8 +34,8 @@ function CguFr() {
       <section>
         <h2>2. Éditeur</h2>
         <p>
-          Le service est édité par « J&apos;ai ma nounou », entreprise individuelle exploitée en
-          Côte d&apos;Ivoire et exerçant en ligne. Contact :{" "}
+          Le service est édité par « Kelenix Tech », entreprise individuelle exploitée en
+          Italie;Ivoire et exerçant en ligne. Contact :{" "}
           <a href="mailto:lionelkelenix@gmail.com">lionelkelenix@gmail.com</a>.
         </p>
       </section>
@@ -43,7 +43,7 @@ function CguFr() {
       <section>
         <h2>3. Inscription et compte</h2>
         <p>
-          L&apos;inscription nécessite un numéro de téléphone valide vérifié par SMS (OTP). Vous vous
+          L&apos;inscription nécessite une adresse email valide vérifié par (OTP). Vous vous
           engagez à fournir des informations exactes, à ne pas usurper l&apos;identité d&apos;autrui
           et à garder votre accès confidentiel. Le service est réservé aux personnes majeures.
         </p>
@@ -94,7 +94,7 @@ function CguFr() {
       <section>
         <h2>8. Responsabilité</h2>
         <p>
-          La plateforme met en œuvre des mesures de confiance (vérification du téléphone, notation,
+          La plateforme met en œuvre des mesures de confiance (vérification de l'identité, notation,
           signalement, modération) mais ne garantit pas le comportement des utilisateurs ni la
           conclusion ou la bonne exécution d&apos;un engagement entre eux. Le service est fourni « en
           l&apos;état » ; notre responsabilité est limitée dans les conditions prévues par la loi.
@@ -118,11 +118,6 @@ function CguFr() {
         </p>
       </section>
 
-      <p className="text-xs">
-        Ce document est un modèle destiné à être complété (mentions entre crochets) et
-        <strong> doit faire l&apos;objet d&apos;une relecture juridique</strong> avant mise en
-        production.
-      </p>
     </>
   );
 }
