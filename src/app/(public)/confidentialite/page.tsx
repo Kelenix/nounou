@@ -23,8 +23,8 @@ function PrivacyFr() {
       <section>
         <h2>1. Responsable du traitement</h2>
         <p>
-          Le responsable du traitement des données est « J&apos;ai ma nounou », entreprise
-          individuelle exploitée en Côte d&apos;Ivoire et exerçant en ligne.
+          Le responsable du traitement des données est « Kelenix Tech », entreprise
+          individuelle exploitée en Italie et exerçant en ligne.
           Contact : <a href="mailto:lionelkelenix@gmail.com">lionelkelenix@gmail.com</a>.
         </p>
       </section>
@@ -50,7 +50,7 @@ function PrivacyFr() {
         <h2>3. Finalités et bases légales</h2>
         <ul>
           <li><strong>Fournir la mise en relation</strong> (création de compte, profils, offres, candidatures, messagerie) — exécution du contrat.</li>
-          <li><strong>Authentification par OTP SMS</strong> et sécurité des comptes — exécution du contrat et intérêt légitime.</li>
+          <li><strong>Authentification par email (OTP) ou compte Google </strong> et sécurité des comptes — exécution du contrat et intérêt légitime.</li>
           <li><strong>Paiements</strong> (activation candidate, premium employeur) — exécution du contrat.</li>
           <li><strong>Notifications</strong> liées à votre activité — exécution du contrat / intérêt légitime.</li>
           <li><strong>Modération</strong> (signalements, suspensions, journal d&apos;audit) — intérêt légitime et obligations légales.</li>
@@ -73,7 +73,7 @@ function PrivacyFr() {
         <p>Nous faisons appel à des prestataires techniques agissant pour notre compte :</p>
         <ul>
           <li><strong>Supabase</strong> — hébergement de la base de données, authentification (envoi des codes de vérification OTP par SMS) et stockage des photos.</li>
-          <li><strong>Stripe, Djamo, PayDunya</strong> — prestataires de paiement (Mobile Money et carte bancaire).</li>
+          <li><strong>Stripe, Cartflox</strong> — prestataires de paiement (Mobile Money, Orange Money, MTN MoMo, Moov Money, Wave et carte bancaire).</li>
           <li><strong>Hostinger</strong> — hébergement et diffusion de l&apos;application (VPS, serveur Nginx).</li>
         </ul>
         <p>Nous ne vendons pas vos données et ne les partageons pas à des fins publicitaires.</p>
