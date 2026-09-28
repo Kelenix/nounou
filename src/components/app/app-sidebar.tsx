@@ -14,13 +14,9 @@ import {
   Briefcase,
   Heart,
   Settings,
-  Globe,
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
-import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LanguageSwitcher } from "@/components/i18n/language-switcher";
-import { SignOutButton } from "@/features/auth/sign-out-button";
 import { cn } from "@/lib/utils";
 import type { ProfileRow } from "@/lib/supabase/database.types";
 
@@ -88,33 +84,6 @@ export function AppSidebar({ profile, unread, messagesUnread = 0 }: { profile: P
           );
         })}
       </nav>
-
-      <div className="border-t border-border p-3">
-        <Link
-          href="/"
-          className="mb-3 flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-        >
-          <Globe className="size-5" /> {t("appNav.siteHome")}
-        </Link>
-        <div className="mb-3 px-1">
-          <LanguageSwitcher />
-        </div>
-        <Link
-          href="/app/profil"
-          className="mb-3 flex items-center gap-3 rounded-2xl p-2 transition-colors hover:bg-secondary"
-        >
-          <Avatar src={profile.photo_url} nom={profile.nom} prenom={profile.prenom} className="size-10" />
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">
-              {`${profile.prenom ?? ""} ${profile.nom ?? ""}`.trim() || t("appNav.myProfile")}
-            </p>
-            <p className="truncate text-xs text-muted-foreground">
-              {profile.role === "employer" ? t("roles.employer") : t("roles.candidate")}
-            </p>
-          </div>
-        </Link>
-        <SignOutButton />
-      </div>
     </aside>
   );
 }

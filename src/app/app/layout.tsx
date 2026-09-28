@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AppHeader } from "@/components/app/app-header";
 import { BottomNav } from "@/components/app/bottom-nav";
 import { AppSidebar } from "@/components/app/app-sidebar";
+import { AppUserMenu } from "@/components/app/app-user-menu";
 import { RealtimeNotifications } from "@/features/notifications/realtime-notifications";
 import { countUnreadMessages } from "@/features/messages/queries";
 
@@ -30,6 +31,13 @@ export default async function AppLayout({
       <AppSidebar profile={profile} unread={unread} messagesUnread={messagesUnread} />
 
       <div className="flex min-h-screen flex-1 flex-col">
+        {/* En-tête desktop : menu utilisateur en haut à droite */}
+        <header className="sticky top-0 z-30 hidden border-b border-border/60 bg-background/90 backdrop-blur lg:block">
+          <div className="flex h-16 items-center justify-end px-10">
+            <AppUserMenu profile={profile} />
+          </div>
+        </header>
+
         {/* En-tête mobile uniquement (desktop = sidebar) */}
         <div className="lg:hidden">
           <AppHeader profile={profile} unread={unread} />
