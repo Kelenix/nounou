@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/app/bottom-nav";
 import { AppSidebar } from "@/components/app/app-sidebar";
 import { AppUserMenu } from "@/components/app/app-user-menu";
 import { RealtimeNotifications } from "@/features/notifications/realtime-notifications";
+import { IdentityVerificationPrompt } from "@/features/profiles/identity-verification-prompt";
 import { countUnreadMessages } from "@/features/messages/queries";
 
 export default async function AppLayout({
@@ -28,6 +29,7 @@ export default async function AppLayout({
   return (
     <div className="min-h-screen bg-secondary lg:flex">
       <RealtimeNotifications userId={profile.id} />
+      <IdentityVerificationPrompt level={profile.verification_level} />
       <AppSidebar profile={profile} unread={unread} messagesUnread={messagesUnread} />
 
       <div className="flex min-h-screen flex-1 flex-col">

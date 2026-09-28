@@ -41,12 +41,16 @@
     "verified": "Identity verified ✓",
     "uploaded": "Document sent. Awaiting review.",
     "uploadFailed": "Upload failed. Please try again.",
-    "tooLarge": "File too large (max 5 MB)."
+    "tooLarge": "File too large (max 5 MB).",
+    "promptTitle": "Verify your identity",
+    "promptBody": "To build trust and earn the “Identity verified” badge, add an ID document. An administrator will review it.",
+    "promptCta": "Verify now",
+    "promptLater": "Later"
   },
   "verifications": {
     "metaTitle": "Identity verifications",
     "title": "Identity verifications",
-    "subtitle": "Review the ID documents uploaded by nannies.",
+    "subtitle": "Review the ID documents uploaded by users (nannies and families).",
     "empty": "No documents awaiting review.",
     "candidate": "Candidate",
     "viewDoc": "View document",

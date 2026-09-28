@@ -26,11 +26,12 @@ export default async function VerificationsPage({ searchParams }: { searchParams
   const period = get("period"); // "" | today | 7d | 30d (date d'inscription)
   const sort = get("sort"); // "" (récent) | old
 
-  // Candidates ayant téléversé une pièce et pas encore vérifiées (niveau de base).
+  // Utilisateurs (candidates ET employeurs) ayant téléversé une pièce et pas
+  // encore vérifiés (niveau de base). Les administrateurs sont exclus.
   let query = admin
     .from("profiles")
-    .select("id, prenom, nom, photo_url, identity_doc_path, verification_level, created_at")
-    .eq("role", "candidate")
+    .select("id, role, prenom, nom, photo_url, identity_doc_path, verification_level, created_at")
+    .neq("role", "admin")
     .eq("verification_level", "phone")
     .not("identity_doc_path", "is", null);
 
@@ -84,7 +85,12 @@ export default async function VerificationsPage({ searchParams }: { searchParams
                   <div className="flex items-center gap-3">
                     <Avatar src={p.photo_url} nom={p.nom} prenom={p.prenom} className="size-12" />
                     <div>
-                      <p className="font-semibold">{name}</p>
+                      <p className="flex items-center gap-2 font-semibold">
+                        {name}
+                        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                          {p.role === "employer" ? t("roles.employer") : t("roles.candidate")}
+                        </span>
+                      </p>
                       {p.email && (
                         <p className="flex items-center gap-1 truncate text-xs text-muted-foreground">
                           <Mail className="size-3 shrink-0" /> {p.email}

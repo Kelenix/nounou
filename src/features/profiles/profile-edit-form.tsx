@@ -204,10 +204,6 @@ export function ProfileEditForm({
             <Textarea value={candDesc} onChange={(e) => setCandDesc(e.target.value)} placeholder={t("profileEdit.aboutMePlaceholder")} />
           </Field>
 
-          <div className="border-t border-border/60 pt-4">
-            <h3 className="mb-2 font-semibold">{t("identity.sectionTitle")}</h3>
-            <IdentityDocUpload userId={profile.id} hasDoc={!!profile.identity_doc_path} level={profile.verification_level} />
-          </div>
         </div>
       )}
 
@@ -234,6 +230,14 @@ export function ProfileEditForm({
           <Field label={t("profileEdit.description")}>
             <Textarea value={empDesc} onChange={(e) => setEmpDesc(e.target.value)} placeholder={t("profileEdit.descriptionPlaceholder")} />
           </Field>
+        </div>
+      )}
+
+      {/* Vérification d'identité — pour les candidates ET les employeurs. */}
+      {profile.role !== "admin" && (
+        <div id="identite" className="scroll-mt-24 space-y-2 rounded-2xl border border-border bg-card p-4">
+          <h2 className="font-bold">{t("identity.sectionTitle")}</h2>
+          <IdentityDocUpload userId={profile.id} hasDoc={!!profile.identity_doc_path} level={profile.verification_level} />
         </div>
       )}
 

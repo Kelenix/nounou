@@ -41,12 +41,16 @@
     "verified": "Identité vérifiée ✓",
     "uploaded": "Document envoyé. En attente de vérification.",
     "uploadFailed": "Échec de l'envoi. Réessayez.",
-    "tooLarge": "Fichier trop lourd (max 5 Mo)."
+    "tooLarge": "Fichier trop lourd (max 5 Mo).",
+    "promptTitle": "Vérifiez votre identité",
+    "promptBody": "Pour renforcer la confiance et obtenir le badge « Identité vérifiée », ajoutez une pièce d'identité. Un administrateur la validera.",
+    "promptCta": "Vérifier maintenant",
+    "promptLater": "Plus tard"
   },
   "verifications": {
     "metaTitle": "Vérifications d'identité",
     "title": "Vérifications d'identité",
-    "subtitle": "Validez les pièces d'identité téléversées par les nounous.",
+    "subtitle": "Validez les pièces d'identité téléversées par les utilisateurs (nounous et familles).",
     "empty": "Aucune pièce en attente de vérification.",
     "candidate": "Candidate",
     "viewDoc": "Voir le document",
