@@ -1,10 +1,12 @@
 import { Users, UserCheck, Briefcase, FileText, Send, CreditCard, Flag, ShieldCheck } from "lucide-react";
-import { getTranslations } from "next-intl/server";
-import { createClient } from "@/lib/supabase/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { requireAdmin } from "@/lib/admin";
 import { canAccess } from "@/lib/admin-permissions";
+import { getDashboardStats } from "@/features/admin/stats-queries";
+import { DashboardCharts } from "@/features/admin/dashboard-charts";
 import { formatFcfa } from "@/lib/utils";
 
 export async function generateMetadata() {
@@ -41,6 +43,9 @@ export default async function AdminDashboard() {
     .select("montant, statut")
     .eq("statut", "reussi");
   const revenue = (payments ?? []).reduce((s, p) => s + Number(p.montant), 0);
+
+  // Séries temporelles pour les graphes (données réelles, via le client admin).
+  const stats = await getDashboardStats(createAdminClient(), await getLocale());
 
   let recentUsersQuery = supabase
     .from("profiles")
@@ -84,6 +89,14 @@ export default async function AdminDashboard() {
           <Stat icon={<CreditCard className="size-5" />} label={t("admin.statRevenue")} value={formatFcfa(revenue)} accent />
         )}
       </div>
+
+      {/* Graphes : inscriptions, revenus, paiements par type */}
+      <DashboardCharts
+        signups={stats.signups}
+        revenue={stats.revenue}
+        payments={stats.payments}
+        showRevenue={canSeeRevenue}
+      />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>

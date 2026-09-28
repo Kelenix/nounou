@@ -94,7 +94,7 @@ function CguFr() {
       <section>
         <h2>8. Responsabilité</h2>
         <p>
-          La plateforme met en œuvre des mesures de confiance (vérification de l'identité, notation,
+          La plateforme met en œuvre des mesures de confiance (vérification de l&apos;identité, notation,
           signalement, modération) mais ne garantit pas le comportement des utilisateurs ni la
           conclusion ou la bonne exécution d&apos;un engagement entre eux. Le service est fourni « en
           l&apos;état » ; notre responsabilité est limitée dans les conditions prévues par la loi.
