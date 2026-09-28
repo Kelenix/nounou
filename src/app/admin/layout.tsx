@@ -4,6 +4,7 @@ import { requireRole } from "@/lib/auth";
 import { Logo } from "@/components/brand/logo";
 import { AdminSidebar } from "@/components/app/admin-sidebar";
 import { AdminBottomNav } from "@/components/app/admin-bottom-nav";
+import { AdminUserMenu } from "@/components/app/admin-user-menu";
 import { SignOutButton } from "@/features/auth/sign-out-button";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -14,6 +15,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <AdminSidebar profile={profile} />
 
       <div className="flex min-h-screen flex-1 flex-col">
+        {/* En-tête desktop : menu utilisateur en haut à droite */}
+        <header className="sticky top-0 z-30 hidden border-b border-border/60 bg-background/90 backdrop-blur lg:block">
+          <div className="flex h-16 items-center justify-end px-10">
+            <AdminUserMenu profile={profile} />
+          </div>
+        </header>
+
         {/* En-tête mobile uniquement */}
         <header className="sticky top-0 z-30 border-b border-border/60 bg-background/90 backdrop-blur lg:hidden">
           <div className="flex h-14 items-center justify-between px-4">
