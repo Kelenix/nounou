@@ -646,7 +646,25 @@
     "email": "E-mail",
     "address": "Adresse",
     "addressValue": "Abidjan, Côte d'Ivoire",
-    "soon": "Un formulaire de contact en ligne sera bientôt disponible."
+    "soon": "Un formulaire de contact en ligne sera bientôt disponible.",
+    "form": {
+      "title": "Écrivez-nous",
+      "name": "Nom",
+      "namePlaceholder": "Votre nom",
+      "email": "E-mail",
+      "emailPlaceholder": "vous@exemple.com",
+      "subject": "Sujet (facultatif)",
+      "subjectPlaceholder": "L'objet de votre message",
+      "message": "Message",
+      "messagePlaceholder": "Votre message…",
+      "send": "Envoyer",
+      "invalid": "Veuillez indiquer votre nom, un e-mail valide et un message.",
+      "error": "Envoi impossible. Réessayez.",
+      "unavailable": "Envoi indisponible pour le moment. Écrivez-nous plutôt par WhatsApp ou e-mail (ci-contre).",
+      "success": "Message envoyé !",
+      "successTitle": "Message envoyé",
+      "successBody": "Merci ! Nous vous répondrons au plus vite."
+    }
   },
   "faq": {
     "metaTitle": "FAQ",

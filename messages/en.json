@@ -646,7 +646,25 @@
     "email": "Email",
     "address": "Address",
     "addressValue": "Abidjan, Côte d'Ivoire",
-    "soon": "An online contact form will be available soon."
+    "soon": "An online contact form will be available soon.",
+    "form": {
+      "title": "Write to us",
+      "name": "Name",
+      "namePlaceholder": "Your name",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "subject": "Subject (optional)",
+      "subjectPlaceholder": "What is it about",
+      "message": "Message",
+      "messagePlaceholder": "Your message…",
+      "send": "Send",
+      "invalid": "Please provide your name, a valid email and a message.",
+      "error": "Could not send. Please try again.",
+      "unavailable": "Sending is unavailable right now. Please reach us via WhatsApp or email (shown left).",
+      "success": "Message sent!",
+      "successTitle": "Message sent",
+      "successBody": "Thanks! We'll get back to you shortly."
+    }
   },
   "faq": {
     "metaTitle": "FAQ",
